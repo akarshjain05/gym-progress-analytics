@@ -6,15 +6,24 @@ class Settings(BaseSettings):
     # DATABASE_URL: postgres in production (Render), sqlite for local dev/tests.
     # Render's managed Postgres gives a URL starting with "postgres://" which
     # SQLAlchemy's psycopg2 driver needs as "postgresql://" - we normalize that.
-    database_url: str = os.environ.get("DATABASE_URL", "sqlite:///./gym.db")
+    database_url: str = "sqlite:///./gym.db"
 
-    secret_key: str = os.environ.get("SECRET_KEY", "dev-secret-change-me-in-production")
+    secret_key: str = "dev-secret-change-me-in-production"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))  # 7 days
+    access_token_expire_minutes: int = 10080  # 7 days
 
-    cors_origins: list[str] = os.environ.get("CORS_ORIGINS", "*").split(",")
+    # Comma-separated string, NOT list[str]. pydantic-settings parses env vars
+    # for list/dict-typed fields as JSON by default (e.g. ["a","b"]), so a
+    # plain comma-separated value like Render's CORS_ORIGINS env var would
+    # crash on startup with a SettingsError. Splitting it ourselves in
+    # cors_origins_list below avoids that entirely.
+    cors_origins: str = "*"
 
     model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 settings = Settings()
