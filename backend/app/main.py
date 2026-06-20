@@ -24,7 +24,11 @@ app = FastAPI(title="Gym Progress Analytics API", version="1.0.0", lifespan=life
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    origins = [
+    "http://localhost:8080",
+    "https://gym-progress-frontend.onrender.com",
+    "https://gym-progress-frontend-wmbt.onrender.com",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
