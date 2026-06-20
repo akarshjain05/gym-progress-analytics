@@ -13,10 +13,24 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
+    # Nullable: a user who just signed in with Google but hasn't chosen a
+    # username/password yet has both of these as NULL until they complete
+    # setup via /auth/complete-google-signup. Postgres and SQLite both allow
+    # multiple NULLs under a UNIQUE constraint, so this doesn't cause clashes
+    # between several pending Google sign-ups.
+    username = Column(String, unique=True, index=True, nullable=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+    # Google Sign-In
+    google_id = Column(String, unique=True, index=True, nullable=True)
+
+    # Password reset - token is stored as a SHA-256 hash, never the raw value,
+    # same principle as password storage: a DB leak shouldn't hand out usable
+    # reset links.
+    reset_token_hash = Column(String, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
 
     # Profile fields - all optional, used for BMR/TDEE and unit display.
     # gender accepts "male" / "female" / "other". For "other" we average the
@@ -33,6 +47,14 @@ class User(Base):
     lift_logs = relationship("LiftLog", back_populates="user", cascade="all, delete-orphan")
     calorie_logs = relationship("CalorieLog", back_populates="user", cascade="all, delete-orphan")
     goal_lifts = relationship("GoalLift", back_populates="user", cascade="all, delete-orphan")
+
+    @property
+    def has_google_login(self) -> bool:
+        return self.google_id is not None
+
+    @property
+    def has_password(self) -> bool:
+        return self.password_hash is not None
 
 
 class Exercise(Base):

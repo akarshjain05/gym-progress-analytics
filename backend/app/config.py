@@ -19,6 +19,23 @@ class Settings(BaseSettings):
     # cors_origins_list below avoids that entirely.
     cors_origins: str = "*"
 
+    # Google Sign-In: OAuth client ID from Google Cloud Console. Required for
+    # /auth/google to verify ID tokens. Leaving it blank disables Google
+    # sign-in gracefully (returns a clear 500 instead of crashing).
+    google_client_id: str = ""
+
+    # SMTP for password reset emails. If smtp_host is left blank, reset links
+    # are printed to the server logs instead of emailed - so local dev and
+    # tests don't need real email credentials.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = ""
+
+    # Used to build the password reset link (e.g. https://x.onrender.com/reset-password.html)
+    frontend_url: str = "http://127.0.0.1:8080"
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @property

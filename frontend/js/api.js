@@ -91,6 +91,23 @@ const Api = {
   getProfile() { return apiRequest("/profile/me"); },
   updateProfile(payload) { return apiRequest("/profile/me", { method: "PUT", body: payload }); },
 
+  // --- google sign-in / password reset ---
+  googleLogin(idToken) {
+    return apiRequest("/auth/google", { method: "POST", auth: false, body: { id_token: idToken } });
+  },
+  completeGoogleSignup(setupToken, username, password) {
+    return apiRequest("/auth/complete-google-signup", {
+      method: "POST", auth: false,
+      body: { setup_token: setupToken, username, password },
+    });
+  },
+  forgotPassword(email) {
+    return apiRequest("/auth/forgot-password", { method: "POST", auth: false, body: { email } });
+  },
+  resetPassword(token, newPassword) {
+    return apiRequest("/auth/reset-password", { method: "POST", auth: false, body: { token, new_password: newPassword } });
+  },
+
   // --- weight ---
   logWeight(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
   listWeight(params = {}) { return apiRequest(`/weight${qs(params)}`); },

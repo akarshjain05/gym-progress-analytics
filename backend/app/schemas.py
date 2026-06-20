@@ -26,6 +26,33 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+class GoogleLoginIn(BaseModel):
+    id_token: str  # the credential JWT returned by Google Identity Services on the frontend
+
+
+class GoogleLoginOut(BaseModel):
+    needs_setup: bool
+    access_token: Optional[str] = None
+    token_type: str = "bearer"
+    setup_token: Optional[str] = None  # present only when needs_setup is True
+    email: Optional[str] = None
+
+
+class CompleteGoogleSignupIn(BaseModel):
+    setup_token: str
+    username: str = Field(min_length=3, max_length=30)
+    password: str = Field(min_length=6)
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6)
+
+
 # ---------- Profile ----------
 
 class ProfileUpdate(BaseModel):
@@ -39,7 +66,7 @@ class ProfileUpdate(BaseModel):
 
 class UserOut(BaseModel):
     id: int
-    username: str
+    username: Optional[str] = None
     email: str
     gender: Optional[str] = None
     age: Optional[int] = None
@@ -47,6 +74,8 @@ class UserOut(BaseModel):
     activity_level: Optional[str] = None
     unit_preference: str
     goal_weight_kg: Optional[float] = None
+    has_google_login: bool = False
+    has_password: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
