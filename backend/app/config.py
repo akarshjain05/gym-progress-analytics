@@ -24,14 +24,15 @@ class Settings(BaseSettings):
     # sign-in gracefully (returns a clear 500 instead of crashing).
     google_client_id: str = ""
 
-    # SMTP for password reset emails. If smtp_host is left blank, reset links
-    # are printed to the server logs instead of emailed - so local dev and
-    # tests don't need real email credentials.
-    smtp_host: str = ""
-    smtp_port: int = 587
-    smtp_user: str = ""
-    smtp_password: str = ""
-    smtp_from_email: str = ""
+    # Brevo (formerly Sendinblue) transactional email API for password reset
+    # links. Uses HTTPS, not SMTP - deliberately, since Render (and many
+    # cloud platforms) block or silently hang outbound SMTP connections on
+    # their free tier as an anti-spam measure, which has no clean error and
+    # just looks like the request hanging forever. If brevo_api_key is left
+    # blank, reset links are printed to the server logs instead of emailed -
+    # so local dev and tests don't need a real API key.
+    brevo_api_key: str = ""
+    brevo_sender_email: str = ""
 
     # Used to build the password reset link (e.g. https://x.onrender.com/reset-password.html)
     frontend_url: str = "http://127.0.0.1:8080"

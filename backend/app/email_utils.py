@@ -1,27 +1,31 @@
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import requests
 
 from .config import settings
+
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 def send_password_reset_email(to_email: str, reset_link: str) -> None:
     """
-    Sends a password reset email via SMTP (STARTTLS on smtp_port, 587 by
-    default - the standard port/method for Gmail and most providers).
+    Sends a password reset email via Brevo's transactional email HTTP API.
+    Uses HTTPS (port 443), NOT SMTP - Render's free tier (and many cloud
+    platforms) silently blocks or hangs outbound SMTP connections as an
+    anti-spam measure, which has no clean error and just looks like the
+    request hanging forever. Brevo's REST API avoids that entirely.
 
-    If SMTP isn't configured (no SMTP_HOST env var set), this prints the
-    reset link to the server logs instead of sending an email, so local
-    development and automated tests never need real email credentials.
+    If BREVO_API_KEY isn't configured, this prints the reset link to the
+    server logs instead of sending an email, so local development and
+    automated tests never need a real API key.
+
+    If the Brevo API call itself fails (bad key, rate limit, etc.), this
+    logs the error but does NOT raise - the /auth/forgot-password endpoint
+    is designed to always return the same generic response regardless of
+    whether the email actually exists or sending succeeded, so a transient
+    email-provider failure shouldn't turn into a 500 for the user.
     """
-    if not settings.smtp_host:
-        print(f"[DEV - no SMTP configured] Password reset link for {to_email}: {reset_link}")
+    if not settings.brevo_api_key:
+        print(f"[DEV - no BREVO_API_KEY configured] Password reset link for {to_email}: {reset_link}")
         return
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Reset your IRONLOG password"
-    msg["From"] = settings.smtp_from_email or settings.smtp_user
-    msg["To"] = to_email
 
     text_body = (
         "Reset your IRONLOG password using the link below. It's valid for 1 hour.\n\n"
@@ -42,10 +46,21 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
     </div>
     """
 
-    msg.attach(MIMEText(text_body, "plain"))
-    msg.attach(MIMEText(html_body, "html"))
+    payload = {
+        "sender": {"email": settings.brevo_sender_email, "name": "IRONLOG"},
+        "to": [{"email": to_email}],
+        "subject": "Reset your IRONLOG password",
+        "htmlContent": html_body,
+        "textContent": text_body,
+    }
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.brevo_api_key,
+        "content-type": "application/json",
+    }
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10) as server:
-        server.starttls()
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.sendmail(msg["From"], [to_email], msg.as_string())
+    try:
+        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f"[ERROR] Failed to send password reset email via Brevo: {e}")l
