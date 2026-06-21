@@ -1,6 +1,14 @@
 renderShell("analytics", "Analytics", "The full picture, pulled together.");
 
-let changeChart = null, volumeChart = null, weightTrendChart = null;
+let changeChart = null, volumeChart = null, weightTrendChart = null, muscleVolumeChart = null;
+
+// One color per muscle group keeps the bars visually distinguishable rather
+// than all-one-color, without needing a full design pass per group.
+const MUSCLE_GROUP_COLORS = {
+  chest: "#E2402D", back: "#3E7CB1", shoulders: "#D4A33B", biceps: "#4F9D69",
+  triceps: "#8B6BB7", legs: "#C9CCD1", quads: "#5FA8D3", hamstrings: "#E08A6B",
+  glutes: "#D46BA3", calves: "#7BAE7F", core: "#B0A458", other: "#6B7480",
+};
 
 document.getElementById("pageContent").innerHTML = `
   <div class="bar-divider" style="margin-top:0;"><div class="collar"></div><div class="rail"></div><div class="label">All insights</div><div class="rail"></div><div class="collar"></div></div>
@@ -17,9 +25,14 @@ document.getElementById("pageContent").innerHTML = `
     </div>
   </div>
 
-  <div class="card">
+  <div class="card mb-16">
     <div class="card-title">Weekly training volume <span class="text-tertiary" style="font-weight:400;">(all lifts, kg × reps)</span></div>
     <canvas id="volumeCanvas" height="80"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Volume by muscle group <span class="text-tertiary" style="font-weight:400;">(all-time, kg × reps)</span></div>
+    <canvas id="muscleVolumeCanvas" height="100"></canvas>
   </div>
 `;
 
@@ -174,7 +187,51 @@ async function loadVolumeChart() {
   }
 }
 
+async function loadMuscleGroupVolumeChart() {
+  const ctx = document.getElementById("muscleVolumeCanvas");
+  try {
+    const [logs, exercisesList] = await Promise.all([Api.listLifts(), Api.listExercises()]);
+    if (!logs.length) {
+      ctx.parentElement.innerHTML = `<div class="card-title">Volume by muscle group</div><div class="empty-state"><p>Log some sets to see this breakdown.</p></div>`;
+      return;
+    }
+
+    const exerciseToGroup = Object.fromEntries(exercisesList.map(e => [e.id, e.muscle_group || "other"]));
+    const byGroup = {};
+    for (const l of logs) {
+      const group = exerciseToGroup[l.exercise_id] || "other";
+      byGroup[group] = (byGroup[group] || 0) + l.weight_kg * l.reps;
+    }
+    const entries = Object.entries(byGroup).sort((a, b) => b[1] - a[1]);
+
+    if (muscleVolumeChart) muscleVolumeChart.destroy();
+    muscleVolumeChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: entries.map(([group]) => capitalize(group)),
+        datasets: [{
+          data: entries.map(([, volume]) => Math.round(volume)),
+          backgroundColor: entries.map(([group]) => MUSCLE_GROUP_COLORS[group] || MUSCLE_GROUP_COLORS.other),
+          borderRadius: 4,
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
+          y: { ticks: { color: "#9CA5AC", font: { size: 12 } }, grid: { display: false } },
+        },
+      },
+    });
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
 loadInsights();
 loadChangeChart();
 loadWeightTrend();
 loadVolumeChart();
+loadMuscleGroupVolumeChart();

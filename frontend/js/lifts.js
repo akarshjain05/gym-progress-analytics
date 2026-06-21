@@ -206,7 +206,7 @@ async function loadExercises(preferId) {
   exercises = await Api.listExercises();
   const select = document.getElementById("exerciseSelect");
   const formSelect = document.getElementById("lExercise");
-  const optionsHtml = exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join("");
+  const optionsHtml = buildGroupedExerciseOptions(exercises);
   select.innerHTML = optionsHtml;
   formSelect.innerHTML = optionsHtml;
 
@@ -257,7 +257,10 @@ async function loadProgress(exerciseId) {
         </div>
       </div>
       <div class="card mb-16">
-        <div class="card-title">${escapeHtml(progress.exercise)} — estimated 1RM over time</div>
+        <div class="card-title flex gap-8" style="align-items:center;">
+          <span>${escapeHtml(progress.exercise)} — estimated 1RM over time</span>
+          ${progress.muscle_group ? `<span class="badge badge-grey">${escapeHtml(capitalize(progress.muscle_group))}</span>` : ""}
+        </div>
         <canvas id="liftCanvas" height="85"></canvas>
       </div>
       <div class="card">
@@ -345,7 +348,12 @@ async function loadPRTable() {
   }
   const rows = prs.map(p => `
     <tr>
-      <td class="label-cell">${escapeHtml(p.exercise)}</td>
+      <td class="label-cell">
+        <div class="flex gap-8" style="align-items:center;">
+          <span>${escapeHtml(p.exercise)}</span>
+          ${p.muscle_group ? `<span class="badge badge-grey">${escapeHtml(capitalize(p.muscle_group))}</span>` : ""}
+        </div>
+      </td>
       <td>${fmtKg(p.estimated_1rm_kg)} kg</td>
       <td>${fmtKg(p.achieved_with.weight_kg)} kg × ${p.achieved_with.reps}</td>
       <td class="text-secondary">${fmtDate(p.date)}</td>

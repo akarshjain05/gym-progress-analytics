@@ -190,3 +190,34 @@ function fmtDate(isoDate) {
 function todayIso() {
   return new Date().toISOString().split("T")[0];
 }
+
+function capitalize(str) {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Sensible anatomical grouping order; anything not in this list (custom
+// exercises with an unrecognized or missing muscle_group) is grouped
+// under "Other" at the end.
+const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "biceps", "triceps", "legs", "quads", "hamstrings", "glutes", "calves", "core"];
+
+function groupExercisesByMuscle(exercises) {
+  const groups = {};
+  for (const e of exercises) {
+    const key = e.muscle_group || "other";
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  }
+  const known = MUSCLE_GROUP_ORDER.filter(k => groups[k]);
+  const unknown = Object.keys(groups).filter(k => !MUSCLE_GROUP_ORDER.includes(k)).sort();
+  return [...known, ...unknown].map(key => ({ key, label: capitalize(key), items: groups[key] }));
+}
+
+// Builds <optgroup> HTML grouped by muscle group, for any exercise <select>.
+function buildGroupedExerciseOptions(exercises) {
+  return groupExercisesByMuscle(exercises).map(g => `
+    <optgroup label="${g.label}">
+      ${g.items.map(e => `<option value="${e.id}">${e.name.replace(/</g, "&lt;")}</option>`).join("")}
+    </optgroup>
+  `).join("");
+}

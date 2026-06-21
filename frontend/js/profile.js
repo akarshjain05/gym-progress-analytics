@@ -124,7 +124,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 
 async function loadGoalExerciseOptions() {
   const exercises = await Api.listExercises();
-  document.getElementById("gExercise").innerHTML = exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join("");
+  document.getElementById("gExercise").innerHTML = buildGroupedExerciseOptions(exercises);
 }
 
 document.getElementById("goalForm").addEventListener("submit", async (e) => {

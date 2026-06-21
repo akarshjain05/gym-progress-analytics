@@ -173,6 +173,7 @@ def lift_progress(
     return {
         "has_data": True,
         "exercise": exercise.name,
+        "muscle_group": exercise.muscle_group,
         "first_session_1rm_kg": first_1rm,
         "latest_session_1rm_kg": latest_1rm,
         "change_pct": calc.percent_change(first_1rm, latest_1rm),
@@ -204,6 +205,7 @@ def all_personal_records(
         results.append({
             "exercise_id": exercise_id,
             "exercise": exercise.name if exercise else "Unknown",
+            "muscle_group": exercise.muscle_group if exercise else None,
             "estimated_1rm_kg": calc.estimate_1rm_epley(best.weight_kg, best.reps),
             "achieved_with": {"weight_kg": best.weight_kg, "reps": best.reps},
             "date": best.date.isoformat(),

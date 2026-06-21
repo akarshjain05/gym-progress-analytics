@@ -20,12 +20,12 @@ PREDEFINED_EXERCISES = [
     ("Dumbbell Bench Press", "compound", "chest"),
     ("Dumbbell Shoulder Press", "compound", "shoulders"),
     ("Lateral Raise", "isolation", "shoulders"),
-    ("Bicep Curl", "isolation", "arms"),
-    ("Barbell Curl", "isolation", "arms"),
-    ("Dumbbell Curl", "isolation", "arms"),
-    ("Hammer Curl", "isolation", "arms"),
-    ("Tricep Pushdown", "isolation", "arms"),
-    ("Skull Crusher", "isolation", "arms"),
+    ("Bicep Curl", "isolation", "biceps"),
+    ("Barbell Curl", "isolation", "biceps"),
+    ("Dumbbell Curl", "isolation", "biceps"),
+    ("Hammer Curl", "isolation", "biceps"),
+    ("Tricep Pushdown", "isolation", "triceps"),
+    ("Skull Crusher", "isolation", "triceps"),
     ("Leg Curl", "isolation", "hamstrings"),
     ("Leg Extension", "isolation", "quads"),
     ("Calf Raise", "isolation", "calves"),
@@ -42,8 +42,25 @@ PREDEFINED_EXERCISES = [
 
 
 def seed_exercises(db: Session) -> None:
-    existing_names = {e.name for e in db.query(models.Exercise).filter(models.Exercise.created_by.is_(None)).all()}
+    """
+    Inserts any predefined exercise that doesn't exist yet, AND updates the
+    category/muscle_group of ones that already exist if the predefined list
+    has changed since they were first seeded (e.g. splitting "arms" into
+    "biceps"/"triceps"). Without the update half, changing PREDEFINED_EXERCISES
+    would only affect brand-new databases - anyone already deployed would be
+    stuck with stale values forever, since this only ever touches rows where
+    created_by is NULL (the global catalog), never a user's custom exercises.
+    """
+    existing = {
+        e.name: e
+        for e in db.query(models.Exercise).filter(models.Exercise.created_by.is_(None)).all()
+    }
     for name, category, muscle_group in PREDEFINED_EXERCISES:
-        if name not in existing_names:
+        if name in existing:
+            exercise = existing[name]
+            if exercise.category != category or exercise.muscle_group != muscle_group:
+                exercise.category = category
+                exercise.muscle_group = muscle_group
+        else:
             db.add(models.Exercise(name=name, category=category, muscle_group=muscle_group, is_custom=False, created_by=None))
     db.commit()
