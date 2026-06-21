@@ -135,6 +135,28 @@ class LiftLogOut(LiftLogIn):
 
     model_config = ConfigDict(from_attributes=True)
 
+class SetEntry(BaseModel):
+    """One set within a logged session - weight/reps/rpe only, no date/exercise
+    (those are shared across the whole session, see LiftSessionIn below)."""
+    weight_kg: float = Field(ge=0, le=600)
+    reps: int = Field(gt=0, le=100)
+    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+
+    @field_validator("rpe")
+    @classmethod
+    def round_rpe(cls, v):
+        return round(v * 2) / 2 if v is not None else v
+
+
+class LiftSessionIn(BaseModel):
+    """Log an entire session (however many sets) for one exercise on one date
+    in a single request. set_number is assigned automatically (1, 2, 3...)
+    in the order the sets are given."""
+    exercise_id: int
+    date: date
+    notes: Optional[str] = None
+    sets: list[SetEntry] = Field(min_length=1, max_length=20)
+
 
 # ---------- Calorie logs ----------
 

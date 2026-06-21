@@ -121,6 +121,7 @@ const Api = {
 
   // --- lifts ---
   logLift(payload) { return apiRequest("/lifts", { method: "POST", body: payload }); },
+  logLiftSession(payload) { return apiRequest("/lifts/session", { method: "POST", body: payload }); },
   listLifts(params = {}) { return apiRequest(`/lifts${qs(params)}`); },
   deleteLift(id) { return apiRequest(`/lifts/${id}`, { method: "DELETE" }); },
   liftProgress(exerciseId) { return apiRequest(`/lifts/progress/${exerciseId}`); },

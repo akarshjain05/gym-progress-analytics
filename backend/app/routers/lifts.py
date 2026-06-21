@@ -40,6 +40,41 @@ def log_lift(
     return entry
 
 
+@router.post("/session", response_model=list[schemas.LiftLogOut], status_code=201)
+def log_lift_session(
+    payload: schemas.LiftSessionIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    Logs every set of one session (same exercise, same date) in a single
+    request. set_number is assigned automatically in the order given, so
+    PRs/volume/1RM calculations - which already aggregate per exercise per
+    date - pick up the whole session correctly with no extra work.
+    """
+    _get_owned_exercise(db, payload.exercise_id, current_user)
+
+    entries = []
+    for i, set_entry in enumerate(payload.sets, start=1):
+        entry = models.LiftLog(
+            user_id=current_user.id,
+            exercise_id=payload.exercise_id,
+            date=payload.date,
+            weight_kg=set_entry.weight_kg,
+            reps=set_entry.reps,
+            rpe=set_entry.rpe,
+            set_number=i,
+            notes=payload.notes,
+        )
+        db.add(entry)
+        entries.append(entry)
+
+    db.commit()
+    for entry in entries:
+        db.refresh(entry)
+    return entries
+
+
 @router.get("", response_model=list[schemas.LiftLogOut])
 def list_lifts(
     exercise_id: Optional[int] = None,

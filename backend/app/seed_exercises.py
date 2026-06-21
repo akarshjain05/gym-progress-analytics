@@ -21,6 +21,8 @@ PREDEFINED_EXERCISES = [
     ("Dumbbell Shoulder Press", "compound", "shoulders"),
     ("Lateral Raise", "isolation", "shoulders"),
     ("Bicep Curl", "isolation", "arms"),
+    ("Barbell Curl", "isolation", "arms"),
+    ("Dumbbell Curl", "isolation", "arms"),
     ("Hammer Curl", "isolation", "arms"),
     ("Tricep Pushdown", "isolation", "arms"),
     ("Skull Crusher", "isolation", "arms"),
@@ -31,6 +33,11 @@ PREDEFINED_EXERCISES = [
     ("Bulgarian Split Squat", "compound", "legs"),
     ("Plank", "core", "core"),
     ("Cable Crunch", "isolation", "core"),
+    ("Pec Deck", "isolation", "chest"),
+    ("Cable Fly", "isolation", "chest"),
+    ("T-Bar Row", "compound", "back"),
+    ("Reverse Pec Deck", "isolation", "shoulders"),
+    ("Face Pull", "isolation", "shoulders"),
 ]
 
 

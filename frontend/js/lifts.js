@@ -7,7 +7,7 @@ let selectedExerciseId = localStorage.getItem("ironlog_last_exercise") ? parseIn
 document.getElementById("pageHeaderActions").innerHTML = `
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-    Log a set
+    Log a session
   </button>
 `;
 
@@ -36,7 +36,7 @@ document.getElementById("pageContent").innerHTML = `
   </div>
 
   <div id="formCard" class="card mb-16" style="display:none;">
-    <div class="card-title">Log a set</div>
+    <div class="card-title">Log a session</div>
     <form id="liftForm">
       <div class="form-row">
         <div class="field" style="grid-column:1/-1;">
@@ -44,13 +44,17 @@ document.getElementById("pageContent").innerHTML = `
           <select id="lExercise" required></select>
         </div>
         <div class="field"><label for="lDate">Date</label><input type="date" id="lDate" required></div>
-        <div class="field"><label for="lWeight">Weight (kg)</label><input type="number" id="lWeight" step="0.5" min="0" required placeholder="e.g. 100"></div>
-        <div class="field"><label for="lReps">Reps</label><input type="number" id="lReps" min="1" max="100" required placeholder="e.g. 5"></div>
-        <div class="field"><label for="lRpe">RPE <span class="text-tertiary">(optional)</span></label><input type="number" id="lRpe" step="0.5" min="1" max="10" placeholder="1–10"></div>
       </div>
-      <div class="field"><label for="lNotes">Notes <span class="text-tertiary">(optional)</span></label><input id="lNotes" placeholder="e.g. belt, 2 min rest"></div>
+
+      <div class="field">
+        <label>Sets</label>
+        <div id="setRows"></div>
+        <button type="button" class="btn btn-secondary btn-sm mt-8" id="addSetRowBtn">+ Add another set</button>
+      </div>
+
+      <div class="field"><label for="lNotes">Notes <span class="text-tertiary">(optional, applies to the whole session)</span></label><input id="lNotes" placeholder="e.g. belt, felt strong"></div>
       <div class="flex gap-12">
-        <button type="submit" class="btn btn-primary" id="lSubmitBtn">Save set</button>
+        <button type="submit" class="btn btn-primary" id="lSubmitBtn">Save session</button>
         <button type="button" class="btn btn-ghost" id="lCancelBtn">Cancel</button>
       </div>
     </form>
@@ -65,9 +69,56 @@ document.getElementById("pageContent").innerHTML = `
 const formCard = document.getElementById("formCard");
 const addExerciseCard = document.getElementById("addExerciseCard");
 
+let sessionSets = [{ weight: "", reps: "", rpe: "" }];
+
+function renderSetRows() {
+  const wrap = document.getElementById("setRows");
+  wrap.innerHTML = sessionSets.map((s, i) => `
+    <div class="flex gap-12" style="align-items:flex-end;margin-bottom:10px;">
+      <div style="font-size:12.5px;color:var(--text-secondary);font-weight:600;width:28px;padding-bottom:11px;flex-shrink:0;">#${i + 1}</div>
+      <div class="field" style="margin-bottom:0;flex:1;">
+        <label>Weight (kg)</label>
+        <input type="number" step="0.5" min="0" class="set-weight" data-idx="${i}" value="${s.weight}" placeholder="e.g. 60" required>
+      </div>
+      <div class="field" style="margin-bottom:0;flex:1;">
+        <label>Reps</label>
+        <input type="number" min="1" max="100" class="set-reps" data-idx="${i}" value="${s.reps}" placeholder="e.g. 8" required>
+      </div>
+      <div class="field" style="margin-bottom:0;flex:1;">
+        <label>RPE <span class="text-tertiary">(optional)</span></label>
+        <input type="number" step="0.5" min="1" max="10" class="set-rpe" data-idx="${i}" value="${s.rpe}" placeholder="1–10">
+      </div>
+      <button type="button" class="icon-btn set-remove-btn" data-idx="${i}" style="margin-bottom:11px;flex-shrink:0;" ${sessionSets.length === 1 ? "disabled" : ""} title="Remove set">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join("");
+
+  wrap.querySelectorAll(".set-weight").forEach(el => el.addEventListener("input", e => { sessionSets[e.target.dataset.idx].weight = e.target.value; }));
+  wrap.querySelectorAll(".set-reps").forEach(el => el.addEventListener("input", e => { sessionSets[e.target.dataset.idx].reps = e.target.value; }));
+  wrap.querySelectorAll(".set-rpe").forEach(el => el.addEventListener("input", e => { sessionSets[e.target.dataset.idx].rpe = e.target.value; }));
+  wrap.querySelectorAll(".set-remove-btn").forEach(el => el.addEventListener("click", (e) => {
+    const idx = parseInt(e.currentTarget.dataset.idx);
+    if (sessionSets.length > 1) {
+      sessionSets.splice(idx, 1);
+      renderSetRows();
+    }
+  }));
+}
+
+document.getElementById("addSetRowBtn").addEventListener("click", () => {
+  // Convenience: most lifters repeat the same weight across sets in a session,
+  // so prefill the new row with the previous set's weight.
+  const last = sessionSets[sessionSets.length - 1];
+  sessionSets.push({ weight: last ? last.weight : "", reps: "", rpe: "" });
+  renderSetRows();
+});
+
 document.getElementById("openLogBtn").addEventListener("click", () => {
   document.getElementById("lDate").value = todayIso();
   if (selectedExerciseId) document.getElementById("lExercise").value = selectedExerciseId;
+  sessionSets = [{ weight: "", reps: "", rpe: "" }];
+  renderSetRows();
   formCard.style.display = formCard.style.display === "none" ? "block" : "none";
 });
 document.getElementById("lCancelBtn").addEventListener("click", () => formCard.style.display = "none");
@@ -99,18 +150,27 @@ document.getElementById("saveExerciseBtn").addEventListener("click", async () =>
 document.getElementById("liftForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = document.getElementById("lSubmitBtn");
+
+  const sets = sessionSets.map(s => ({
+    weight_kg: parseFloat(s.weight),
+    reps: parseInt(s.reps),
+    rpe: s.rpe !== "" && s.rpe !== null && s.rpe !== undefined ? parseFloat(s.rpe) : null,
+  }));
+  if (sets.some(s => isNaN(s.weight_kg) || isNaN(s.reps))) {
+    showToast("Fill in weight and reps for every set.");
+    return;
+  }
+
   btn.disabled = true; btn.textContent = "Saving…";
   try {
     const exId = parseInt(document.getElementById("lExercise").value);
-    await Api.logLift({
+    await Api.logLiftSession({
       exercise_id: exId,
       date: document.getElementById("lDate").value,
-      weight_kg: parseFloat(document.getElementById("lWeight").value),
-      reps: parseInt(document.getElementById("lReps").value),
-      rpe: document.getElementById("lRpe").value ? parseFloat(document.getElementById("lRpe").value) : null,
       notes: document.getElementById("lNotes").value || null,
+      sets,
     });
-    showToast("Set logged.");
+    showToast(sets.length > 1 ? `${sets.length} sets logged.` : "Set logged.");
     document.getElementById("liftForm").reset();
     formCard.style.display = "none";
     selectedExerciseId = exId;
@@ -120,7 +180,7 @@ document.getElementById("liftForm").addEventListener("submit", async (e) => {
   } catch (err) {
     handleApiError(err);
   } finally {
-    btn.disabled = false; btn.textContent = "Save set";
+    btn.disabled = false; btn.textContent = "Save session";
   }
 });
 
@@ -254,6 +314,7 @@ async function renderLiftTable(exerciseId) {
   const rows = [...logs].reverse().map(l => `
     <tr>
       <td class="label-cell">${fmtDate(l.date)}</td>
+      <td>${l.set_number ? `#${l.set_number}` : "—"}</td>
       <td>${fmtKg(l.weight_kg)} kg</td>
       <td>${l.reps}</td>
       <td>${l.rpe ?? "—"}</td>
@@ -269,7 +330,7 @@ async function renderLiftTable(exerciseId) {
   `).join("");
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Date</th><th>Weight</th><th>Reps</th><th>RPE</th><th>Notes</th><th></th></tr></thead>
+      <thead><tr><th>Date</th><th>Set</th><th>Weight</th><th>Reps</th><th>RPE</th><th>Notes</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   `;
