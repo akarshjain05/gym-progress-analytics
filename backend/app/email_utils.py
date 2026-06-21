@@ -63,4 +63,4 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
         resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
         resp.raise_for_status()
     except requests.RequestException as e:
-        print(f"[ERROR] Failed to send password reset email via Brevo: {e}")l
+        print(f"[ERROR] Failed to send password reset email via Brevo: {e}")
