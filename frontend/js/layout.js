@@ -13,13 +13,71 @@ const NAV_ITEMS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>' },
 ];
 
+// ── Barbell SVG used in brand and mobile nav ──────────────────────────────────
+const BARBELL_SVG = `
+  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+    <rect x="1" y="8.75" width="18" height="2.5" rx="1.25" fill="#c9a84c"/>
+    <rect x="6.5" y="8.75" width="7" height="2.5" rx="1.25" fill="#e0bc60"/>
+    <rect x="1.2" y="5.5" width="2.8" height="9" rx="0.8" fill="#c0392b"/>
+    <rect x="16" y="5.5" width="2.8" height="9" rx="0.8" fill="#c0392b"/>
+    <rect x="5" y="7" width="1.2" height="6" rx="0.4" fill="#a07830"/>
+    <rect x="13.8" y="7" width="1.2" height="6" rx="0.4" fill="#a07830"/>
+  </svg>`;
+
+// ── Mobile bottom nav HTML ────────────────────────────────────────────────────
+function buildMobileNav(activeId) {
+  const items = NAV_ITEMS.map(item => `
+    <a href="${item.href}" class="mobile-nav-link ${item.id === activeId ? 'active' : ''}" aria-label="${item.label}">
+      ${item.icon}
+      <span>${item.label}</span>
+    </a>
+  `).join('');
+  return `<nav class="mobile-nav" aria-label="Main navigation">${items}</nav>`;
+}
+
+// ── Loading overlay ───────────────────────────────────────────────────────────
+function buildLoadingOverlay() {
+  return `
+    <div id="ironlog-loading" role="status" aria-label="Loading">
+      <div class="ironlog-spinner"></div>
+      <span class="ironlog-loading-text">Loading your stats…</span>
+    </div>`;
+}
+
+// ── Hide loading overlay (call this when your page data is ready) ─────────────
+window.hideLoading = function () {
+  const overlay = document.getElementById('ironlog-loading');
+  if (!overlay) return;
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.remove(), 350);
+};
+
+// Auto-hide: watch for real content appearing, fallback after 5s
+function setupLoadingAutoHide() {
+  const CONTENT_SELECTORS = [
+    '.stats-card', '.log-entry', '.lift-row', '.chart-container',
+    '#weightChart', '#dashStats', '.table-wrapper', '.entry-list',
+    '[data-loaded]', '.card'
+  ].join(', ');
+
+  const observer = new MutationObserver(() => {
+    if (document.querySelector(CONTENT_SELECTORS)) {
+      window.hideLoading();
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Hard fallback
+  setTimeout(() => {
+    window.hideLoading();
+    observer.disconnect();
+  }, 5000);
+}
+
 function renderShell(activeId, pageTitle, subtitle) {
   if (!Auth.isLoggedIn()) {
     window.location.href = "index.html";
-    // Stop this script's execution right here. window.location.href navigation
-    // is asynchronous, so without this, the rest of the page's script would
-    // keep running against a shell that was never rendered and crash on
-    // null DOM lookups before the redirect actually takes effect.
     throw new Error("IRONLOG: not authenticated, redirecting to login.");
   }
 
@@ -30,11 +88,15 @@ function renderShell(activeId, pageTitle, subtitle) {
   `).join("");
 
   document.body.innerHTML = `
+    ${buildLoadingOverlay()}
+
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">IL</div>
-          <div class="brand-text"><strong>IRONLOG</strong><span>Progress Analytics</span></div>
+          <a href="dashboard.html" class="brand-with-logo" aria-label="IRONLOG home">
+            <span class="brand-logo-icon" aria-hidden="true">${BARBELL_SVG}</span>
+            <div class="brand-text"><strong>IRONLOG</strong><span>Progress Analytics</span></div>
+          </a>
           <button class="mobile-menu-btn" id="mobileMenuBtn" style="margin-left:auto;display:none;">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
@@ -58,6 +120,8 @@ function renderShell(activeId, pageTitle, subtitle) {
         <div id="pageContent"></div>
       </main>
     </div>
+
+    ${buildMobileNav(activeId)}
   `;
 
   document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -67,6 +131,13 @@ function renderShell(activeId, pageTitle, subtitle) {
 
   const menuBtn = document.getElementById("mobileMenuBtn");
   if (window.innerWidth <= 880) menuBtn.style.display = "flex";
-  window.addEventListener("resize", () => { menuBtn.style.display = window.innerWidth <= 880 ? "flex" : "none"; });
-  menuBtn.addEventListener("click", () => document.getElementById("navList").classList.toggle("open"));
+  window.addEventListener("resize", () => {
+    menuBtn.style.display = window.innerWidth <= 880 ? "flex" : "none";
+  });
+  menuBtn.addEventListener("click", () => {
+    document.getElementById("navList").classList.toggle("open");
+  });
+
+  // Start auto-hide watcher
+  setupLoadingAutoHide();
 }

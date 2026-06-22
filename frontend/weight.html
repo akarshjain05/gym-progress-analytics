@@ -19,6 +19,10 @@
 <script src="js/vendor/chart.umd.js"></script>
 </head>
 <body>
+    <div id="ironlog-loading" aria-live="polite" aria-label="Loading">
+        <div class="ironlog-spinner"></div>
+        <span class="ironlog-loading-text">Loading your stats…</span>
+    </div>
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/layout.js"></script>
@@ -78,5 +82,45 @@
   if (el) el.classList.add('active');
 })();
 </script>
+<script>
+(function() {
+  var overlay = document.getElementById('ironlog-loading');
+  if (!overlay) return;
+ 
+  // Hide the overlay — call this from your page JS when data is loaded,
+  // OR use the auto-hide timeout below as a fallback.
+  window.hideLoading = function() {
+    overlay.classList.add('hidden');
+    setTimeout(function() { overlay.style.display = 'none'; }, 350);
+  };
+ 
+  // AUTO-HIDE APPROACH (easiest — no changes to existing JS needed):
+  // Watches for the page's main content to appear, then hides the overlay.
+  // Adjust the selector to match the first element that appears after load.
+  var observer = new MutationObserver(function() {
+    // Check if meaningful content has been added to the page
+    var hasContent =
+      document.querySelector('.stats-card, .log-entry, .lift-row, .chart-container, #weightChart, #dashStats, [data-loaded]');
+    if (hasContent) {
+      window.hideLoading();
+      observer.disconnect();
+    }
+  });
+ 
+  observer.observe(document.body, { childList: true, subtree: true });
+ 
+  // Hard fallback: always hide after 5 seconds no matter what
+  setTimeout(function() {
+    window.hideLoading();
+    observer.disconnect();
+  }, 5000);
+ 
+  // If page is already loaded (cached), hide quickly
+  if (document.readyState === 'complete') {
+    setTimeout(window.hideLoading, 800);
+  }
+})();
+</script>
+ 
 </body>
 </html>
