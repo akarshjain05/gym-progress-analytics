@@ -9,6 +9,8 @@ const NAV_ITEMS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6c0-3 2-6 6-7 4 1 6 4 6 7Z"/><path d="M12 14v7"/></svg>' },
   { id: "analytics", href: "analytics.html", label: "Analytics",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M11 19V4M18 19v-7"/></svg>' },
+  { id: "coach", href: "coach.html", label: "AI Coach",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' },
   { id: "profile", href: "profile.html", label: "Profile",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>' },
 ];
@@ -22,23 +24,14 @@ const BARBELL_SVG = `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.o
   <rect x="13.8" y="7" width="1.2" height="6" rx="0.4" fill="#a07830"/>
 </svg>`;
 
-const HAMBURGER_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-  <path d="M4 6h16M4 12h16M4 18h16"/>
-</svg>`;
+const HAMBURGER_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+const CLOSE_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+const LOGOUT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>`;
 
-const CLOSE_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-  <path d="M18 6L6 18M6 6l12 12"/>
-</svg>`;
-
-const LOGOUT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-</svg>`;
-
-// ── Loading overlay ───────────────────────────────────────────────────────────
 function buildLoadingOverlay() {
   return `<div id="ironlog-loading" role="status" aria-label="Loading">
     <div class="ironlog-spinner"></div>
-    <span class="ironlog-loading-text">Loading your stats…</span>
+    <span class="ironlog-loading-text">Loading…</span>
   </div>`;
 }
 
@@ -50,7 +43,7 @@ window.hideLoading = function () {
 };
 
 function setupLoadingAutoHide() {
-  const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value';
+  const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value,.coach-card';
   const observer = new MutationObserver(() => {
     if (document.querySelector(SELECTORS)) {
       window.hideLoading();
@@ -61,20 +54,17 @@ function setupLoadingAutoHide() {
   setTimeout(() => { window.hideLoading(); observer.disconnect(); }, 5000);
 }
 
-// ── Mobile drawer nav ─────────────────────────────────────────────────────────
 function buildMobileDrawer(activeId) {
-  const navLinks = NAV_ITEMS.map(item => `
+  // All nav items in drawer except profile (shown separately in footer)
+  const mainItems = NAV_ITEMS.filter(i => i.id !== 'profile');
+  const navLinks = mainItems.map(item => `
     <a class="drawer-link ${item.id === activeId ? 'active' : ''}" href="${item.href}">
-      ${item.icon}
-      <span>${item.label}</span>
+      ${item.icon}<span>${item.label}</span>
     </a>
   `).join('');
 
   return `
-    <!-- Overlay backdrop -->
     <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
-
-    <!-- Slide-in drawer -->
     <div id="mobile-drawer" class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
       <div class="drawer-header">
         <div class="drawer-brand">
@@ -84,32 +74,21 @@ function buildMobileDrawer(activeId) {
             <span>Progress Analytics</span>
           </div>
         </div>
-        <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close menu">
-          ${CLOSE_ICON}
-        </button>
+        <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close menu">${CLOSE_ICON}</button>
       </div>
-
-      <nav class="drawer-nav">
-        ${navLinks}
-      </nav>
-
+      <nav class="drawer-nav">${navLinks}</nav>
       <div class="drawer-footer">
-        <a class="drawer-link drawer-link-profile ${activeId === 'profile' ? 'active' : ''}" href="profile.html">
+        <a class="drawer-link ${activeId === 'profile' ? 'active' : ''}" href="profile.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>
           <span>Profile</span>
         </a>
         <a class="drawer-link drawer-link-logout" id="drawerLogoutBtn">
-          ${LOGOUT_ICON}
-          <span>Log out</span>
+          ${LOGOUT_ICON}<span>Log out</span>
         </a>
       </div>
     </div>
-
-    <!-- Mobile top bar (only visible on mobile) -->
     <header class="mobile-topbar">
-      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
-        ${HAMBURGER_ICON}
-      </button>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">${HAMBURGER_ICON}</button>
       <a href="dashboard.html" class="mobile-topbar-brand">
         <span class="brand-logo-icon" aria-hidden="true">${BARBELL_SVG}</span>
         <span class="mobile-brand-name">IRONLOG</span>
@@ -119,38 +98,37 @@ function buildMobileDrawer(activeId) {
   `;
 }
 
-// ── Bottom nav (5 main items only, no profile — it's in drawer) ───────────────
 function buildBottomNav(activeId) {
-  const bottomItems = NAV_ITEMS.filter(i => i.id !== 'profile');
+  // Bottom nav: 5 items max (skip profile, skip coach to keep it clean — both in drawer)
+  const bottomItems = NAV_ITEMS.filter(i => i.id !== 'profile' && i.id !== 'coach');
   const links = bottomItems.map(item => `
     <a href="${item.href}" class="bottom-nav-link ${item.id === activeId ? 'active' : ''}" aria-label="${item.label}">
       ${item.icon}
       <span>${item.label === 'Body Weight' ? 'Weight' : item.label}</span>
     </a>
   `).join('');
-
-  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${links}</nav>`;
+  // Add coach as last item with robot icon
+  const coachActive = activeId === 'coach' ? 'active' : '';
+  const coachLink = `
+    <a href="coach.html" class="bottom-nav-link ${coachActive}" aria-label="AI Coach">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>Coach</span>
+    </a>
+  `;
+  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${links}${coachLink}</nav>`;
 }
 
 function openDrawer() {
-  const drawer = document.getElementById('mobile-drawer');
-  const backdrop = document.getElementById('drawer-backdrop');
-  const btn = document.getElementById('hamburgerBtn');
-  if (!drawer) return;
-  drawer.classList.add('open');
-  backdrop.classList.add('open');
-  btn && btn.setAttribute('aria-expanded', 'true');
+  document.getElementById('mobile-drawer')?.classList.add('open');
+  document.getElementById('drawer-backdrop')?.classList.add('open');
+  document.getElementById('hamburgerBtn')?.setAttribute('aria-expanded', 'true');
   document.body.style.overflow = 'hidden';
 }
 
 function closeDrawer() {
-  const drawer = document.getElementById('mobile-drawer');
-  const backdrop = document.getElementById('drawer-backdrop');
-  const btn = document.getElementById('hamburgerBtn');
-  if (!drawer) return;
-  drawer.classList.remove('open');
-  backdrop.classList.remove('open');
-  btn && btn.setAttribute('aria-expanded', 'false');
+  document.getElementById('mobile-drawer')?.classList.remove('open');
+  document.getElementById('drawer-backdrop')?.classList.remove('open');
+  document.getElementById('hamburgerBtn')?.setAttribute('aria-expanded', 'false');
   document.body.style.overflow = '';
 }
 
@@ -169,7 +147,6 @@ function renderShell(activeId, pageTitle, subtitle) {
   document.body.innerHTML = `
     ${buildLoadingOverlay()}
     ${buildMobileDrawer(activeId)}
-
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
@@ -181,12 +158,10 @@ function renderShell(activeId, pageTitle, subtitle) {
         <ul class="nav-list" id="navList">
           ${navHtml}
           <a class="nav-link nav-link-logout" id="logoutBtn">
-            ${LOGOUT_ICON}
-            <span>Log out</span>
+            ${LOGOUT_ICON}<span>Log out</span>
           </a>
         </ul>
       </aside>
-
       <main class="main-content">
         <div class="page-header">
           <div>
@@ -198,35 +173,15 @@ function renderShell(activeId, pageTitle, subtitle) {
         <div id="pageContent"></div>
       </main>
     </div>
-
     ${buildBottomNav(activeId)}
   `;
 
-  // Desktop logout
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    Auth.clear();
-    window.location.href = "index.html";
-  });
-
-  // Hamburger open
+  document.getElementById("logoutBtn").addEventListener("click", () => { Auth.clear(); window.location.href = "index.html"; });
   document.getElementById("hamburgerBtn").addEventListener("click", openDrawer);
-
-  // Close button
   document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
-
-  // Backdrop click closes
   document.getElementById("drawer-backdrop").addEventListener("click", closeDrawer);
-
-  // Drawer logout
-  document.getElementById("drawerLogoutBtn").addEventListener("click", () => {
-    Auth.clear();
-    window.location.href = "index.html";
-  });
-
-  // Close drawer on Escape key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeDrawer();
-  });
+  document.getElementById("drawerLogoutBtn").addEventListener("click", () => { Auth.clear(); window.location.href = "index.html"; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
 
   setupLoadingAutoHide();
 }

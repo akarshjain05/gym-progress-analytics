@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import Base, engine, SessionLocal
 from .seed_exercises import seed_exercises
 from .config import settings
-from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics
+from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics, coach
 
 
 @asynccontextmanager
@@ -42,6 +42,7 @@ app.include_router(lifts.router)
 app.include_router(nutrition.router)
 app.include_router(goals.router)
 app.include_router(analytics.router)
+app.include_router(coach.router)
 
 
 @app.get("/")
