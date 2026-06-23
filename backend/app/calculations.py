@@ -220,10 +220,33 @@ STRENGTH_STANDARDS = {
 }
 
 STANDARD_LIFT_KEYS = {
-    "bench press": "bench", "bench": "bench",
-    "squat": "squat", "back squat": "squat",
+    # Bench press variants → bench standards
+    "bench press": "bench",
+    "bench": "bench",
+    "incline bench press": "bench",
+    "dumbbell bench press": "bench",
+    "dip": "bench",
+    "cable fly": "bench",
+    "pec deck": "bench",
+
+    # Squat variants → squat standards
+    "squat": "squat",
+    "back squat": "squat",
+    "front squat": "squat",
+    "leg press": "squat",
+    "bulgarian split squat": "squat",
+
+    # Deadlift variants → deadlift standards
     "deadlift": "deadlift",
-    "overhead press": "overhead_press", "ohp": "overhead_press", "shoulder press": "overhead_press",
+    "romanian deadlift": "deadlift",
+    "hip thrust": "deadlift",
+
+    # Overhead press variants → overhead_press standards
+    "overhead press": "overhead_press",
+    "ohp": "overhead_press",
+    "shoulder press": "overhead_press",
+    "dumbbell shoulder press": "overhead_press",
+    "lateral raise": "overhead_press",
 }
 
 
