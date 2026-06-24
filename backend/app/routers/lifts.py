@@ -11,6 +11,12 @@ from ..security import get_current_user
 
 router = APIRouter(prefix="/lifts", tags=["lifts"])
 
+# Muscle group display order for PRs
+MUSCLE_GROUP_ORDER = [
+    "chest", "back", "shoulders", "legs", "quads",
+    "hamstrings", "glutes", "biceps", "triceps", "core", "calves", "other"
+]
+
 
 def _get_owned_exercise(db: Session, exercise_id: int, user: models.User) -> models.Exercise:
     exercise = (
@@ -46,14 +52,7 @@ def log_lift_session(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """
-    Logs every set of one session (same exercise, same date) in a single
-    request. set_number is assigned automatically in the order given, so
-    PRs/volume/1RM calculations - which already aggregate per exercise per
-    date - pick up the whole session correctly with no extra work.
-    """
     _get_owned_exercise(db, payload.exercise_id, current_user)
-
     entries = []
     for i, set_entry in enumerate(payload.sets, start=1):
         entry = models.LiftLog(
@@ -68,7 +67,6 @@ def log_lift_session(
         )
         db.add(entry)
         entries.append(entry)
-
     db.commit()
     for entry in entries:
         db.refresh(entry)
@@ -111,6 +109,42 @@ def delete_lift(
     return None
 
 
+def _get_strength_info(exercise_name: str, gender: Optional[str], bodyweight_kg: Optional[float], pr_1rm: float) -> dict:
+    """
+    Returns strength level classification + full breakpoint scale.
+    Falls back gracefully if profile data is missing.
+    """
+    if not gender or not bodyweight_kg or bodyweight_kg <= 0:
+        return {
+            "level": None,
+            "reason": "Add bodyweight and gender in Profile to see your strength level",
+            "breakpoints_kg": None,
+        }
+
+    if gender == "other":
+        return {
+            "level": None,
+            "reason": "Strength standards are only available for male/female profiles",
+            "breakpoints_kg": None,
+        }
+
+    level = calc.classify_strength_level(exercise_name, gender, bodyweight_kg, pr_1rm)
+    breakpoints = calc.get_strength_standard_info(exercise_name, gender, bodyweight_kg)
+
+    if level is None and breakpoints is None:
+        return {
+            "level": None,
+            "reason": "No population standard available for this exercise yet",
+            "breakpoints_kg": None,
+        }
+
+    return {
+        "level": level or "beginner",
+        "reason": None,
+        "breakpoints_kg": breakpoints,
+    }
+
+
 @router.get("/progress/{exercise_id}")
 def lift_progress(
     exercise_id: int,
@@ -118,28 +152,31 @@ def lift_progress(
     current_user: models.User = Depends(get_current_user),
 ):
     """
-    Per-exercise progress: best estimated 1RM per session over time,
-    all-time PR, % change from first to most recent session, volume per
-    session, and an approximate strength-level classification.
+    Per-exercise progress with:
+    - Sessions grouped by date with all sets listed
+    - Strength level + full breakpoint scale for visual display
+    - Best 1RM per session for the chart
     """
     exercise = _get_owned_exercise(db, exercise_id, current_user)
     logs = (
         db.query(models.LiftLog)
         .filter(models.LiftLog.user_id == current_user.id, models.LiftLog.exercise_id == exercise_id)
-        .order_by(models.LiftLog.date.asc())
+        .order_by(models.LiftLog.date.asc(), models.LiftLog.set_number.asc())
         .all()
     )
     if not logs:
         return {"has_data": False, "exercise": exercise.name, "message": "No logs yet for this exercise."}
 
-    # Group sets by date (a "session")
+    # Group by date — preserve set order
     sessions: dict[date_type, list[models.LiftLog]] = defaultdict(list)
     for log in logs:
         sessions[log.date].append(log)
 
-    session_dates = sorted(sessions.keys())
+    session_dates = sorted(sessions.keys(), reverse=True)  # newest first for display
+
+    # Build series (oldest first) for chart
     series = []
-    for d in session_dates:
+    for d in sorted(sessions.keys()):
         sets = [(s.weight_kg, s.reps) for s in sessions[d]]
         best_1rm = calc.best_estimated_1rm(sets)
         volume = sum(w * r for w, r in sets)
@@ -151,35 +188,63 @@ def lift_progress(
             "top_set": {"weight_kg": top_set.weight_kg, "reps": top_set.reps},
         })
 
+    # Sessions grouped by date with individual sets (newest first)
+    sessions_grouped = []
+    for d in session_dates:
+        day_logs = sessions[d]
+        sets_list = []
+        for log in sorted(day_logs, key=lambda x: (x.set_number or 0)):
+            sets_list.append({
+                "id": log.id,
+                "set_number": log.set_number,
+                "weight_kg": log.weight_kg,
+                "reps": log.reps,
+                "rpe": log.rpe,
+                "notes": log.notes,
+            })
+        day_1rm = calc.best_estimated_1rm([(s["weight_kg"], s["reps"]) for s in sets_list])
+        sessions_grouped.append({
+            "date": d.isoformat(),
+            "sets": sets_list,
+            "set_count": len(sets_list),
+            "best_1rm_kg": round(day_1rm, 1),
+            "volume_kg": round(sum(s["weight_kg"] * s["reps"] for s in sets_list), 1),
+        })
+
     first_1rm = series[0]["estimated_1rm_kg"]
     latest_1rm = series[-1]["estimated_1rm_kg"]
     pr_1rm = max(s["estimated_1rm_kg"] for s in series)
     pr_session = next(s for s in series if s["estimated_1rm_kg"] == pr_1rm)
 
-    strength_level = None
-    if current_user.gender and current_user.height_cm:
-        # Use most recent bodyweight if available, otherwise skip classification
-        latest_bw = (
-            db.query(models.BodyWeightLog)
-            .filter(models.BodyWeightLog.user_id == current_user.id)
-            .order_by(models.BodyWeightLog.date.desc())
-            .first()
-        )
-        if latest_bw:
-            strength_level = calc.classify_strength_level(
-                exercise.name, current_user.gender, latest_bw.weight_kg, pr_1rm
-            )
+    # Get bodyweight for strength classification
+    latest_bw = (
+        db.query(models.BodyWeightLog)
+        .filter(models.BodyWeightLog.user_id == current_user.id)
+        .order_by(models.BodyWeightLog.date.desc())
+        .first()
+    )
+    bw_kg = latest_bw.weight_kg if latest_bw else None
+
+    strength_info = _get_strength_info(exercise.name, current_user.gender, bw_kg, pr_1rm)
 
     return {
         "has_data": True,
         "exercise": exercise.name,
         "muscle_group": exercise.muscle_group,
+        "category": exercise.category,
         "first_session_1rm_kg": first_1rm,
         "latest_session_1rm_kg": latest_1rm,
         "change_pct": calc.percent_change(first_1rm, latest_1rm),
         "personal_record_1rm_kg": pr_1rm,
         "personal_record_date": pr_session["date"],
-        "approximate_strength_level": strength_level,
+        # Strength level with full breakpoints
+        "approximate_strength_level": strength_info["level"],
+        "strength_reason": strength_info["reason"],
+        "strength_breakpoints_kg": strength_info["breakpoints_kg"],
+        "bodyweight_kg": bw_kg,
+        # Sessions newest first with all sets
+        "sessions_grouped": sessions_grouped,
+        # Chart data oldest first
         "series": series,
     }
 
@@ -189,25 +254,80 @@ def all_personal_records(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """All-time best estimated 1RM per exercise the user has logged."""
+    """
+    All-time best estimated 1RM per exercise, grouped by muscle group.
+    Also includes strength level for each exercise.
+    """
     logs = db.query(models.LiftLog).filter(models.LiftLog.user_id == current_user.id).all()
     if not logs:
-        return []
+        return {"grouped": [], "flat": []}
 
     by_exercise: dict[int, list[models.LiftLog]] = defaultdict(list)
     for log in logs:
         by_exercise[log.exercise_id].append(log)
 
-    results = []
+    latest_bw = (
+        db.query(models.BodyWeightLog)
+        .filter(models.BodyWeightLog.user_id == current_user.id)
+        .order_by(models.BodyWeightLog.date.desc())
+        .first()
+    )
+    bw_kg = latest_bw.weight_kg if latest_bw else None
+
+    flat = []
     for exercise_id, entries in by_exercise.items():
         exercise = db.get(models.Exercise, exercise_id)
+        if not exercise:
+            continue
         best = max(entries, key=lambda e: calc.estimate_1rm_epley(e.weight_kg, e.reps))
-        results.append({
+        pr_1rm = calc.estimate_1rm_epley(best.weight_kg, best.reps)
+
+        strength_info = _get_strength_info(exercise.name, current_user.gender, bw_kg, pr_1rm)
+
+        flat.append({
             "exercise_id": exercise_id,
-            "exercise": exercise.name if exercise else "Unknown",
-            "muscle_group": exercise.muscle_group if exercise else None,
-            "estimated_1rm_kg": calc.estimate_1rm_epley(best.weight_kg, best.reps),
+            "exercise": exercise.name,
+            "muscle_group": exercise.muscle_group or "other",
+            "category": exercise.category,
+            "estimated_1rm_kg": pr_1rm,
             "achieved_with": {"weight_kg": best.weight_kg, "reps": best.reps},
             "date": best.date.isoformat(),
+            "strength_level": strength_info["level"],
+            "strength_breakpoints_kg": strength_info["breakpoints_kg"],
         })
-    return sorted(results, key=lambda r: r["estimated_1rm_kg"], reverse=True)
+
+    # Group by muscle group in anatomical order
+    by_group: dict[str, list] = defaultdict(list)
+    for pr in flat:
+        group = pr["muscle_group"].lower() if pr["muscle_group"] else "other"
+        by_group[group].append(pr)
+
+    # Sort within each group by 1RM descending
+    for group in by_group:
+        by_group[group].sort(key=lambda x: x["estimated_1rm_kg"], reverse=True)
+
+    # Build ordered groups list
+    grouped = []
+    seen = set()
+    for group_key in MUSCLE_GROUP_ORDER:
+        if group_key in by_group:
+            grouped.append({
+                "muscle_group": group_key,
+                "label": group_key.capitalize(),
+                "records": by_group[group_key],
+            })
+            seen.add(group_key)
+
+    # Any groups not in our order list go at the end
+    for group_key, records in by_group.items():
+        if group_key not in seen:
+            grouped.append({
+                "muscle_group": group_key,
+                "label": group_key.capitalize(),
+                "records": records,
+            })
+
+    return {
+        "grouped": grouped,
+        "flat": sorted(flat, key=lambda r: r["estimated_1rm_kg"], reverse=True),
+    }
