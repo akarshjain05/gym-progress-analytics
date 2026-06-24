@@ -132,7 +132,7 @@
       window.hideLoading && window.hideLoading();
     }, 45000);
 
-    Api.request("GET", "/coach/analysis")
+    apiRequest("/coach/analysis")
       .then(data => {
         clearTimeout(wakeupTimer);
         clearTimeout(hardTimeout);
