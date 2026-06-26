@@ -320,6 +320,13 @@
         let scaleHtml = "";
         let labelsHtml = "";
 
+        // Grey pre-beginner segment (0 → beginner reps)
+        const preBegReps = (repValues[0] / maxReps * 100).toFixed(1);
+        scaleHtml += `<div class="scale-seg"
+          style="width:${preBegReps}%;background:#374151;opacity:0.4;"
+          title="Below beginner"></div>`;
+        labelsHtml += `<div class="scale-label" style="width:${preBegReps}%;"></div>`;
+
         tiers.forEach((tier, i) => {
           const val = repValues[i];
           const nextVal = i < tiers.length - 1 ? repValues[i + 1] : maxReps;
@@ -334,8 +341,8 @@
           </div>`;
         });
 
-        // User marker based on reps
-        const userPct = Math.min(95, (bestReps / maxReps * 100)).toFixed(1);
+        // User marker: position = bestReps / maxReps * 100 (aligns with 0→maxReps scale)
+        const userPct = Math.min(97, (bestReps / maxReps * 100)).toFixed(1);
         const markerLabel = bestReps > 0 ? `${bestReps} ${unit}` : "0";
         scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your best: ${markerLabel}">
           <div class="scale-marker-arrow"></div>
@@ -347,9 +354,20 @@
 
       } else {
         // Weight-based scale — values are kg numbers
+        // IMPORTANT: Scale spans 0 → maxVal. First segment is grey (0 → beginner).
+        // Each tier segment goes from its breakpoint to the next.
+        // User marker uses (pr / maxVal * 100) which aligns correctly with this layout.
         const maxVal = breakpoints.elite * 1.3;
         let scaleHtml = "";
         let labelsHtml = "";
+
+        // Grey pre-beginner segment (0 → beginner breakpoint)
+        const preBegWidth = (breakpoints.beginner / maxVal * 100).toFixed(1);
+        scaleHtml += `<div class="scale-seg"
+          style="width:${preBegWidth}%;background:#374151;opacity:0.4;"
+          title="Below beginner"></div>`;
+        // Empty label spacer for pre-beginner
+        labelsHtml += `<div class="scale-label" style="width:${preBegWidth}%;"></div>`;
 
         tiers.forEach((tier, i) => {
           const val = breakpoints[tier];
@@ -365,8 +383,8 @@
           </div>`;
         });
 
-        // User marker based on PR kg
-        const userPct = Math.min(95, (pr / maxVal * 100)).toFixed(1);
+        // User marker: position = pr / maxVal * 100 (correct since scale spans 0→maxVal)
+        const userPct = Math.min(97, (pr / maxVal * 100)).toFixed(1);
         scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your PR: ${pr}kg">
           <div class="scale-marker-arrow"></div>
           <div class="scale-marker-label">${pr}kg</div>
