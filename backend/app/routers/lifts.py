@@ -109,16 +109,68 @@ def delete_lift(
     return None
 
 
-def _get_strength_info(exercise_name: str, gender: Optional[str], bodyweight_kg: Optional[float], pr_1rm: float) -> dict:
+BODYWEIGHT_EXERCISE_NAMES = {
+    "pull-up", "pullup", "pull up",
+    "chin-up", "chinup", "chin up",
+    "dip",
+    "hanging leg raise",
+    "plank",
+}
+
+
+def _is_bodyweight_exercise(exercise_name: str) -> bool:
+    return exercise_name.strip().lower() in BODYWEIGHT_EXERCISE_NAMES
+
+
+def _get_strength_info(
+    exercise_name: str,
+    gender: Optional[str],
+    bodyweight_kg: Optional[float],
+    pr_1rm: float,
+    best_reps: int = 0,
+) -> dict:
     """
-    Returns strength level classification + full breakpoint scale.
-    Falls back gracefully if profile data is missing.
+    Returns strength level + breakpoints.
+
+    For bodyweight exercises (dip, pull-up, chin-up, hanging leg raise, plank):
+      - Uses best_reps for classification, not weight
+      - breakpoints are rep counts (or seconds for plank), not kg
+      - is_bodyweight = True so frontend shows reps scale
+
+    For weighted exercises:
+      - Uses pr_1rm / bodyweight ratio
+      - breakpoints are kg values
     """
+    is_bw = _is_bodyweight_exercise(exercise_name)
+
+    # Bodyweight exercises only need gender, not bodyweight_kg
+    if is_bw:
+        if not gender or gender == "other":
+            return {
+                "level": None,
+                "reason": "Add gender in Profile to see your strength level",
+                "breakpoints_kg": None,
+                "is_bodyweight": True,
+                "best_reps": best_reps,
+            }
+        level = calc.classify_bodyweight_exercise(exercise_name, gender, best_reps)
+        breakpoints = calc.get_strength_standard_info(exercise_name, gender, bodyweight_kg or 70)
+        return {
+            "level": level or "beginner",
+            "reason": None,
+            "breakpoints_kg": breakpoints,  # actually rep breakpoints for BW exercises
+            "is_bodyweight": True,
+            "best_reps": best_reps,
+        }
+
+    # Weighted exercises need both gender and bodyweight
     if not gender or not bodyweight_kg or bodyweight_kg <= 0:
         return {
             "level": None,
             "reason": "Add bodyweight and gender in Profile to see your strength level",
             "breakpoints_kg": None,
+            "is_bodyweight": False,
+            "best_reps": 0,
         }
 
     if gender == "other":
@@ -126,6 +178,8 @@ def _get_strength_info(exercise_name: str, gender: Optional[str], bodyweight_kg:
             "level": None,
             "reason": "Strength standards are only available for male/female profiles",
             "breakpoints_kg": None,
+            "is_bodyweight": False,
+            "best_reps": 0,
         }
 
     level = calc.classify_strength_level(exercise_name, gender, bodyweight_kg, pr_1rm)
@@ -136,12 +190,16 @@ def _get_strength_info(exercise_name: str, gender: Optional[str], bodyweight_kg:
             "level": None,
             "reason": "No population standard available for this exercise yet",
             "breakpoints_kg": None,
+            "is_bodyweight": False,
+            "best_reps": 0,
         }
 
     return {
         "level": level or "beginner",
         "reason": None,
         "breakpoints_kg": breakpoints,
+        "is_bodyweight": False,
+        "best_reps": 0,
     }
 
 
@@ -225,22 +283,32 @@ def lift_progress(
     )
     bw_kg = latest_bw.weight_kg if latest_bw else None
 
-    strength_info = _get_strength_info(exercise.name, current_user.gender, bw_kg, pr_1rm)
+    # For bodyweight exercises (dip, pull-up etc.) use max reps as the metric
+    best_reps_ever = 0
+    if _is_bodyweight_exercise(exercise.name):
+        best_reps_ever = max((log.reps for log in logs), default=0)
+
+    strength_info = _get_strength_info(
+        exercise.name, current_user.gender, bw_kg, pr_1rm, best_reps=best_reps_ever
+    )
 
     return {
         "has_data": True,
         "exercise": exercise.name,
         "muscle_group": exercise.muscle_group,
         "category": exercise.category,
+        "is_bodyweight": _is_bodyweight_exercise(exercise.name),
         "first_session_1rm_kg": first_1rm,
         "latest_session_1rm_kg": latest_1rm,
         "change_pct": calc.percent_change(first_1rm, latest_1rm),
         "personal_record_1rm_kg": pr_1rm,
         "personal_record_date": pr_session["date"],
+        "best_reps_ever": best_reps_ever,
         # Strength level with full breakpoints
         "approximate_strength_level": strength_info["level"],
         "strength_reason": strength_info["reason"],
         "strength_breakpoints_kg": strength_info["breakpoints_kg"],
+        "is_bodyweight_exercise": strength_info["is_bodyweight"],
         "bodyweight_kg": bw_kg,
         # Sessions newest first with all sets
         "sessions_grouped": sessions_grouped,
@@ -282,13 +350,19 @@ def all_personal_records(
         best = max(entries, key=lambda e: calc.estimate_1rm_epley(e.weight_kg, e.reps))
         pr_1rm = calc.estimate_1rm_epley(best.weight_kg, best.reps)
 
-        strength_info = _get_strength_info(exercise.name, current_user.gender, bw_kg, pr_1rm)
+        # For bodyweight exercises use max reps as metric
+        best_reps = max((e.reps for e in entries), default=0) if _is_bodyweight_exercise(exercise.name) else 0
+        strength_info = _get_strength_info(
+            exercise.name, current_user.gender, bw_kg, pr_1rm, best_reps=best_reps
+        )
 
         flat.append({
             "exercise_id": exercise_id,
             "exercise": exercise.name,
             "muscle_group": exercise.muscle_group or "other",
             "category": exercise.category,
+            "is_bodyweight": _is_bodyweight_exercise(exercise.name),
+            "best_reps": best_reps,
             "estimated_1rm_kg": pr_1rm,
             "achieved_with": {"weight_kg": best.weight_kg, "reps": best.reps},
             "date": best.date.isoformat(),

@@ -483,7 +483,6 @@ STRENGTH_STANDARDS = {
         "single_arm_pushdown": {"beginner": 0.07, "novice": 0.11, "intermediate": 0.16, "advanced": 0.22, "elite": 0.29},
         "db_overhead_tri":     {"beginner": 0.06, "novice": 0.09, "intermediate": 0.14, "advanced": 0.19, "elite": 0.26},
         "machine_tri":         {"beginner": 0.13, "novice": 0.2,  "intermediate": 0.29, "advanced": 0.4,  "elite": 0.51},
-        "close_grip_bench":    {"beginner": 0.22, "novice": 0.38, "intermediate": 0.52, "advanced": 0.78, "elite": 1.02},
 
         # ── Legs ──────────────────────────────────────────────────────────
         "squat":               {"beginner": 0.5,  "novice": 0.75, "intermediate": 1.0,  "advanced": 1.5,  "elite": 1.9},

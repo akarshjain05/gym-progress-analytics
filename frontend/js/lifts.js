@@ -29,13 +29,13 @@
         <!-- Stats row -->
         <div class="lifts-stats-row">
           <div class="stat-card">
-            <div class="stat-label">LATEST EST. 1RM</div>
-            <div class="stat-big"><span id="latest1rm">—</span> <span class="stat-unit">kg</span></div>
+            <div class="stat-label" data-label="latest">LATEST EST. 1RM</div>
+            <div class="stat-big"><span id="latest1rm">—</span> <span class="stat-unit" id="latest1rmUnit">kg</span></div>
             <div class="stat-sub" id="changePct"></div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">PERSONAL RECORD</div>
-            <div class="stat-big"><span id="pr1rm">—</span> <span class="stat-unit">kg</span></div>
+            <div class="stat-label" data-label="pr">PERSONAL RECORD</div>
+            <div class="stat-big"><span id="pr1rm">—</span> <span class="stat-unit" id="pr1rmUnit">kg</span></div>
             <div class="stat-sub" id="prDate"></div>
           </div>
           <div class="stat-card" id="strengthCard">
@@ -204,14 +204,27 @@
       document.getElementById("noDataMsg").style.display = "none";
       document.getElementById("progressSection").style.display = "block";
 
-      // Stats
-      document.getElementById("latest1rm").textContent = fmtKg(data.latest_session_1rm_kg);
-      document.getElementById("pr1rm").textContent = fmtKg(data.personal_record_1rm_kg);
-      document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
-
-      const delta = fmtDelta(data.change_pct, "%");
-      document.getElementById("changePct").textContent = delta.text + " since first log";
-      document.getElementById("changePct").className = "stat-sub " + delta.cls;
+      // Stats — bodyweight exercises show reps, weighted show kg
+      const isBWExercise = data.is_bodyweight_exercise || data.is_bodyweight;
+      if (isBWExercise) {
+        // Change card labels for bodyweight — show reps not kg
+        document.querySelector('[data-label="latest"]').textContent = "BEST REPS (LATEST)";
+        document.querySelector('[data-label="pr"]').textContent = "BEST REPS EVER";
+        document.getElementById("latest1rm").textContent = data.best_reps_ever || "—";
+        document.getElementById("latest1rmUnit").textContent = "reps";
+        document.getElementById("pr1rm").textContent = data.best_reps_ever || "—";
+        document.getElementById("pr1rmUnit").textContent = "reps";
+        document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
+        document.getElementById("changePct").textContent = "Bodyweight exercise — classified by reps";
+        document.getElementById("changePct").className = "stat-sub neutral";
+      } else {
+        document.getElementById("latest1rm").textContent = fmtKg(data.latest_session_1rm_kg);
+        document.getElementById("pr1rm").textContent = fmtKg(data.personal_record_1rm_kg);
+        document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
+        const delta = fmtDelta(data.change_pct, "%");
+        document.getElementById("changePct").textContent = delta.text + " since first log";
+        document.getElementById("changePct").className = "stat-sub " + delta.cls;
+      }
 
       // Chart title
       document.getElementById("chartTitle").textContent =
@@ -243,6 +256,8 @@
     const level = data.approximate_strength_level;
     const reason = data.strength_reason;
     const breakpoints = data.strength_breakpoints_kg;
+    const isBW = data.is_bodyweight_exercise;
+    const bestReps = data.best_reps_ever || 0;
     const pr = data.personal_record_1rm_kg;
 
     const levelColors = {
@@ -261,21 +276,22 @@
     };
 
     if (!level && reason) {
-      card.innerHTML = `
-        <div style="font-size:13px;color:#a09880;line-height:1.4;">${reason}</div>
-      `;
+      card.innerHTML = `<div style="font-size:13px;color:#a09880;line-height:1.4;">${reason}</div>`;
       scaleWrap.style.display = "none";
       return;
     }
 
     if (level) {
       const color = levelColors[level] || "#a09880";
+      const subtitle = isBW
+        ? `Best: ${bestReps} reps · vs population avg`
+        : "vs population avg";
       card.innerHTML = `
         <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
           <span style="font-size:18px;">${levelEmojis[level] || "💪"}</span>
           <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
         </div>
-        <div style="font-size:11px;color:#a09880;margin-top:4px;">vs population avg</div>
+        <div style="font-size:11px;color:#a09880;margin-top:4px;">${subtitle}</div>
       `;
     }
 
@@ -285,34 +301,74 @@
       const tiers = ["beginner", "novice", "intermediate", "advanced", "elite"];
       const tierColors = ["#6b7280", "#3b82f6", "#f59e0b", "#10b981", "#c0392b"];
 
-      // Build scale segments
-      const maxVal = breakpoints.elite * 1.3;
-      let scaleHtml = "";
-      let labelsHtml = "";
+      if (isBW) {
+        // Reps-based scale — parse "X reps" or "X seconds" strings
+        const repValues = tiers.map(t => {
+          const val = breakpoints[t];
+          return typeof val === "string" ? parseInt(val) : val;
+        });
+        const unit = typeof breakpoints.beginner === "string"
+          ? breakpoints.beginner.replace(/[0-9]/g, "").trim()
+          : "reps";
+        const maxReps = repValues[4] * 1.3;
+        let scaleHtml = "";
+        let labelsHtml = "";
 
-      tiers.forEach((tier, i) => {
-        const val = breakpoints[tier];
-        const nextVal = i < tiers.length - 1 ? breakpoints[tiers[i + 1]] : maxVal;
-        const segWidth = ((nextVal - val) / maxVal * 100).toFixed(1);
-        const isActive = level === tier;
-        scaleHtml += `<div class="scale-seg ${isActive ? "active" : ""}"
-          style="width:${segWidth}%;background:${tierColors[i]};opacity:${isActive ? 1 : 0.35};"
-          title="${tier}: ${val}kg"></div>`;
-        labelsHtml += `<div class="scale-label" style="width:${segWidth}%;color:${tierColors[i]};">
-          <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${tier}</div>
-          <div style="font-size:9px;">${val}kg</div>
+        tiers.forEach((tier, i) => {
+          const val = repValues[i];
+          const nextVal = i < tiers.length - 1 ? repValues[i + 1] : maxReps;
+          const segWidth = ((nextVal - val) / maxReps * 100).toFixed(1);
+          const isActive = level === tier;
+          scaleHtml += `<div class="scale-seg ${isActive ? "active" : ""}"
+            style="width:${segWidth}%;background:${tierColors[i]};opacity:${isActive ? 1 : 0.35};"
+            title="${tier}: ${val} ${unit}"></div>`;
+          labelsHtml += `<div class="scale-label" style="width:${segWidth}%;color:${tierColors[i]};">
+            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${tier}</div>
+            <div style="font-size:9px;">${val} ${unit}</div>
+          </div>`;
+        });
+
+        // User marker based on reps
+        const userPct = Math.min(95, (bestReps / maxReps * 100)).toFixed(1);
+        const markerLabel = bestReps > 0 ? `${bestReps} ${unit}` : "0";
+        scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your best: ${markerLabel}">
+          <div class="scale-marker-arrow"></div>
+          <div class="scale-marker-label">${markerLabel}</div>
         </div>`;
-      });
 
-      // User marker
-      const userPct = Math.min(95, (pr / maxVal * 100)).toFixed(1);
-      scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your PR: ${pr}kg">
-        <div class="scale-marker-arrow"></div>
-        <div class="scale-marker-label">${pr}kg</div>
-      </div>`;
+        scaleEl.innerHTML = `<div class="scale-track">${scaleHtml}</div>`;
+        labelsEl.innerHTML = labelsHtml;
 
-      scaleEl.innerHTML = `<div class="scale-track">${scaleHtml}</div>`;
-      labelsEl.innerHTML = labelsHtml;
+      } else {
+        // Weight-based scale — values are kg numbers
+        const maxVal = breakpoints.elite * 1.3;
+        let scaleHtml = "";
+        let labelsHtml = "";
+
+        tiers.forEach((tier, i) => {
+          const val = breakpoints[tier];
+          const nextVal = i < tiers.length - 1 ? breakpoints[tiers[i + 1]] : maxVal;
+          const segWidth = ((nextVal - val) / maxVal * 100).toFixed(1);
+          const isActive = level === tier;
+          scaleHtml += `<div class="scale-seg ${isActive ? "active" : ""}"
+            style="width:${segWidth}%;background:${tierColors[i]};opacity:${isActive ? 1 : 0.35};"
+            title="${tier}: ${val}kg"></div>`;
+          labelsHtml += `<div class="scale-label" style="width:${segWidth}%;color:${tierColors[i]};">
+            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${tier}</div>
+            <div style="font-size:9px;">${val}kg</div>
+          </div>`;
+        });
+
+        // User marker based on PR kg
+        const userPct = Math.min(95, (pr / maxVal * 100)).toFixed(1);
+        scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your PR: ${pr}kg">
+          <div class="scale-marker-arrow"></div>
+          <div class="scale-marker-label">${pr}kg</div>
+        </div>`;
+
+        scaleEl.innerHTML = `<div class="scale-track">${scaleHtml}</div>`;
+        labelsEl.innerHTML = labelsHtml;
+      }
     } else {
       scaleWrap.style.display = "none";
     }
@@ -463,11 +519,19 @@
             ? `<span class="pr-level-badge" style="background:${levelColor}20;color:${levelColor};border:1px solid ${levelColor}40;">${pr.strength_level}</span>`
             : `<span class="pr-level-badge" style="color:#6b7280;background:#1e232720;">—</span>`;
 
+          const isBW = pr.is_bodyweight;
+          const prMetric = isBW
+            ? `${pr.best_reps} reps`
+            : `${fmtKg(pr.estimated_1rm_kg)} <span class="pr-unit">kg</span>`;
+          const prAchieved = isBW
+            ? `Best set: ${pr.achieved_with.reps} reps`
+            : `${pr.achieved_with.weight_kg}kg × ${pr.achieved_with.reps}`;
+
           return `
             <div class="pr-row" data-exid="${pr.exercise_id}" style="cursor:pointer;">
               <div class="pr-exercise">${pr.exercise}</div>
-              <div class="pr-1rm">${fmtKg(pr.estimated_1rm_kg)} <span class="pr-unit">kg</span></div>
-              <div class="pr-achieved">${pr.achieved_with.weight_kg}kg × ${pr.achieved_with.reps}</div>
+              <div class="pr-1rm">${prMetric}</div>
+              <div class="pr-achieved">${prAchieved}</div>
               <div class="pr-date">${fmtDate(pr.date)}</div>
               <div class="pr-level">${levelBadge}</div>
             </div>
