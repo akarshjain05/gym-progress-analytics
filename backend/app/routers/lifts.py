@@ -285,8 +285,14 @@ def lift_progress(
 
     # For bodyweight exercises (dip, pull-up etc.) use max reps as the metric
     best_reps_ever = 0
+    latest_session_best_reps = 0
     if _is_bodyweight_exercise(exercise.name):
         best_reps_ever = max((log.reps for log in logs), default=0)
+        # Latest session = most recent date's best reps
+        latest_date = session_dates[0]  # session_dates is newest first
+        latest_session_best_reps = max(
+            (log.reps for log in sessions[latest_date]), default=0
+        )
 
     strength_info = _get_strength_info(
         exercise.name, current_user.gender, bw_kg, pr_1rm, best_reps=best_reps_ever
@@ -304,6 +310,7 @@ def lift_progress(
         "personal_record_1rm_kg": pr_1rm,
         "personal_record_date": pr_session["date"],
         "best_reps_ever": best_reps_ever,
+        "latest_session_best_reps": latest_session_best_reps,
         # Strength level with full breakpoints
         "approximate_strength_level": strength_info["level"],
         "strength_reason": strength_info["reason"],

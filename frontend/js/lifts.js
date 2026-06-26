@@ -204,18 +204,24 @@
       document.getElementById("noDataMsg").style.display = "none";
       document.getElementById("progressSection").style.display = "block";
 
+      // ALWAYS reset labels first to avoid stale values when switching exercises
+      document.querySelector('[data-label="latest"]').textContent = "LATEST EST. 1RM";
+      document.querySelector('[data-label="pr"]').textContent = "PERSONAL RECORD";
+      document.getElementById("latest1rmUnit").textContent = "kg";
+      document.getElementById("pr1rmUnit").textContent = "kg";
+
       // Stats — bodyweight exercises show reps, weighted show kg
-      const isBWExercise = data.is_bodyweight_exercise || data.is_bodyweight;
+      const isBWExercise = !!(data.is_bodyweight || data.is_bodyweight_exercise);
       if (isBWExercise) {
         // Change card labels for bodyweight — show reps not kg
-        document.querySelector('[data-label="latest"]').textContent = "BEST REPS (LATEST)";
+        document.querySelector('[data-label="latest"]').textContent = "BEST REPS (LATEST SESSION)";
         document.querySelector('[data-label="pr"]').textContent = "BEST REPS EVER";
-        document.getElementById("latest1rm").textContent = data.best_reps_ever || "—";
+        document.getElementById("latest1rm").textContent = data.latest_session_best_reps || data.best_reps_ever || "—";
         document.getElementById("latest1rmUnit").textContent = "reps";
         document.getElementById("pr1rm").textContent = data.best_reps_ever || "—";
         document.getElementById("pr1rmUnit").textContent = "reps";
         document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
-        document.getElementById("changePct").textContent = "Bodyweight exercise — classified by reps";
+        document.getElementById("changePct").textContent = "Bodyweight — classified by max reps";
         document.getElementById("changePct").className = "stat-sub neutral";
       } else {
         document.getElementById("latest1rm").textContent = fmtKg(data.latest_session_1rm_kg);
@@ -228,7 +234,7 @@
 
       // Chart title
       document.getElementById("chartTitle").textContent =
-        data.exercise.toUpperCase() + " — ESTIMATED 1RM OVER TIME";
+        data.exercise.toUpperCase() + (isBWExercise ? " — BEST REPS OVER TIME" : " — ESTIMATED 1RM OVER TIME");
       document.getElementById("muscleGroupTag").textContent =
         data.muscle_group ? data.muscle_group.toUpperCase() : "";
 
@@ -236,7 +242,7 @@
       renderStrengthLevel(data);
 
       // Chart
-      renderChart(data.series, data.exercise);
+      renderChart(data.series, data.exercise, isBWExercise, data.sessions_grouped);
 
       // Sessions grouped by date
       renderSessionsGrouped(data.sessions_grouped, exerciseId);
@@ -375,43 +381,89 @@
   }
 
   // ── Chart ─────────────────────────────────────────────────────────────────
-  function renderChart(series, exerciseName) {
+  function renderChart(series, exerciseName, isBW, sessionsGrouped) {
     if (liftChart) { liftChart.destroy(); liftChart = null; }
     if (!series || series.length === 0) return;
 
     const ctx = document.getElementById("liftChart").getContext("2d");
-    liftChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: series.map(s => fmtDate(s.date)),
-        datasets: [{
-          label: "Est. 1RM (kg)",
-          data: series.map(s => s.estimated_1rm_kg),
-          borderColor: "#c0392b",
-          backgroundColor: "rgba(192,57,43,0.1)",
-          pointBackgroundColor: "#c0392b",
-          pointRadius: series.length < 10 ? 5 : 3,
-          tension: 0.3,
-          fill: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => `Est. 1RM: ${ctx.parsed.y} kg`,
-            }
-          }
+
+    let chartData, chartLabel, tooltipLabel, yLabel;
+
+    if (isBW) {
+      // For bodyweight exercises: show best reps per session over time
+      // Use sessionsGrouped (newest first) reversed to oldest first for chart
+      const chronological = sessionsGrouped ? [...sessionsGrouped].reverse() : [];
+      chartData = chronological.map(s => Math.max(...s.sets.map(set => set.reps)));
+      const labels = chronological.map(s => fmtDate(s.date));
+      chartLabel = "Best Reps";
+      tooltipLabel = ctx => `Best reps: ${ctx.parsed.y}`;
+      yLabel = "Reps";
+
+      liftChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: chartLabel,
+            data: chartData,
+            borderColor: "#c0392b",
+            backgroundColor: "rgba(192,57,43,0.1)",
+            pointBackgroundColor: "#c0392b",
+            pointRadius: chronological.length < 10 ? 5 : 3,
+            tension: 0.3,
+            fill: true,
+          }]
         },
-        scales: {
-          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: tooltipLabel } }
+          },
+          scales: {
+            x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+            y: {
+              grid: { color: "rgba(255,255,255,0.05)" },
+              ticks: { color: "#a09880", font: { size: 11 }, stepSize: 1 },
+              title: { display: true, text: yLabel, color: "#a09880", font: { size: 11 } },
+            },
+          }
         }
-      }
-    });
+      });
+    } else {
+      // Weighted exercise: show estimated 1RM over time
+      liftChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: series.map(s => fmtDate(s.date)),
+          datasets: [{
+            label: "Est. 1RM (kg)",
+            data: series.map(s => s.estimated_1rm_kg),
+            borderColor: "#c0392b",
+            backgroundColor: "rgba(192,57,43,0.1)",
+            pointBackgroundColor: "#c0392b",
+            pointRadius: series.length < 10 ? 5 : 3,
+            tension: 0.3,
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: ctx => `Est. 1RM: ${ctx.parsed.y} kg` }
+            }
+          },
+          scales: {
+            x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+            y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+          }
+        }
+      });
+    }
   }
 
   // ── Sessions grouped by date (collapsible) ────────────────────────────────
