@@ -14,13 +14,17 @@
   content.innerHTML = `
     <div id="liftsPage">
 
-      <!-- Exercise selector -->
+      <!-- Two-step exercise selector -->
       <div class="lifts-top-row">
-        <div class="field" style="margin:0;flex:1;max-width:340px;">
-          <label class="field-label">Viewing exercise</label>
-          <select id="exerciseSelect" class="select-input"></select>
+        <div class="selector-step">
+          <label class="field-label">Muscle group</label>
+          <div id="muscleGroupButtons" class="muscle-group-pills"></div>
         </div>
-        <button class="btn btn-secondary" id="addCustomBtn">+ Custom exercise</button>
+        <div class="selector-step" id="exerciseStep" style="display:none;">
+          <label class="field-label">Exercise</label>
+          <select id="exerciseSelect" class="select-input" style="max-width:280px;"></select>
+        </div>
+        <button class="btn btn-secondary" id="addCustomBtn" style="align-self:flex-end;">+ Custom</button>
       </div>
 
       <!-- Progress section -->
@@ -172,7 +176,7 @@
     try {
       exercises = await apiRequest("/exercises");
       populateExerciseSelects();
-      loadProgress(exercises[0]?.id);
+      // loadProgress is called inside populateMuscleGroupPills automatically
       loadPersonalRecords();
       window.hideLoading && window.hideLoading();
     } catch (err) {
@@ -181,10 +185,96 @@
     }
   }
 
+  // ── Muscle group order ───────────────────────────────────────────────────
+  const MUSCLE_ORDER = [
+    "chest", "back", "shoulders", "quads", "hamstrings",
+    "glutes", "adductors", "legs", "biceps", "triceps",
+    "core", "calves", "other"
+  ];
+
+  const MUSCLE_ICONS = {
+    chest: "🫀", back: "🦬", shoulders: "💪", quads: "🦵",
+    hamstrings: "🦵", glutes: "🍑", adductors: "🦵", legs: "🦵",
+    biceps: "💪", triceps: "💪", core: "🎯", calves: "🦶", other: "🏋️"
+  };
+
+  const MUSCLE_LABELS = {
+    chest: "Chest", back: "Back", shoulders: "Shoulders",
+    quads: "Quads", hamstrings: "Hamstrings", glutes: "Glutes",
+    adductors: "Adductors", legs: "Legs", biceps: "Biceps",
+    triceps: "Triceps", core: "Core", calves: "Calves", other: "Other"
+  };
+
+  let selectedMuscleGroup = null;
+
+  function getGroupedExercises() {
+    const groups = {};
+    for (const ex of exercises) {
+      const key = (ex.muscle_group || "other").toLowerCase();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(ex);
+    }
+    // Sort exercises within each group alphabetically
+    for (const key of Object.keys(groups)) {
+      groups[key].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return groups;
+  }
+
+  function populateMuscleGroupPills() {
+    const groups = getGroupedExercises();
+    const container = document.getElementById("muscleGroupButtons");
+
+    // Build ordered list of groups that have exercises
+    const orderedGroups = MUSCLE_ORDER.filter(g => groups[g]);
+    const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
+    const allGroups = [...orderedGroups, ...extraGroups];
+
+    container.innerHTML = allGroups.map(g => `
+      <button class="muscle-pill" data-group="${g}" title="${MUSCLE_LABELS[g] || g}">
+        <span class="pill-icon">${MUSCLE_ICONS[g] || "🏋️"}</span>
+        <span class="pill-label">${MUSCLE_LABELS[g] || g}</span>
+        <span class="pill-count">${groups[g].length}</span>
+      </button>
+    `).join("");
+
+    // Click handler
+    container.querySelectorAll(".muscle-pill").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedMuscleGroup = btn.dataset.group;
+        // Highlight selected
+        container.querySelectorAll(".muscle-pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        // Populate exercise dropdown for this group
+        populateExerciseSelect(groups[selectedMuscleGroup]);
+        document.getElementById("exerciseStep").style.display = "block";
+      });
+    });
+
+    // Auto-select first group
+    if (allGroups.length > 0) {
+      selectedMuscleGroup = allGroups[0];
+      container.querySelector(".muscle-pill").classList.add("active");
+      populateExerciseSelect(groups[selectedMuscleGroup]);
+      document.getElementById("exerciseStep").style.display = "block";
+    }
+  }
+
+  function populateExerciseSelect(groupExercises) {
+    const select = document.getElementById("exerciseSelect");
+    select.innerHTML = groupExercises.map(ex =>
+      `<option value="${ex.id}">${ex.name}</option>`
+    ).join("");
+    // Trigger load for first exercise in group
+    if (groupExercises.length > 0) {
+      loadProgress(groupExercises[0].id);
+    }
+  }
+
   function populateExerciseSelects() {
-    const html = buildGroupedExerciseOptions(exercises);
-    document.getElementById("exerciseSelect").innerHTML = html;
-    document.getElementById("modalExercise").innerHTML = html;
+    populateMuscleGroupPills();
+    // Modal still uses grouped options
+    document.getElementById("modalExercise").innerHTML = buildGroupedExerciseOptions(exercises);
   }
 
   // ── Load progress ─────────────────────────────────────────────────────────
@@ -637,8 +727,10 @@
   }
 
   // ── Exercise select change ────────────────────────────────────────────────
-  document.getElementById("exerciseSelect").addEventListener("change", function () {
-    loadProgress(parseInt(this.value));
+  document.addEventListener("change", function(e) {
+    if (e.target && e.target.id === "exerciseSelect") {
+      loadProgress(parseInt(e.target.value));
+    }
   });
 
   // ── Log Session Modal ─────────────────────────────────────────────────────
@@ -743,11 +835,25 @@
     try {
       const ex = await apiRequest("/exercises", { method: "POST", body: { name, muscle_group, category } });
       exercises.push(ex);
-      populateExerciseSelects();
-      document.getElementById("exerciseSelect").value = ex.id;
+      populateMuscleGroupPills();
+      document.getElementById("modalExercise").innerHTML = buildGroupedExerciseOptions(exercises);
+      // Switch to the new exercise's muscle group
+      const newGroup = (ex.muscle_group || "other").toLowerCase();
+      const pills = document.querySelectorAll(".muscle-pill");
+      pills.forEach(p => p.classList.remove("active"));
+      const targetPill = document.querySelector('[data-group="' + newGroup + '"]');
+      if (targetPill) {
+        targetPill.classList.add("active");
+        selectedMuscleGroup = newGroup;
+        const grouped = getGroupedExercises();
+        populateExerciseSelect(grouped[newGroup] || [ex]);
+      }
+      setTimeout(() => {
+        document.getElementById("exerciseSelect").value = ex.id;
+        loadProgress(ex.id);
+      }, 50);
       document.getElementById("customModal").style.display = "none";
       showToast("Exercise added!");
-      loadProgress(ex.id);
     } catch (err) {
       handleApiError(err);
     } finally {

@@ -105,14 +105,14 @@ PREDEFINED_EXERCISES = [
     ("Smith Machine Squat",           "compound",   "quads"),
     ("Leg Press",                     "compound",   "quads"),
     ("Leg Extension",                 "isolation",  "quads"),
-    ("Bulgarian Split Squat",         "compound",   "legs"),     # per hand DB
-    ("Walking Lunges",                "compound",   "legs"),     # per hand DB
+    ("Bulgarian Split Squat",         "compound",   "quads"),     # per hand DB
+    ("Walking Lunges",                "compound",   "glutes"),     # per hand DB
     ("Leg Curl",                      "isolation",  "hamstrings"),
     ("Lying Leg Curl",                "isolation",  "hamstrings"),
     ("Seated Leg Curl",               "isolation",  "hamstrings"),
     ("Hip Thrust",                    "compound",   "glutes"),
     ("Cable Kickback",                "isolation",  "glutes"),   # single leg
-    ("Adductor Machine",              "isolation",  "legs"),
+    ("Adductor Machine",              "isolation",  "adductors"),
     ("Standing Calf Raise",           "isolation",  "calves"),
     ("Seated Calf Raise",             "isolation",  "calves"),
     ("Calf Raise",                    "isolation",  "calves"),
@@ -136,7 +136,7 @@ PREDEFINED_EXERCISES = [
     ("Leg Extension",                 "isolation",  "quads"),
     ("Calf Raise",                    "isolation",  "calves"),
     ("Hip Thrust",                    "compound",   "glutes"),
-    ("Bulgarian Split Squat",         "compound",   "legs"),
+    ("Bulgarian Split Squat",         "compound",   "quads"),
     ("Plank",                         "bodyweight", "core"),
     ("Cable Crunch",                  "isolation",  "core"),
     ("Pec Deck",                      "isolation",  "chest"),
