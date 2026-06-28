@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,7 @@ from .. import schemas, models
 from ..config import settings
 from ..database import get_db
 from ..email_utils import send_password_reset_email
+from ..main import limiter
 from ..security import (
     hash_password,
     verify_password,
@@ -22,8 +23,21 @@ from ..security import (
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+# ---------------------------------------------------------------------------
+# Rate limits:
+#   /auth/login           — 10 per minute per IP  (brute force protection)
+#   /auth/register        — 5 per minute per IP   (spam account creation)
+#   /auth/forgot-password — 3 per minute per IP   (email flood protection)
+#   /auth/google          — 10 per minute per IP
+#   /auth/reset-password  — 5 per minute per IP
+#
+# These limits are generous enough that a real user will never hit them.
+# A bot hammering the endpoint will be blocked after the first few attempts.
+# ---------------------------------------------------------------------------
+
 @router.post("/register", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
-def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, payload: schemas.UserCreate, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.username == payload.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
 
@@ -49,11 +63,9 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
-    # user.password_hash can be None for an account that signed up with
-    # Google but never finished choosing a username/password - `not user.password_hash`
-    # short-circuits before verify_password ever sees a None hash.
     if not user or not user.password_hash or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,7 +77,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @router.post("/google", response_model=schemas.GoogleLoginOut)
-def google_login(payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
     google_data = verify_google_id_token(payload.id_token)
     google_id = google_data["sub"]
     email = google_data["email"]
@@ -73,10 +86,6 @@ def google_login(payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.google_id == google_id).first()
 
     if not user:
-        # Not seen this Google account before - if the email already belongs
-        # to an existing account (e.g. they originally signed up with a
-        # username/password), link Google to it instead of creating a
-        # duplicate. Otherwise, create a new pending account.
         user = db.query(models.User).filter(models.User.email == email).first()
         if user:
             user.google_id = google_id
@@ -89,9 +98,6 @@ def google_login(payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
             db.refresh(user)
 
     if user.username is None:
-        # Brand new account (or a previous Google sign-in that never finished
-        # setup) - they must choose a username/password before they can log
-        # in normally. We do NOT issue a real access token yet.
         setup_token = create_setup_token(google_id)
         return {"needs_setup": True, "setup_token": setup_token, "email": user.email}
 
@@ -100,7 +106,8 @@ def google_login(payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
 
 
 @router.post("/complete-google-signup", response_model=schemas.Token)
-def complete_google_signup(payload: schemas.CompleteGoogleSignupIn, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def complete_google_signup(request: Request, payload: schemas.CompleteGoogleSignupIn, db: Session = Depends(get_db)):
     google_id = decode_setup_token(payload.setup_token)
 
     user = db.query(models.User).filter(models.User.google_id == google_id).first()
@@ -121,14 +128,10 @@ def complete_google_signup(payload: schemas.CompleteGoogleSignupIn, db: Session 
 
 
 @router.post("/forgot-password")
-def forgot_password(payload: schemas.ForgotPasswordIn, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def forgot_password(request: Request, payload: schemas.ForgotPasswordIn, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == payload.email).first()
 
-    # Only send a reset link if the account actually has a password to reset
-    # (a pending Google sign-up doesn't have one yet - they should use
-    # "Sign in with Google" instead). Either way, return the exact same
-    # response so the endpoint can't be used to discover which emails are
-    # registered.
     if user and user.password_hash:
         raw_token, hashed_token = generate_reset_token()
         user.reset_token_hash = hashed_token
@@ -142,7 +145,8 @@ def forgot_password(payload: schemas.ForgotPasswordIn, db: Session = Depends(get
 
 
 @router.post("/reset-password")
-def reset_password(payload: schemas.ResetPasswordIn, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def reset_password(request: Request, payload: schemas.ResetPasswordIn, db: Session = Depends(get_db)):
     hashed = hash_reset_token(payload.token)
     user = db.query(models.User).filter(models.User.reset_token_hash == hashed).first()
 
