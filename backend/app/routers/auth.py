@@ -8,7 +8,7 @@ from .. import schemas, models
 from ..config import settings
 from ..database import get_db
 from ..email_utils import send_password_reset_email
-from ..main import limiter
+from ..rate_limiter import limiter
 from ..security import (
     hash_password,
     verify_password,
