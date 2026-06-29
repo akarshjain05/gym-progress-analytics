@@ -1,0 +1,558 @@
+"""
+workout_templates.py — Workout Templates & Active Workout Router
+
+Endpoints:
+  GET    /templates              — list user's templates
+  POST   /templates              — create template
+  GET    /templates/{id}         — get template with exercises
+  PUT    /templates/{id}         — update template name/description
+  DELETE /templates/{id}         — delete template
+  POST   /templates/{id}/exercises        — add exercise to template
+  PUT    /templates/{id}/exercises/{eid}  — update exercise in template
+  DELETE /templates/{id}/exercises/{eid} — remove exercise from template
+  POST   /templates/{id}/reorder          — reorder exercises
+
+  POST   /templates/{id}/finish  — finish active workout: saves all logged
+                                   sets to lift_logs in one transaction.
+                                   This is the core "end workout" endpoint.
+"""
+
+from datetime import date as date_type, datetime, timezone
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from .. import models
+from ..database import get_db
+from ..security import get_current_user
+
+router = APIRouter(prefix="/templates", tags=["templates"])
+
+
+# ---------------------------------------------------------------------------
+# Pydantic schemas (local — only used here)
+# ---------------------------------------------------------------------------
+
+class TemplateExerciseIn(BaseModel):
+    exercise_id: int
+    position: int = 0
+    target_sets: int = Field(default=3, ge=1, le=20)
+    target_reps: int = Field(default=10, ge=1, le=100)
+    target_weight_kg: Optional[float] = Field(default=None, ge=0, le=600)
+    rest_seconds: int = Field(default=90, ge=0, le=600)
+    notes: Optional[str] = None
+
+
+class TemplateExerciseUpdate(BaseModel):
+    position: Optional[int] = None
+    target_sets: Optional[int] = Field(default=None, ge=1, le=20)
+    target_reps: Optional[int] = Field(default=None, ge=1, le=100)
+    target_weight_kg: Optional[float] = Field(default=None, ge=0, le=600)
+    rest_seconds: Optional[int] = Field(default=None, ge=0, le=600)
+    notes: Optional[str] = None
+
+
+class TemplateIn(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+    description: Optional[str] = None
+    exercises: list[TemplateExerciseIn] = []
+
+
+class TemplateUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=60)
+    description: Optional[str] = None
+
+
+class ReorderIn(BaseModel):
+    # List of template_exercise IDs in the new desired order
+    ordered_ids: list[int]
+
+
+# Logged set submitted when finishing a workout
+class LoggedSet(BaseModel):
+    weight_kg: float = Field(ge=0, le=600)
+    reps: int = Field(ge=1, le=100)
+    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    completed: bool = True   # False = user skipped this set
+
+
+class LoggedExercise(BaseModel):
+    exercise_id: int
+    sets: list[LoggedSet]
+    notes: Optional[str] = None
+
+
+class FinishWorkoutIn(BaseModel):
+    date: date_type
+    duration_seconds: Optional[int] = None   # total workout duration
+    exercises: list[LoggedExercise]
+    notes: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _get_template(db: Session, template_id: int, user: models.User) -> models.WorkoutTemplate:
+    t = (
+        db.query(models.WorkoutTemplate)
+        .filter(
+            models.WorkoutTemplate.id == template_id,
+            models.WorkoutTemplate.user_id == user.id,
+        )
+        .first()
+    )
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return t
+
+
+def _get_exercise(db: Session, exercise_id: int, user: models.User) -> models.Exercise:
+    ex = (
+        db.query(models.Exercise)
+        .filter(
+            models.Exercise.id == exercise_id,
+            (
+                (models.Exercise.created_by.is_(None)) |
+                (models.Exercise.created_by == user.id)
+            ),
+        )
+        .first()
+    )
+    if not ex:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    return ex
+
+
+def _template_out(t: models.WorkoutTemplate) -> dict:
+    return {
+        "id": t.id,
+        "name": t.name,
+        "description": t.description,
+        "created_at": t.created_at.isoformat() if t.created_at else None,
+        "updated_at": t.updated_at.isoformat() if t.updated_at else None,
+        "exercise_count": len(t.exercises),
+        "exercises": [_tex_out(te) for te in sorted(t.exercises, key=lambda x: x.position)],
+    }
+
+
+def _tex_out(te: models.WorkoutTemplateExercise) -> dict:
+    return {
+        "id": te.id,
+        "exercise_id": te.exercise_id,
+        "exercise_name": te.exercise.name if te.exercise else "Unknown",
+        "muscle_group": te.exercise.muscle_group if te.exercise else None,
+        "position": te.position,
+        "target_sets": te.target_sets,
+        "target_reps": te.target_reps,
+        "target_weight_kg": te.target_weight_kg,
+        "rest_seconds": te.rest_seconds,
+        "notes": te.notes,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Template CRUD
+# ---------------------------------------------------------------------------
+
+@router.get("")
+def list_templates(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    templates = (
+        db.query(models.WorkoutTemplate)
+        .filter(models.WorkoutTemplate.user_id == current_user.id)
+        .order_by(models.WorkoutTemplate.updated_at.desc())
+        .all()
+    )
+    return [_template_out(t) for t in templates]
+
+
+@router.post("", status_code=201)
+def create_template(
+    payload: TemplateIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    # Validate all exercises exist before creating anything
+    for ex_in in payload.exercises:
+        _get_exercise(db, ex_in.exercise_id, current_user)
+
+    template = models.WorkoutTemplate(
+        user_id=current_user.id,
+        name=payload.name.strip(),
+        description=payload.description,
+    )
+    db.add(template)
+    db.flush()  # get template.id without committing
+
+    for i, ex_in in enumerate(payload.exercises):
+        te = models.WorkoutTemplateExercise(
+            template_id=template.id,
+            exercise_id=ex_in.exercise_id,
+            position=ex_in.position if ex_in.position else i,
+            target_sets=ex_in.target_sets,
+            target_reps=ex_in.target_reps,
+            target_weight_kg=ex_in.target_weight_kg,
+            rest_seconds=ex_in.rest_seconds,
+            notes=ex_in.notes,
+        )
+        db.add(te)
+
+    db.commit()
+    db.refresh(template)
+    return _template_out(template)
+
+
+@router.get("/{template_id}")
+def get_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    return _template_out(_get_template(db, template_id, current_user))
+
+
+@router.put("/{template_id}")
+def update_template(
+    template_id: int,
+    payload: TemplateUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    if payload.name is not None:
+        t.name = payload.name.strip()
+    if payload.description is not None:
+        t.description = payload.description
+    t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    db.refresh(t)
+    return _template_out(t)
+
+
+@router.delete("/{template_id}", status_code=204)
+def delete_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    db.delete(t)
+    db.commit()
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Template exercise management
+# ---------------------------------------------------------------------------
+
+@router.post("/{template_id}/exercises", status_code=201)
+def add_exercise_to_template(
+    template_id: int,
+    payload: TemplateExerciseIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    _get_exercise(db, payload.exercise_id, current_user)
+
+    # Auto-assign position if not specified
+    max_pos = max((te.position for te in t.exercises), default=-1)
+    position = payload.position if payload.position is not None else max_pos + 1
+
+    te = models.WorkoutTemplateExercise(
+        template_id=t.id,
+        exercise_id=payload.exercise_id,
+        position=position,
+        target_sets=payload.target_sets,
+        target_reps=payload.target_reps,
+        target_weight_kg=payload.target_weight_kg,
+        rest_seconds=payload.rest_seconds,
+        notes=payload.notes,
+    )
+    db.add(te)
+    t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    db.refresh(te)
+    return _tex_out(te)
+
+
+@router.put("/{template_id}/exercises/{te_id}")
+def update_template_exercise(
+    template_id: int,
+    te_id: int,
+    payload: TemplateExerciseUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    te = db.query(models.WorkoutTemplateExercise).filter(
+        models.WorkoutTemplateExercise.id == te_id,
+        models.WorkoutTemplateExercise.template_id == t.id,
+    ).first()
+    if not te:
+        raise HTTPException(status_code=404, detail="Exercise entry not found in template")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(te, field, value)
+
+    t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    db.refresh(te)
+    return _tex_out(te)
+
+
+@router.delete("/{template_id}/exercises/{te_id}", status_code=204)
+def remove_exercise_from_template(
+    template_id: int,
+    te_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    te = db.query(models.WorkoutTemplateExercise).filter(
+        models.WorkoutTemplateExercise.id == te_id,
+        models.WorkoutTemplateExercise.template_id == t.id,
+    ).first()
+    if not te:
+        raise HTTPException(status_code=404, detail="Exercise entry not found in template")
+    db.delete(te)
+    t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    return None
+
+
+@router.post("/{template_id}/reorder")
+def reorder_template_exercises(
+    template_id: int,
+    payload: ReorderIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    t = _get_template(db, template_id, current_user)
+    te_map = {te.id: te for te in t.exercises}
+
+    for new_pos, te_id in enumerate(payload.ordered_ids):
+        if te_id not in te_map:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Exercise entry {te_id} not found in this template",
+            )
+        te_map[te_id].position = new_pos
+
+    t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    return _template_out(t)
+
+
+# ---------------------------------------------------------------------------
+# Finish workout — the core active workout save endpoint
+# ---------------------------------------------------------------------------
+
+@router.post("/{template_id}/finish")
+def finish_workout(
+    template_id: int,
+    payload: FinishWorkoutIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    Saves all completed sets from an active workout to lift_logs.
+
+    Called when the user taps "Finish Workout" in the active workout screen.
+    Each exercise's completed sets are saved as individual LiftLog rows,
+    exactly like logging via the Lifts page — so PRs, 1RM calculations, and
+    all analytics pick them up automatically.
+
+    Skipped sets (completed=False) are not saved.
+    Returns a summary: exercises logged, total sets, any new PRs detected.
+    """
+    # Verify template belongs to user (or template_id=0 for free workout)
+    if template_id != 0:
+        _get_template(db, template_id, current_user)
+
+    if not payload.exercises:
+        raise HTTPException(status_code=400, detail="No exercises to save")
+
+    total_sets_saved = 0
+    exercises_saved = 0
+    new_prs = []
+
+    for ex_data in payload.exercises:
+        # Verify exercise access
+        exercise = (
+            db.query(models.Exercise)
+            .filter(
+                models.Exercise.id == ex_data.exercise_id,
+                (
+                    (models.Exercise.created_by.is_(None)) |
+                    (models.Exercise.created_by == current_user.id)
+                ),
+            )
+            .first()
+        )
+        if not exercise:
+            continue  # skip invalid exercise silently
+
+        completed_sets = [s for s in ex_data.sets if s.completed]
+        if not completed_sets:
+            continue
+
+        # Find existing PR for this exercise (to detect new PRs)
+        from .. import calculations as calc
+        existing_logs = (
+            db.query(models.LiftLog)
+            .filter(
+                models.LiftLog.user_id == current_user.id,
+                models.LiftLog.exercise_id == ex_data.exercise_id,
+            )
+            .all()
+        )
+        old_pr = max(
+            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
+            default=0.0,
+        )
+
+        # Save each completed set
+        set_number = 1
+        session_1rms = []
+        for set_data in completed_sets:
+            entry = models.LiftLog(
+                user_id=current_user.id,
+                exercise_id=ex_data.exercise_id,
+                date=payload.date,
+                weight_kg=set_data.weight_kg,
+                reps=set_data.reps,
+                rpe=set_data.rpe,
+                set_number=set_number,
+                notes=ex_data.notes,
+            )
+            db.add(entry)
+            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
+            set_number += 1
+            total_sets_saved += 1
+
+        exercises_saved += 1
+
+        # Check for new PR
+        if session_1rms:
+            session_best = max(session_1rms)
+            if session_best > old_pr:
+                new_prs.append({
+                    "exercise": exercise.name,
+                    "new_1rm_kg": round(session_best, 1),
+                    "old_1rm_kg": round(old_pr, 1),
+                })
+
+    if total_sets_saved == 0:
+        raise HTTPException(status_code=400, detail="No completed sets to save")
+
+    db.commit()
+
+    return {
+        "success": True,
+        "exercises_saved": exercises_saved,
+        "total_sets_saved": total_sets_saved,
+        "new_prs": new_prs,
+        "date": payload.date.isoformat(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Free workout finish (no template) — same logic, template_id = 0
+# ---------------------------------------------------------------------------
+
+@router.post("/free/finish")
+def finish_free_workout(
+    payload: FinishWorkoutIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Finish a free (no template) workout session."""
+    # Reuse finish_workout logic with a dummy template_id
+    # We handle the template check manually here
+    if not payload.exercises:
+        raise HTTPException(status_code=400, detail="No exercises to save")
+
+    total_sets_saved = 0
+    exercises_saved = 0
+    new_prs = []
+
+    for ex_data in payload.exercises:
+        exercise = (
+            db.query(models.Exercise)
+            .filter(
+                models.Exercise.id == ex_data.exercise_id,
+                (
+                    (models.Exercise.created_by.is_(None)) |
+                    (models.Exercise.created_by == current_user.id)
+                ),
+            )
+            .first()
+        )
+        if not exercise:
+            continue
+
+        completed_sets = [s for s in ex_data.sets if s.completed]
+        if not completed_sets:
+            continue
+
+        from .. import calculations as calc
+        existing_logs = (
+            db.query(models.LiftLog)
+            .filter(
+                models.LiftLog.user_id == current_user.id,
+                models.LiftLog.exercise_id == ex_data.exercise_id,
+            )
+            .all()
+        )
+        old_pr = max(
+            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
+            default=0.0,
+        )
+
+        set_number = 1
+        session_1rms = []
+        for set_data in completed_sets:
+            entry = models.LiftLog(
+                user_id=current_user.id,
+                exercise_id=ex_data.exercise_id,
+                date=payload.date,
+                weight_kg=set_data.weight_kg,
+                reps=set_data.reps,
+                rpe=set_data.rpe,
+                set_number=set_number,
+                notes=ex_data.notes,
+            )
+            db.add(entry)
+            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
+            set_number += 1
+            total_sets_saved += 1
+
+        exercises_saved += 1
+        if session_1rms:
+            session_best = max(session_1rms)
+            if session_best > old_pr:
+                new_prs.append({
+                    "exercise": exercise.name,
+                    "new_1rm_kg": round(session_best, 1),
+                    "old_1rm_kg": round(old_pr, 1),
+                })
+
+    if total_sets_saved == 0:
+        raise HTTPException(status_code=400, detail="No completed sets to save")
+
+    db.commit()
+
+    return {
+        "success": True,
+        "exercises_saved": exercises_saved,
+        "total_sets_saved": total_sets_saved,
+        "new_prs": new_prs,
+        "date": payload.date.isoformat(),
+    }

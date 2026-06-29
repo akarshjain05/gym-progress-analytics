@@ -1,8 +1,7 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -11,13 +10,8 @@ from slowapi.middleware import SlowAPIMiddleware
 from .database import Base, engine, SessionLocal
 from .seed_exercises import seed_exercises
 from .config import settings
-from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics, coach
+from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics, coach, workout_templates
 
-# ---------------------------------------------------------------------------
-# Rate limiter
-# Uses the client's real IP address. On Render, X-Forwarded-For is set by the
-# load balancer, so get_remote_address correctly resolves to the real client IP.
-# ---------------------------------------------------------------------------
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 
@@ -34,14 +28,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Gym Progress Analytics API", version="1.0.0", lifespan=lifespan)
 
-# Attach limiter to app state so route decorators can access it
 app.state.limiter = limiter
-
-# Rate limit exceeded → 429 JSON response (not a 500)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# SlowAPI middleware must come BEFORE CORSMiddleware so rate-limited requests
-# still get the correct CORS headers in their 429 response
 app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
@@ -65,6 +53,7 @@ app.include_router(nutrition.router)
 app.include_router(goals.router)
 app.include_router(analytics.router)
 app.include_router(coach.router)
+app.include_router(workout_templates.router)
 
 
 @app.get("/")

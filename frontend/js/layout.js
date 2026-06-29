@@ -5,6 +5,8 @@ const NAV_ITEMS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6" stroke-linecap="round"/></svg>' },
   { id: "lifts", href: "lifts.html", label: "Lifts",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M18 12h2M6 8v8M18 8v8M9 12h6M9 6v12M15 6v12"/></svg>' },
+  { id: "workout", href: "workout.html", label: "Workouts",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg>' },
   { id: "nutrition", href: "nutrition.html", label: "Nutrition",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6c0-3 2-6 6-7 4 1 6 4 6 7Z"/><path d="M12 14v7"/></svg>' },
   { id: "analytics", href: "analytics.html", label: "Analytics",
@@ -232,7 +234,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   if (window.Skeleton) {
     const skeletonMap = {
       dashboard: "dashboard", weight: "weight", lifts: "lifts",
-      nutrition: "nutrition", analytics: "analytics",
+      nutrition: "nutrition", analytics: "analytics", workout: null,
     };
     const skPage = skeletonMap[activeId];
     if (skPage) {

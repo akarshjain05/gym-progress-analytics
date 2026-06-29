@@ -2,7 +2,7 @@ from datetime import datetime, date, timezone
 
 from sqlalchemy import (
     Column, Integer, String, Float, Date, DateTime, ForeignKey, Boolean,
-    UniqueConstraint, Text
+    UniqueConstraint, Text, JSON
 )
 from sqlalchemy.orm import relationship
 
@@ -13,33 +13,21 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    # Nullable: a user who just signed in with Google but hasn't chosen a
-    # username/password yet has both of these as NULL until they complete
-    # setup via /auth/complete-google-signup. Postgres and SQLite both allow
-    # multiple NULLs under a UNIQUE constraint, so this doesn't cause clashes
-    # between several pending Google sign-ups.
     username = Column(String, unique=True, index=True, nullable=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
-    # Google Sign-In
     google_id = Column(String, unique=True, index=True, nullable=True)
 
-    # Password reset - token is stored as a SHA-256 hash, never the raw value,
-    # same principle as password storage: a DB leak shouldn't hand out usable
-    # reset links.
     reset_token_hash = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
 
-    # Profile fields - all optional, used for BMR/TDEE and unit display.
-    # gender accepts "male" / "female" / "other". For "other" we average the
-    # male/female Mifflin-St Jeor offset, since the formula has no neutral term.
     gender = Column(String, nullable=True)
     age = Column(Integer, nullable=True)
     height_cm = Column(Float, nullable=True)
     activity_level = Column(String, nullable=True, default="moderate")
-    unit_preference = Column(String, nullable=False, default="kg")  # "kg" or "lb"
+    unit_preference = Column(String, nullable=False, default="kg")
 
     goal_weight_kg = Column(Float, nullable=True)
 
@@ -47,6 +35,7 @@ class User(Base):
     lift_logs = relationship("LiftLog", back_populates="user", cascade="all, delete-orphan")
     calorie_logs = relationship("CalorieLog", back_populates="user", cascade="all, delete-orphan")
     goal_lifts = relationship("GoalLift", back_populates="user", cascade="all, delete-orphan")
+    workout_templates = relationship("WorkoutTemplate", back_populates="user", cascade="all, delete-orphan")
 
     @property
     def has_google_login(self) -> bool:
@@ -62,10 +51,10 @@ class Exercise(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
-    category = Column(String, nullable=True)       # e.g. "compound", "isolation"
-    muscle_group = Column(String, nullable=True)    # e.g. "chest", "legs", "back"
+    category = Column(String, nullable=True)
+    muscle_group = Column(String, nullable=True)
     is_custom = Column(Boolean, default=False)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # null = global/predefined
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     __table_args__ = (UniqueConstraint("name", "created_by", name="uq_exercise_name_per_owner"),)
 
@@ -86,7 +75,7 @@ class BodyWeightLog(Base):
 
 
 class LiftLog(Base):
-    """One row = one logged set. Sessions/volume/PRs are aggregated at query time."""
+    """One row = one logged set."""
     __tablename__ = "lift_logs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -95,7 +84,7 @@ class LiftLog(Base):
     date = Column(Date, nullable=False, default=date.today)
     weight_kg = Column(Float, nullable=False)
     reps = Column(Integer, nullable=False)
-    rpe = Column(Float, nullable=True)  # rate of perceived exertion, 1-10, optional
+    rpe = Column(Float, nullable=True)
     set_number = Column(Integer, nullable=True)
     notes = Column(Text, nullable=True)
 
@@ -131,4 +120,56 @@ class GoalLift(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
     user = relationship("User", back_populates="goal_lifts")
+    exercise = relationship("Exercise")
+
+
+# ---------------------------------------------------------------------------
+# Workout Templates
+# ---------------------------------------------------------------------------
+
+class WorkoutTemplate(Base):
+    """
+    A named workout plan, e.g. "Push Day A" or "Leg Day".
+    Contains an ordered list of exercises with target sets/reps/weight.
+    """
+    __tablename__ = "workout_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    name = Column(String, nullable=False)            # "Push Day A"
+    description = Column(Text, nullable=True)        # optional note
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+                        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+    user = relationship("User", back_populates="workout_templates")
+    exercises = relationship(
+        "WorkoutTemplateExercise",
+        back_populates="template",
+        cascade="all, delete-orphan",
+        order_by="WorkoutTemplateExercise.position",
+    )
+
+
+class WorkoutTemplateExercise(Base):
+    """
+    One exercise entry inside a template.
+    Stores target sets/reps/weight as guidance during the active workout.
+    The user can deviate — actual logged weights come from LiftLog.
+    """
+    __tablename__ = "workout_template_exercises"
+
+    id = Column(Integer, primary_key=True, index=True)
+    template_id = Column(Integer, ForeignKey("workout_templates.id"), nullable=False, index=True)
+    exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False)
+    position = Column(Integer, nullable=False, default=0)   # display order
+
+    # Targets (guidance only — user logs actual values during workout)
+    target_sets = Column(Integer, nullable=False, default=3)
+    target_reps = Column(Integer, nullable=False, default=10)
+    target_weight_kg = Column(Float, nullable=True)         # null = user decides
+    rest_seconds = Column(Integer, nullable=False, default=90)  # rest between sets
+    notes = Column(Text, nullable=True)                     # e.g. "go to failure"
+
+    template = relationship("WorkoutTemplate", back_populates="exercises")
     exercise = relationship("Exercise")
