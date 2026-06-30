@@ -13,6 +13,7 @@ from .rate_limiter import limiter
 from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics, coach, workout_templates
 
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
@@ -32,11 +33,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080",
-        "https://gym-progress-frontend.onrender.com",
-        "https://gym-progress-frontend-wmbt.onrender.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

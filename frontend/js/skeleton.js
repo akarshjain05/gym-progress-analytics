@@ -171,8 +171,27 @@
       const template = TEMPLATES[page];
       if (!template) return;
 
-      // Inject skeleton
-      container.innerHTML = `<div class="sk-wrapper" id="sk-active">${template}</div>`;
+      // Wrap current children of container into a hidden div to preserve elements and event listeners
+      let realContent = container.querySelector('.hidden-by-skeleton');
+      if (!realContent) {
+        realContent = document.createElement('div');
+        realContent.className = 'hidden-by-skeleton';
+        realContent.style.display = 'none';
+        while (container.firstChild) {
+          realContent.appendChild(container.firstChild);
+        }
+        container.appendChild(realContent);
+      }
+
+      // Inject skeleton as a sibling to the hidden real content
+      let activeSk = document.getElementById('sk-active');
+      if (!activeSk) {
+        activeSk = document.createElement('div');
+        activeSk.className = 'sk-wrapper';
+        activeSk.id = 'sk-active';
+        container.appendChild(activeSk);
+      }
+      activeSk.innerHTML = template;
 
       // Auto-remove when real content appears
       this._watchForContent(container);
@@ -180,10 +199,23 @@
 
     /** Manually hide skeleton */
     hide(containerId = 'pageContent') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
       const wrapper = document.getElementById('sk-active');
       if (wrapper) {
         wrapper.classList.add('sk-fadeout');
-        setTimeout(() => wrapper.remove(), 300);
+        setTimeout(() => {
+          wrapper.remove();
+          const realContent = container.querySelector('.hidden-by-skeleton');
+          if (realContent) {
+            // Unwrap realContent back to the container
+            while (realContent.firstChild) {
+              container.appendChild(realContent.firstChild);
+            }
+            realContent.remove();
+          }
+        }, 300);
       }
     },
 
@@ -197,9 +229,10 @@
       ].join(',');
 
       const observer = new MutationObserver(() => {
-        const hasReal = container.querySelector(REAL_CONTENT_SELECTORS);
+        const elements = container.querySelectorAll(REAL_CONTENT_SELECTORS);
+        const hasReal = Array.from(elements).some(el => !el.closest('.hidden-by-skeleton'));
         if (hasReal) {
-          this.hide();
+          this.hide(container.id);
           observer.disconnect();
         }
       });
@@ -208,7 +241,7 @@
 
       // Hard timeout — always remove after 8s
       setTimeout(() => {
-        this.hide();
+        this.hide(container.id);
         observer.disconnect();
       }, 8000);
     },

@@ -46,15 +46,21 @@ function buildLoadingOverlay() {
 
 window.hideLoading = function () {
   const overlay = document.getElementById('ironlog-loading');
-  if (!overlay) return;
-  overlay.classList.add('hidden');
-  setTimeout(() => overlay.remove(), 350);
+  if (overlay) {
+    overlay.classList.add('hidden');
+    setTimeout(() => overlay.remove(), 350);
+  }
+  if (window.Skeleton) {
+    window.Skeleton.hide();
+  }
 };
 
 function setupLoadingAutoHide() {
   const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value';
   const observer = new MutationObserver(() => {
-    if (document.querySelector(SELECTORS)) {
+    const elements = document.querySelectorAll(SELECTORS);
+    const hasReal = Array.from(elements).some(el => !el.closest('.hidden-by-skeleton'));
+    if (hasReal) {
       window.hideLoading();
       observer.disconnect();
     }
