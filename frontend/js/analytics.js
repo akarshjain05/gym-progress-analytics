@@ -59,7 +59,7 @@ async function loadChangeChart() {
   try {
     const exercises = await Api.listExercises();
     const prs = await Api.personalRecords();
-    const loggedIds = new Set(prs.map(p => p.exercise_id));
+    const loggedIds = new Set((prs.flat || []).map(p => p.exercise_id));
     const relevant = exercises.filter(e => loggedIds.has(e.id));
 
     const results = await Promise.all(relevant.map(e => Api.liftProgress(e.id)));
