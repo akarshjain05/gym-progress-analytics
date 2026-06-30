@@ -36,6 +36,7 @@ class User(Base):
     calorie_logs = relationship("CalorieLog", back_populates="user", cascade="all, delete-orphan")
     goal_lifts = relationship("GoalLift", back_populates="user", cascade="all, delete-orphan")
     workout_templates = relationship("WorkoutTemplate", back_populates="user", cascade="all, delete-orphan")
+    workout_sessions = relationship("WorkoutSession", back_populates="user", cascade="all, delete-orphan")
 
     @property
     def has_google_login(self) -> bool:
@@ -173,3 +174,27 @@ class WorkoutTemplateExercise(Base):
 
     template = relationship("WorkoutTemplate", back_populates="exercises")
     exercise = relationship("Exercise")
+
+
+class WorkoutSession(Base):
+    """
+    A record of a completed workout session.
+    Created when the user finishes an active workout (template or free).
+    The actual set data is stored in LiftLog — this just tracks the session
+    metadata for the workout history view.
+    """
+    __tablename__ = "workout_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    template_id = Column(Integer, ForeignKey("workout_templates.id"), nullable=True)  # null for free workout
+    template_name = Column(String, nullable=False, default="Free Workout")
+    date = Column(Date, nullable=False, default=date.today)
+    duration_seconds = Column(Integer, nullable=True)
+    exercises_count = Column(Integer, nullable=False, default=0)
+    sets_count = Column(Integer, nullable=False, default=0)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+    user = relationship("User", back_populates="workout_sessions")
+    template = relationship("WorkoutTemplate")
