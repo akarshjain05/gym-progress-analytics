@@ -1,9 +1,12 @@
 // IRONLOG Service Worker
 // Version bump this string whenever you deploy new frontend files
 // so users get fresh content automatically.
-const CACHE_NAME = 'ironlog-v1';
-const STATIC_CACHE = 'ironlog-static-v1';
-const API_CACHE = 'ironlog-api-v1';
+// IMPORTANT: bump this version number every time you deploy new JS/CSS.
+// This forces the browser to fetch fresh files instead of serving stale
+// cached versions — the root cause of "old code still running" bugs.
+const CACHE_NAME = 'ironlog-v2';
+const STATIC_CACHE = 'ironlog-static-v2';
+const API_CACHE = 'ironlog-api-v2';
 
 // All frontend pages and assets to cache for offline use
 const STATIC_ASSETS = [
@@ -64,7 +67,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ─── Fetch: network-first for API, cache-first for static ────────────────────
+// ─── Fetch strategy ─────────────────────────────────────────────────────────
+// API calls:        network-first (always fresh data, cache as offline fallback)
+// JS/CSS files:      network-first (always fresh code — prevents stale-cache bugs)
+// Images/fonts/etc: cache-first   (rarely change, fine to cache aggressively)
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -81,7 +87,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── Static assets: cache-first, fall back to network ───────────────────────
+  // ── JS/CSS/HTML: network-first so deployed code updates take effect
+  //    immediately instead of being stuck behind a stale cache ────────────────
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') ||
+      url.pathname.endsWith('.html') || url.pathname === '/' ) {
+    event.respondWith(networkFirstWithCache(request, STATIC_CACHE));
+    return;
+  }
+
+  // ── Everything else (images, icons, fonts): cache-first ─────────────────────
   event.respondWith(cacheFirstWithNetwork(request, STATIC_CACHE));
 });
 
