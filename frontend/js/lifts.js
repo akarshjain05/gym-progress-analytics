@@ -15,16 +15,16 @@
     <div id="liftsPage">
 
       <!-- Two-step exercise selector -->
-      <div class="lifts-top-row">
-        <div class="selector-step">
-          <label class="field-label">Muscle group</label>
-          <div id="muscleGroupButtons" class="muscle-group-pills"></div>
+      <div class="lifts-selector-row">
+        <div class="lifts-selector-field">
+          <label class="field-label" for="muscleGroupSelect">Muscle Group</label>
+          <select id="muscleGroupSelect" class="select-input lifts-select"></select>
         </div>
-        <div class="selector-step" id="exerciseStep" style="display:none;">
-          <label class="field-label">Exercise</label>
-          <select id="exerciseSelect" class="select-input" style="max-width:280px;"></select>
+        <div class="lifts-selector-field" id="exerciseStep" style="display:none;">
+          <label class="field-label" for="exerciseSelect">Exercise</label>
+          <select id="exerciseSelect" class="select-input lifts-select"></select>
         </div>
-        <button class="btn btn-secondary" id="addCustomBtn" style="align-self:flex-end;">+ Custom</button>
+        <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
       </div>
 
       <!-- Progress section -->
@@ -223,12 +223,11 @@
 
   function populateMuscleGroupPills() {
     const groups = getGroupedExercises();
-    const container = document.getElementById("muscleGroupButtons");
+    const select = document.getElementById("muscleGroupSelect");
 
-    // Defensive check: if the container isn't in the DOM yet (e.g. due to a
-    // race condition or stale cached page), retry shortly instead of crashing.
-    if (!container) {
-      console.warn("[lifts.js] muscleGroupButtons not found in DOM, retrying in 100ms...");
+    // Defensive check
+    if (!select) {
+      console.warn("[lifts.js] muscleGroupSelect not found in DOM, retrying in 100ms...");
       setTimeout(populateMuscleGroupPills, 100);
       return;
     }
@@ -238,33 +237,23 @@
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
     const allGroups = [...orderedGroups, ...extraGroups];
 
-    container.innerHTML = allGroups.map(g => `
-      <button class="muscle-pill" data-group="${g}" title="${MUSCLE_LABELS[g] || g}">
-        <span class="pill-icon">${MUSCLE_ICONS[g] || "🏋️"}</span>
-        <span class="pill-label">${MUSCLE_LABELS[g] || g}</span>
-        <span class="pill-count">${groups[g].length}</span>
-      </button>
-    `).join("");
+    select.innerHTML = allGroups.map(g =>
+      `<option value="${g}">${MUSCLE_LABELS[g] || g} (${groups[g].length})</option>`
+    ).join("");
 
-    // Click handler
-    container.querySelectorAll(".muscle-pill").forEach(btn => {
-      btn.addEventListener("click", () => {
-        selectedMuscleGroup = btn.dataset.group;
-        // Highlight selected
-        container.querySelectorAll(".muscle-pill").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        // Populate exercise dropdown for this group
-        populateExerciseSelect(groups[selectedMuscleGroup]);
-        document.getElementById("exerciseStep").style.display = "block";
-      });
+    // Change handler
+    select.addEventListener("change", () => {
+      selectedMuscleGroup = select.value;
+      populateExerciseSelect(groups[selectedMuscleGroup]);
+      document.getElementById("exerciseStep").style.display = "";
     });
 
     // Auto-select first group
     if (allGroups.length > 0) {
       selectedMuscleGroup = allGroups[0];
-      container.querySelector(".muscle-pill").classList.add("active");
+      select.value = allGroups[0];
       populateExerciseSelect(groups[selectedMuscleGroup]);
-      document.getElementById("exerciseStep").style.display = "block";
+      document.getElementById("exerciseStep").style.display = "";
     }
   }
 
@@ -847,11 +836,9 @@
       document.getElementById("modalExercise").innerHTML = buildGroupedExerciseOptions(exercises);
       // Switch to the new exercise's muscle group
       const newGroup = (ex.muscle_group || "other").toLowerCase();
-      const pills = document.querySelectorAll(".muscle-pill");
-      pills.forEach(p => p.classList.remove("active"));
-      const targetPill = document.querySelector('[data-group="' + newGroup + '"]');
-      if (targetPill) {
-        targetPill.classList.add("active");
+      const mgSelect = document.getElementById("muscleGroupSelect");
+      if (mgSelect) {
+        mgSelect.value = newGroup;
         selectedMuscleGroup = newGroup;
         const grouped = getGroupedExercises();
         populateExerciseSelect(grouped[newGroup] || [ex]);

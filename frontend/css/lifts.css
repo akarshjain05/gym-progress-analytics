@@ -6,10 +6,54 @@
    ============================================================ */
 
 /* ── Top row ─────────────────────────────────────────────── */
-.lifts-top-row {
-  display: flex; align-items: flex-end; gap: 12px;
-  margin-bottom: 20px; flex-wrap: wrap;
+.lifts-selector-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
+
+.lifts-selector-field {
+  flex: 1;
+  min-width: 180px;
+}
+
+.lifts-select {
+  width: 100%;
+  background: var(--surface, #2a2f35);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: var(--text-primary, #e8e0d5);
+  font-size: 14px;
+  padding: 11px 14px;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a09880' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.lifts-select:hover {
+  border-color: rgba(192,57,43,0.45);
+}
+
+.lifts-select:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.15);
+}
+
+.lifts-custom-btn {
+  align-self: flex-end;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .field-label {
   display: block; font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.08em;
@@ -31,103 +75,19 @@
 }
 .text-input:focus { outline: none; border-color: #c0392b; }
 
-/* ── Two-step muscle group selector ─────────────────────────────────────── */
-
-.selector-step {
-  width: 100%;
-}
-
-.muscle-group-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.muscle-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 13px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: var(--surface, #2a2f35);
-  color: var(--text-secondary, #a09880);
-  font-size: 13px;
-  font-family: Inter, sans-serif;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  white-space: nowrap;
-}
-
-.muscle-pill:hover {
-  border-color: rgba(192,57,43,0.4);
-  color: var(--text-primary, #e8e0d5);
-  background: rgba(192,57,43,0.08);
-}
-
-.muscle-pill.active {
-  background: rgba(192,57,43,0.15);
-  border-color: #c0392b;
-  color: #c0392b;
-  font-weight: 600;
-}
-
-.pill-icon {
-  font-size: 14px;
-}
-
-.pill-label {
-  font-size: 12px;
-}
-
-.pill-count {
-  font-size: 10px;
-  background: rgba(255,255,255,0.08);
-  padding: 1px 5px;
-  border-radius: 10px;
-  color: var(--text-secondary, #a09880);
-  font-weight: 600;
-}
-
-.muscle-pill.active .pill-count {
-  background: rgba(192,57,43,0.2);
-  color: #c0392b;
-}
-
-#exerciseStep {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-#exerciseStep .field-label {
-  white-space: nowrap;
-  margin-bottom: 0;
-  margin-right: 4px;
-}
-
 @media (max-width: 600px) {
-  .muscle-pill {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .pill-icon {
-    font-size: 13px;
-  }
-
-  #exerciseStep {
+  .lifts-selector-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    width: 100%;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  #exerciseSelect {
-    width: 100% !important;
+  .lifts-selector-field {
+    min-width: 100%;
+  }
+
+  .lifts-custom-btn {
+    align-self: flex-start;
   }
 }
 

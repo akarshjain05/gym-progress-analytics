@@ -65,12 +65,11 @@
 
     lifts: `
       <div class="sk-page">
-        <!-- Exercise selector pills -->
-        <div class="sk-pills sk-mt4">
-          ${repeat(6, '<div class="sk-pill"></div>')}
+        <!-- Exercise selector dropdowns -->
+        <div class="sk-grid-2 sk-mt4">
+          <div class="sk-input"></div>
+          <div class="sk-input"></div>
         </div>
-        <!-- Exercise dropdown -->
-        <div class="sk-input sk-mt12" style="max-width:280px;"></div>
         <!-- Stats row -->
         <div class="sk-grid-3 sk-mt16">
           ${repeat(3, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>')}
