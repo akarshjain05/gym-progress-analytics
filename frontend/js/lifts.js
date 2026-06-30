@@ -225,6 +225,14 @@
     const groups = getGroupedExercises();
     const container = document.getElementById("muscleGroupButtons");
 
+    // Defensive check: if the container isn't in the DOM yet (e.g. due to a
+    // race condition or stale cached page), retry shortly instead of crashing.
+    if (!container) {
+      console.warn("[lifts.js] muscleGroupButtons not found in DOM, retrying in 100ms...");
+      setTimeout(populateMuscleGroupPills, 100);
+      return;
+    }
+
     // Build ordered list of groups that have exercises
     const orderedGroups = MUSCLE_ORDER.filter(g => groups[g]);
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
@@ -861,5 +869,7 @@
     }
   });
 
-  init();
+  // Run init on next tick to guarantee the DOM (content.innerHTML above)
+  // has fully committed before we query for elements inside it.
+  setTimeout(init, 0);
 })();
