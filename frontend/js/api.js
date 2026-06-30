@@ -71,6 +71,11 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
   return data;
 }
 
+// ─── EXPOSE apiRequest GLOBALLY ────────────────────────────────────────────
+// This allows lifts.js, workout.js, coach.js, and onboarding.js to call
+// apiRequest() directly instead of having to go through the Api object.
+window.apiRequest = apiRequest;
+
 const Api = {
   // --- auth ---
   register(username, email, password) {
@@ -141,6 +146,22 @@ const Api = {
   // --- analytics ---
   dashboard() { return apiRequest("/analytics/dashboard"); },
   insights() { return apiRequest("/analytics/insights"); },
+
+  // --- workout templates ---
+  listTemplates() { return apiRequest("/templates"); },
+  getTemplate(id) { return apiRequest(`/templates/${id}`); },
+  createTemplate(payload) { return apiRequest("/templates", { method: "POST", body: payload }); },
+  updateTemplate(id, payload) { return apiRequest(`/templates/${id}`, { method: "PUT", body: payload }); },
+  deleteTemplate(id) { return apiRequest(`/templates/${id}`, { method: "DELETE" }); },
+  addTemplateExercise(templateId, payload) { return apiRequest(`/templates/${templateId}/exercises`, { method: "POST", body: payload }); },
+  updateTemplateExercise(templateId, exerciseId, payload) { return apiRequest(`/templates/${templateId}/exercises/${exerciseId}`, { method: "PUT", body: payload }); },
+  deleteTemplateExercise(templateId, exerciseId) { return apiRequest(`/templates/${templateId}/exercises/${exerciseId}`, { method: "DELETE" }); },
+  reorderTemplateExercises(templateId, payload) { return apiRequest(`/templates/${templateId}/reorder`, { method: "POST", body: payload }); },
+  finishWorkout(templateId, payload) { return apiRequest(`/templates/${templateId}/finish`, { method: "POST", body: payload }); },
+
+  // --- coach ---
+  getCoachAnalysis() { return apiRequest("/coach/analysis"); },
+  getCoachAdvice() { return apiRequest("/coach/advice"); },
 };
 
 function qs(params) {
