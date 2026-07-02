@@ -40,20 +40,6 @@
         </div>
       </div>
 
-      <!-- Workout History -->
-      <div id="historySection" style="margin-top:32px;">
-        <div class="wk-section-label">WORKOUT HISTORY</div>
-        <div id="historyLoading" class="wk-loading">
-          <div class="ironlog-spinner"></div><span>Loading history…</span>
-        </div>
-        <div id="historyList" style="display:none;"></div>
-        <div id="historyEmpty" style="display:none;" class="wk-empty wk-empty-sm">
-          <div class="wk-empty-icon">🏋️</div>
-          <h3>No workouts yet</h3>
-          <p>Complete a workout and it will show up here.</p>
-        </div>
-      </div>
-
     </div>
 
     <!-- ── Create/Edit Template Modal ─────────────────────────────────── -->
@@ -125,15 +111,12 @@
         <h2 class="wk-complete-title">Workout Complete!</h2>
         <div id="wcStats" class="wk-complete-stats"></div>
         <div id="wcPRs" class="wk-prs"></div>
-        <div class="wk-modal-footer wk-complete-footer" style="flex-direction:column;gap:8px;">
+        <div class="wk-modal-footer wk-complete-footer">
           <button class="btn btn-primary wk-btn-full" id="wcDoneBtn">Back to Workouts</button>
-          <button class="btn btn-secondary wk-btn-full" id="wcLiftsBtn">View in Lifts →</button>
         </div>
       </div>
     </div>
   `;
-
-  let workoutHistory = [];    // completed workout sessions
 
   // ── Load data ────────────────────────────────────────────────────────────
   async function init() {
@@ -144,24 +127,10 @@
       ]);
       populateExerciseSelect('tmplAddExerciseSelect');
       renderTemplates();
-      // Load workout history
-      loadHistory();
       window.hideLoading && window.hideLoading();
     } catch (err) {
       handleApiError(err);
       window.hideLoading && window.hideLoading();
-    }
-  }
-
-  async function loadHistory() {
-    try {
-      workoutHistory = await apiRequest('/templates/history');
-      renderHistory();
-    } catch (err) {
-      console.warn('[workout] Could not load history:', err);
-      // Non-critical, don't block the page
-      document.getElementById('historyLoading').style.display = 'none';
-      document.getElementById('historyEmpty').style.display = 'flex';
     }
   }
 
@@ -220,84 +189,6 @@
     });
     grid.querySelectorAll('.wk-del-btn').forEach(btn => {
       btn.addEventListener('click', () => deleteTemplate(parseInt(btn.dataset.id)));
-    });
-  }
-
-  // ── Render workout history ────────────────────────────────────────────────
-  function renderHistory() {
-    document.getElementById('historyLoading').style.display = 'none';
-    const list = document.getElementById('historyList');
-    const empty = document.getElementById('historyEmpty');
-
-    if (!workoutHistory.length) {
-      list.style.display = 'none';
-      empty.style.display = 'flex';
-      return;
-    }
-
-    empty.style.display = 'none';
-    list.style.display = 'block';
-
-    // Group sessions by date for timeline look
-    const byDate = {};
-    for (const s of workoutHistory) {
-      if (!byDate[s.date]) byDate[s.date] = [];
-      byDate[s.date].push(s);
-    }
-
-    const fmtDate = (d) => {
-      const dt = new Date(d + 'T00:00:00');
-      const today = new Date(); today.setHours(0,0,0,0);
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      if (dt.getTime() === today.getTime()) return 'Today';
-      if (dt.getTime() === yesterday.getTime()) return 'Yesterday';
-      return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    };
-
-    const fmtDuration = (sec) => {
-      if (!sec) return '—';
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
-      return `${m}m ${s}s`;
-    };
-
-    list.innerHTML = Object.keys(byDate).map(date => `
-      <div class="wk-history-date-group">
-        <div class="wk-history-date">${fmtDate(date)}</div>
-        ${byDate[date].map(s => `
-          <div class="wk-history-card" data-id="${s.id}">
-            <div class="wk-history-card-top">
-              <div class="wk-history-name">
-                <span class="wk-history-icon">${s.template_id ? '📋' : '🏋️'}</span>
-                ${escHtml(s.template_name)}
-              </div>
-              <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete">🗑️</button>
-            </div>
-            <div class="wk-history-meta">
-              <span>⏱ ${fmtDuration(s.duration_seconds)}</span>
-              <span>💪 ${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
-              <span>📊 ${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `).join('');
-
-    // Delete handler
-    list.querySelectorAll('.wk-history-del').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = parseInt(btn.dataset.id);
-        if (!confirm('Delete this workout record? (The lift logs are preserved.)')) return;
-        try {
-          await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
-          workoutHistory = workoutHistory.filter(s => s.id !== id);
-          renderHistory();
-          showToast('Workout record deleted.');
-        } catch (err) {
-          handleApiError(err);
-        }
-      });
     });
   }
 
@@ -613,8 +504,8 @@
           <div class="wk-set-field">
             <label>Weight (kg)</label>
             <input type="number" class="wk-input aw-weight" data-set="${i}"
-              value="${logged ? logged.weight_kg : (ex.target_weight_kg || '')}"
-              placeholder="${ex.target_weight_kg || '0'}" min="0" max="600" step="0.5"
+              value="${logged ? logged.weight_kg : (ex.target_weight_kg != null ? ex.target_weight_kg : (i > 0 && ex.loggedSets[i-1] ? ex.loggedSets[i-1].weight_kg : ''))}"
+              placeholder="${ex.target_weight_kg != null ? ex.target_weight_kg + ' kg' : 'kg'}" min="0.5" max="600" step="0.5"
               ${isDone ? 'disabled' : ''}>
           </div>`}
           <div class="wk-set-field">
@@ -669,22 +560,61 @@
         const repsInput = panel.querySelector(`.aw-reps[data-set="${setIdx}"]`);
         const rpeInput = panel.querySelector(`.aw-rpe[data-set="${setIdx}"]`);
 
-        const weight = isBodyweight ? 0 : (parseFloat(weightInput?.value) || 0);
+        const weight = isBodyweight ? 0 : (parseFloat(weightInput?.value) ?? 0);
         const reps = parseInt(repsInput?.value) || 0;
         const rpe = parseFloat(rpeInput?.value) || null;
 
-        if (!isBodyweight && weight < 0) { showToast('Enter a valid weight.', 'error'); return; }
-        if (reps < 1) { showToast('Enter valid reps.', 'error'); return; }
+        // Validate — must have weight > 0 for weighted exercises
+        if (!isBodyweight && (isNaN(weight) || weight <= 0)) {
+          showToast('Enter a weight greater than 0.', 'error');
+          weightInput && weightInput.focus();
+          return;
+        }
+        if (reps < 1) {
+          showToast('Enter valid reps (at least 1).', 'error');
+          repsInput && repsInput.focus();
+          return;
+        }
 
         ex.loggedSets[setIdx] = { weight_kg: weight, reps, rpe, completed: true };
+
+        // Auto-fill weight into subsequent unlogged sets
+        if (!isBodyweight && weight > 0) {
+          for (let nextIdx = setIdx + 1; nextIdx < ex.target_sets; nextIdx++) {
+            if (ex.loggedSets[nextIdx]) continue; // already logged, skip
+            const nextWeightInput = panel.querySelector(`.aw-weight[data-set="${nextIdx}"]`);
+            if (nextWeightInput && !nextWeightInput.disabled) {
+              nextWeightInput.value = weight;
+            }
+          }
+        }
+
+        // Update just this set row — no full re-render so other inputs stay intact
+        const setRow = panel.querySelector(`.wk-set-row[data-set="${setIdx}"]`);
+        if (setRow) {
+          setRow.classList.add('done');
+          if (weightInput) weightInput.disabled = true;
+          if (repsInput) repsInput.disabled = true;
+          if (rpeInput) rpeInput.disabled = true;
+          btn.classList.add('done');
+          btn.textContent = '✓';
+        }
+
+        // Update progress bar without full re-render
+        const progressBar = panel.querySelector('.wk-panel-progress-bar');
+        const progressTxt = panel.querySelector('.wk-panel-progress-txt');
+        const doneCount = ex.loggedSets.filter(Boolean).length;
+        if (progressBar) progressBar.style.width = Math.min(100, (doneCount / ex.target_sets) * 100) + '%';
+        if (progressTxt) progressTxt.textContent = `${doneCount}/${ex.target_sets} sets done`;
+
+        // Update tabs to reflect progress
         renderAwTabs();
-        renderAwPanel();
 
         // Show rest timer if not last set
         if (setIdx < ex.target_sets - 1) {
           startRestTimer(ex.rest_seconds || 90);
         } else {
-          showToast(`All sets done for ${ex.exercise_name}!`);
+          showToast(`💪 All sets done for ${ex.exercise_name}!`);
         }
       });
     });
@@ -814,16 +744,8 @@
     }
 
     modal.style.display = 'flex';
-
-    // Refresh history in the background
-    loadHistory();
-
     document.getElementById('wcDoneBtn').onclick = () => {
       modal.style.display = 'none';
-    };
-    document.getElementById('wcLiftsBtn').onclick = () => {
-      modal.style.display = 'none';
-      window.location.href = 'lifts.html';
     };
   }
 
