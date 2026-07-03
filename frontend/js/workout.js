@@ -40,6 +40,20 @@
         </div>
       </div>
 
+      <!-- Workout History -->
+      <div id="historySection" style="margin-top:32px;">
+        <div class="wk-section-label">WORKOUT HISTORY</div>
+        <div id="historyLoading" class="wk-loading">
+          <div class="ironlog-spinner"></div><span>Loading history…</span>
+        </div>
+        <div id="historyList" style="display:none;"></div>
+        <div id="historyEmpty" style="display:none;" class="wk-empty wk-empty-sm">
+          <div class="wk-empty-icon">🏋️</div>
+          <h3>No workouts yet</h3>
+          <p>Complete a workout and it will show up here.</p>
+        </div>
+      </div>
+
     </div>
 
     <!-- ── Create/Edit Template Modal ─────────────────────────────────── -->
@@ -111,12 +125,15 @@
         <h2 class="wk-complete-title">Workout Complete!</h2>
         <div id="wcStats" class="wk-complete-stats"></div>
         <div id="wcPRs" class="wk-prs"></div>
-        <div class="wk-modal-footer wk-complete-footer">
+        <div class="wk-modal-footer wk-complete-footer" style="flex-direction:column;gap:8px;">
           <button class="btn btn-primary wk-btn-full" id="wcDoneBtn">Back to Workouts</button>
+          <button class="btn btn-secondary wk-btn-full" id="wcLiftsBtn">View in Lifts →</button>
         </div>
       </div>
     </div>
   `;
+
+  let workoutHistory = [];    // completed workout sessions
 
   // ── Load data ────────────────────────────────────────────────────────────
   async function init() {
@@ -127,10 +144,22 @@
       ]);
       populateExerciseSelect('tmplAddExerciseSelect');
       renderTemplates();
+      loadHistory();
       window.hideLoading && window.hideLoading();
     } catch (err) {
       handleApiError(err);
       window.hideLoading && window.hideLoading();
+    }
+  }
+
+  async function loadHistory() {
+    try {
+      workoutHistory = await apiRequest('/templates/history');
+      renderHistory();
+    } catch (err) {
+      console.warn('[workout] Could not load history:', err);
+      document.getElementById('historyLoading').style.display = 'none';
+      document.getElementById('historyEmpty').style.display = 'flex';
     }
   }
 
@@ -180,7 +209,6 @@
       </div>
     `).join('');
 
-    // Event bindings for template cards
     grid.querySelectorAll('.wk-start-btn').forEach(btn => {
       btn.addEventListener('click', () => startWorkout(parseInt(btn.dataset.id)));
     });
@@ -192,9 +220,85 @@
     });
   }
 
+  // ── Render workout history ────────────────────────────────────────────────
+  function renderHistory() {
+    document.getElementById('historyLoading').style.display = 'none';
+    const list = document.getElementById('historyList');
+    const empty = document.getElementById('historyEmpty');
+
+    if (!workoutHistory.length) {
+      list.style.display = 'none';
+      empty.style.display = 'flex';
+      return;
+    }
+
+    empty.style.display = 'none';
+    list.style.display = 'block';
+
+    const byDate = {};
+    for (const s of workoutHistory) {
+      if (!byDate[s.date]) byDate[s.date] = [];
+      byDate[s.date].push(s);
+    }
+
+    const fmtDate = (d) => {
+      const dt = new Date(d + 'T00:00:00');
+      const today = new Date(); today.setHours(0,0,0,0);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      if (dt.getTime() === today.getTime()) return 'Today';
+      if (dt.getTime() === yesterday.getTime()) return 'Yesterday';
+      return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+    };
+
+    const fmtDuration = (sec) => {
+      if (!sec) return '—';
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
+      return `${m}m ${s}s`;
+    };
+
+    list.innerHTML = Object.keys(byDate).map(date => `
+      <div class="wk-history-date-group">
+        <div class="wk-history-date">${fmtDate(date)}</div>
+        ${byDate[date].map(s => `
+          <div class="wk-history-card" data-id="${s.id}">
+            <div class="wk-history-card-top">
+              <div class="wk-history-name">
+                <span class="wk-history-icon">${s.template_id ? '📋' : '🏋️'}</span>
+                ${escHtml(s.template_name)}
+              </div>
+              <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete">🗑️</button>
+            </div>
+            <div class="wk-history-meta">
+              <span>⏱ ${fmtDuration(s.duration_seconds)}</span>
+              <span>💪 ${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
+              <span>📊 ${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.wk-history-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id);
+        if (!confirm('Delete this workout record? (The lift logs are preserved.)')) return;
+        try {
+          await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
+          workoutHistory = workoutHistory.filter(s => s.id !== id);
+          renderHistory();
+          showToast('Workout record deleted.');
+        } catch (err) {
+          handleApiError(err);
+        }
+      });
+    });
+  }
+
   // ── Create / Edit Template Modal ──────────────────────────────────────────
   let editingTemplateId = null;
-  let tmplExercises = []; // [{exercise_id, exercise_name, target_sets, target_reps, target_weight_kg, rest_seconds, notes, te_id?}]
+  let tmplExercises = [];
 
   function openCreateTemplate() {
     editingTemplateId = null;
@@ -256,7 +360,6 @@
       </div>
     `).join('');
 
-    // Sync inputs to tmplExercises
     container.querySelectorAll('.tmpl-sets').forEach(inp =>
       inp.addEventListener('change', () => { tmplExercises[inp.dataset.idx].target_sets = parseInt(inp.value) || 3; }));
     container.querySelectorAll('.tmpl-reps').forEach(inp =>
@@ -310,11 +413,9 @@
 
     try {
       if (editingTemplateId) {
-        // Update name/desc first
         await apiRequest(`/templates/${editingTemplateId}`, {
           method: 'PUT', body: { name, description: desc || null },
         });
-        // For simplicity: delete all exercises and re-add
         const existing = templates.find(t => t.id === editingTemplateId);
         if (existing) {
           for (const te of existing.exercises) {
@@ -352,7 +453,6 @@
     }
   }
 
-  // Modal close handlers
   document.getElementById('closeTemplateModal').addEventListener('click', () => {
     document.getElementById('templateModal').style.display = 'none';
   });
@@ -363,8 +463,7 @@
   document.getElementById('createFirstBtn')?.addEventListener('click', openCreateTemplate);
 
   // ── Active Workout ─────────────────────────────────────────────────────────
-  // State: array of exercise panels, each with logged sets
-  let awExercises = [];   // [{exercise_id, exercise_name, target_sets, target_reps, target_weight_kg, rest_seconds, loggedSets:[]}]
+  let awExercises = [];
   let awCurrentIdx = 0;
   let awStartTime = null;
   let awTimerInterval = null;
@@ -391,7 +490,6 @@
         loggedSets: [],
         notes: '',
       })) : [{
-        // Free workout starts with one empty exercise slot
         exercise_id: exercises[0]?.id || 0,
         exercise_name: exercises[0]?.name || '',
         target_sets: 3,
@@ -430,13 +528,12 @@
   function renderAwTabs() {
     const tabs = document.getElementById('awTabs');
     tabs.innerHTML = awExercises.map((e, i) => {
-      const done = e.loggedSets.length >= e.target_sets;
+      const done = e.loggedSets.filter(Boolean).length >= e.target_sets;
       return `<button class="wk-tab ${i === awCurrentIdx ? 'active' : ''} ${done ? 'done' : ''}"
         data-idx="${i}">${i + 1}. ${e.exercise_name.split(' ').slice(0, 2).join(' ')}</button>`;
     }).join('');
 
     if (awTemplateId === 0) {
-      // Free workout: add exercise button
       tabs.innerHTML += `<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`;
       document.getElementById('awAddExBtn')?.addEventListener('click', addExerciseToWorkout);
     }
@@ -451,7 +548,6 @@
   }
 
   function addExerciseToWorkout() {
-    // Show quick picker
     const sel = document.createElement('select');
     sel.className = 'wk-select';
     sel.innerHTML = buildGroupedExerciseOptions(exercises);
@@ -497,6 +593,12 @@
     const setsHtml = Array.from({ length: ex.target_sets }, (_, i) => {
       const logged = ex.loggedSets[i];
       const isDone = !!logged;
+      // Prefill weight: use logged value, then template target, then previous logged set
+      const prefillWeight = logged
+        ? logged.weight_kg
+        : (ex.target_weight_kg != null
+            ? ex.target_weight_kg
+            : (i > 0 && ex.loggedSets[i - 1] ? ex.loggedSets[i - 1].weight_kg : ''));
       return `
         <div class="wk-set-row ${isDone ? 'done' : ''}" data-set="${i}">
           <div class="wk-set-num">Set ${i + 1}</div>
@@ -504,8 +606,9 @@
           <div class="wk-set-field">
             <label>Weight (kg)</label>
             <input type="number" class="wk-input aw-weight" data-set="${i}"
-              value="${logged ? logged.weight_kg : (ex.target_weight_kg != null ? ex.target_weight_kg : (i > 0 && ex.loggedSets[i-1] ? ex.loggedSets[i-1].weight_kg : ''))}"
-              placeholder="${ex.target_weight_kg != null ? ex.target_weight_kg + ' kg' : 'kg'}" min="0.5" max="600" step="0.5"
+              value="${prefillWeight}"
+              placeholder="${ex.target_weight_kg != null ? ex.target_weight_kg + ' kg' : 'kg'}"
+              min="0.5" max="600" step="0.5"
               ${isDone ? 'disabled' : ''}>
           </div>`}
           <div class="wk-set-field">
@@ -534,9 +637,9 @@
         <div class="wk-panel-title">${escHtml(ex.exercise_name)}</div>
         <div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>
         <div class="wk-panel-progress">
-          <div class="wk-panel-progress-bar" style="width:${Math.min(100,(ex.loggedSets.length/ex.target_sets)*100)}%"></div>
+          <div class="wk-panel-progress-bar" style="width:${Math.min(100,(ex.loggedSets.filter(Boolean).length/ex.target_sets)*100)}%"></div>
         </div>
-        <div class="wk-panel-progress-txt">${ex.loggedSets.length}/${ex.target_sets} sets done</div>
+        <div class="wk-panel-progress-txt">${ex.loggedSets.filter(Boolean).length}/${ex.target_sets} sets done</div>
       </div>
 
       <div class="wk-sets-container">${setsHtml}</div>
@@ -550,21 +653,21 @@
       </div>
     `;
 
-    // Log set buttons
+    // Log set buttons — validate, auto-fill, no full re-render
     panel.querySelectorAll('.wk-log-set-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const setIdx = parseInt(btn.dataset.set);
         if (ex.loggedSets[setIdx]) return; // already logged
 
-        const weightInput = panel.querySelector(`.aw-weight[data-set="${setIdx}"]`);
-        const repsInput = panel.querySelector(`.aw-reps[data-set="${setIdx}"]`);
-        const rpeInput = panel.querySelector(`.aw-rpe[data-set="${setIdx}"]`);
+        const weightInput = panel.querySelector('.aw-weight[data-set="' + setIdx + '"]');
+        const repsInput = panel.querySelector('.aw-reps[data-set="' + setIdx + '"]');
+        const rpeInput = panel.querySelector('.aw-rpe[data-set="' + setIdx + '"]');
 
         const weight = isBodyweight ? 0 : (parseFloat(weightInput?.value) ?? 0);
         const reps = parseInt(repsInput?.value) || 0;
         const rpe = parseFloat(rpeInput?.value) || null;
 
-        // Validate — must have weight > 0 for weighted exercises
+        // Validate
         if (!isBodyweight && (isNaN(weight) || weight <= 0)) {
           showToast('Enter a weight greater than 0.', 'error');
           weightInput && weightInput.focus();
@@ -581,16 +684,14 @@
         // Auto-fill weight into subsequent unlogged sets
         if (!isBodyweight && weight > 0) {
           for (let nextIdx = setIdx + 1; nextIdx < ex.target_sets; nextIdx++) {
-            if (ex.loggedSets[nextIdx]) continue; // already logged, skip
-            const nextWeightInput = panel.querySelector(`.aw-weight[data-set="${nextIdx}"]`);
-            if (nextWeightInput && !nextWeightInput.disabled) {
-              nextWeightInput.value = weight;
-            }
+            if (ex.loggedSets[nextIdx]) continue;
+            const nextInput = panel.querySelector('.aw-weight[data-set="' + nextIdx + '"]');
+            if (nextInput && !nextInput.disabled) nextInput.value = weight;
           }
         }
 
-        // Update just this set row — no full re-render so other inputs stay intact
-        const setRow = panel.querySelector(`.wk-set-row[data-set="${setIdx}"]`);
+        // Update this row only — no full re-render so other inputs stay intact
+        const setRow = panel.querySelector('.wk-set-row[data-set="' + setIdx + '"]');
         if (setRow) {
           setRow.classList.add('done');
           if (weightInput) weightInput.disabled = true;
@@ -600,26 +701,25 @@
           btn.textContent = '✓';
         }
 
-        // Update progress bar without full re-render
+        // Update progress bar and text
+        const doneCount = ex.loggedSets.filter(Boolean).length;
         const progressBar = panel.querySelector('.wk-panel-progress-bar');
         const progressTxt = panel.querySelector('.wk-panel-progress-txt');
-        const doneCount = ex.loggedSets.filter(Boolean).length;
         if (progressBar) progressBar.style.width = Math.min(100, (doneCount / ex.target_sets) * 100) + '%';
-        if (progressTxt) progressTxt.textContent = `${doneCount}/${ex.target_sets} sets done`;
+        if (progressTxt) progressTxt.textContent = doneCount + '/' + ex.target_sets + ' sets done';
 
-        // Update tabs to reflect progress
+        // Update tabs
         renderAwTabs();
 
-        // Show rest timer if not last set
+        // Rest timer or completion toast
         if (setIdx < ex.target_sets - 1) {
           startRestTimer(ex.rest_seconds || 90);
         } else {
-          showToast(`💪 All sets done for ${ex.exercise_name}!`);
+          showToast('All sets done for ' + ex.exercise_name + '!');
         }
       });
     });
 
-    // Navigation
     document.getElementById('awPrevBtn')?.addEventListener('click', () => {
       awCurrentIdx--;
       renderAwTabs();
@@ -649,11 +749,10 @@
     awRestInterval = setInterval(() => {
       remaining--;
       if (countEl) countEl.textContent = remaining;
-      if (barEl) barEl.style.width = `${(remaining / seconds) * 100}%`;
+      if (barEl) barEl.style.width = (remaining / seconds * 100) + '%';
       if (remaining <= 0) {
         clearInterval(awRestInterval);
         if (timerEl) timerEl.style.display = 'none';
-        // Vibrate if supported
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       }
     }, 1000);
@@ -679,10 +778,10 @@
     const today = new Date().toISOString().split('T')[0];
 
     const exercisesPayload = awExercises
-      .filter(e => e.loggedSets.some(s => s.completed))
+      .filter(e => e.loggedSets.some(s => s && s.completed))
       .map(e => ({
         exercise_id: e.exercise_id,
-        sets: e.loggedSets.filter(s => s.completed),
+        sets: e.loggedSets.filter(s => s && s.completed),
         notes: e.notes || null,
       }));
 
@@ -696,7 +795,7 @@
 
     try {
       const endpoint = awTemplateId
-        ? `/templates/${awTemplateId}/finish`
+        ? '/templates/' + awTemplateId + '/finish'
         : '/templates/free/finish';
 
       const result = await apiRequest(endpoint, {
@@ -704,7 +803,6 @@
         body: { date: today, duration_seconds: duration, exercises: exercisesPayload },
       });
 
-      // Show completion modal
       document.getElementById('activeWorkout').style.display = 'none';
       document.body.style.overflow = '';
       showCompletionModal(result, duration);
@@ -718,7 +816,7 @@
   function showCompletionModal(result, durationSeconds) {
     const modal = document.getElementById('workoutCompleteModal');
     const durationStr = durationSeconds
-      ? `${Math.floor(durationSeconds/60)}m ${durationSeconds%60}s`
+      ? Math.floor(durationSeconds/60) + 'm ' + (durationSeconds%60) + 's'
       : '—';
 
     document.getElementById('wcStats').innerHTML = `
@@ -744,12 +842,17 @@
     }
 
     modal.style.display = 'flex';
+    loadHistory();
+
     document.getElementById('wcDoneBtn').onclick = () => {
       modal.style.display = 'none';
     };
+    document.getElementById('wcLiftsBtn').onclick = () => {
+      modal.style.display = 'none';
+      window.location.href = 'lifts.html';
+    };
   }
 
-  // Free workout button
   document.getElementById('startFreeBtn').addEventListener('click', () => startWorkout(0));
 
   // ── Utility ───────────────────────────────────────────────────────────────
