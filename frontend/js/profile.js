@@ -81,6 +81,9 @@ document.getElementById("pageContent").innerHTML = `
       <div id="goalListWrap"></div>
     </div>
   </div>
+
+  <!-- Settings: theme, push, export -->
+  <div id="settingsSection" class="grid grid-3" style="margin-top:0;"></div>
 `;
 
 async function loadProfile() {
@@ -190,4 +193,117 @@ function escapeHtml(str) {
   await loadProfile();
   await loadGoalExerciseOptions();
   await loadGoals();
+  await loadSettingsSection();
 })();
+
+// ── Settings section (theme + push + export) ──────────────────────────────
+async function loadSettingsSection() {
+  const settingsEl = document.getElementById('settingsSection');
+  if (!settingsEl) return;
+
+  // Theme
+  const currentTheme = IronlogTheme ? IronlogTheme.current() : 'dark';
+  const isDark = currentTheme === 'dark';
+
+  // Push support
+  const pushSupported = IronlogPush && IronlogPush.isSupported();
+  const pushSubscribed = pushSupported ? await IronlogPush.isSubscribed() : false;
+
+  settingsEl.innerHTML = `
+    <div class="card">
+      <div class="card-title">Appearance</div>
+      <div class="settings-row">
+        <div class="settings-info">
+          <div class="settings-label">Theme</div>
+          <div class="settings-sub">${isDark ? 'Dark mode active' : 'Light mode active'}</div>
+        </div>
+        <button class="settings-btn" id="themeToggleBtn" data-theme-toggle>
+          ${isDark ? '☀️ Switch to Light' : '🌙 Switch to Dark'}
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Notifications</div>
+      ${pushSupported ? `
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="settings-label">Workout reminders</div>
+            <div class="settings-sub">${pushSubscribed ? 'You will be notified of new PRs and inactivity reminders' : 'Get notified of new PRs and when you have not trained in 3 days'}</div>
+          </div>
+          <button class="settings-btn ${pushSubscribed ? 'settings-btn-active' : ''}" id="pushToggleBtn">
+            ${pushSubscribed ? '🔔 Enabled' : '🔕 Enable'}
+          </button>
+        </div>
+        ${pushSubscribed ? `
+        <div class="settings-row" style="padding-top:0;border-top:none;">
+          <div class="settings-info">
+            <div class="settings-sub">Send a test notification to this device</div>
+          </div>
+          <button class="settings-btn" id="pushTestBtn">Send test</button>
+        </div>` : ''}
+      ` : `
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="settings-label">Push notifications</div>
+            <div class="settings-sub">Not supported in this browser. Use Chrome or Edge for push notifications.</div>
+          </div>
+        </div>
+      `}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Data</div>
+      <p class="text-secondary" style="font-size:13px;margin-bottom:16px;line-height:1.6;">
+        Download everything IRONLOG stores about you — all lift logs, body weight, nutrition, and workout history. Your data, always.
+      </p>
+      <div class="settings-row" style="flex-wrap:wrap;gap:10px;">
+        <div class="settings-info">
+          <div class="settings-label">Export all data</div>
+          <div class="settings-sub">Includes lifts, weight, nutrition, workouts</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="settings-btn" id="exportJsonBtn">⬇ JSON</button>
+          <button class="settings-btn" id="exportCsvBtn">⬇ CSV</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Theme toggle
+  document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+    IronlogTheme.toggle();
+    loadSettingsSection(); // re-render to update button text
+  });
+
+  // Push toggle
+  document.getElementById('pushToggleBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('pushToggleBtn');
+    btn.disabled = true;
+    btn.textContent = 'Please wait…';
+    if (pushSubscribed) {
+      const res = await IronlogPush.unsubscribe();
+      if (res.ok) showToast('Notifications disabled.');
+      else showToast(res.reason || 'Could not disable notifications.', 'error');
+    } else {
+      const res = await IronlogPush.subscribe();
+      if (res.ok) showToast('Notifications enabled! You will get PR and inactivity alerts.');
+      else showToast(res.reason || 'Could not enable notifications.', 'error');
+    }
+    await loadSettingsSection();
+  });
+
+  // Push test
+  document.getElementById('pushTestBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('pushTestBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const res = await IronlogPush.sendTest();
+    if (res.ok) showToast('Test notification sent!');
+    else showToast(res.reason || 'Could not send test.', 'error');
+    btn.disabled = false; btn.textContent = 'Send test';
+  });
+
+  // Export
+  document.getElementById('exportJsonBtn')?.addEventListener('click', () => IronlogExport.download('json'));
+  document.getElementById('exportCsvBtn')?.addEventListener('click', () => IronlogExport.download('csv'));
+}

@@ -369,16 +369,12 @@ def finish_workout(
     exactly like logging via the Lifts page — so PRs, 1RM calculations, and
     all analytics pick them up automatically.
 
-    Also creates a WorkoutSession record for the workout history view.
-
     Skipped sets (completed=False) are not saved.
     Returns a summary: exercises logged, total sets, any new PRs detected.
     """
     # Verify template belongs to user (or template_id=0 for free workout)
-    template_name = "Free Workout"
     if template_id != 0:
-        t = _get_template(db, template_id, current_user)
-        template_name = t.name
+        _get_template(db, template_id, current_user)
 
     if not payload.exercises:
         raise HTTPException(status_code=400, detail="No exercises to save")
@@ -456,22 +452,11 @@ def finish_workout(
     if total_sets_saved == 0:
         raise HTTPException(status_code=400, detail="No completed sets to save")
 
-    # Create workout session record for history
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=template_id if template_id != 0 else None,
-        template_name=template_name,
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-        notes=payload.notes,
-    )
-    db.add(session)
     db.commit()
 
     return {
         "success": True,
+        "session_id": session.id,
         "exercises_saved": exercises_saved,
         "total_sets_saved": total_sets_saved,
         "new_prs": new_prs,
@@ -490,6 +475,8 @@ def finish_free_workout(
     current_user: models.User = Depends(get_current_user),
 ):
     """Finish a free (no template) workout session."""
+    # Reuse finish_workout logic with a dummy template_id
+    # We handle the template check manually here
     if not payload.exercises:
         raise HTTPException(status_code=400, detail="No exercises to save")
 
@@ -561,69 +548,33 @@ def finish_free_workout(
     if total_sets_saved == 0:
         raise HTTPException(status_code=400, detail="No completed sets to save")
 
-    # Create workout session record for history
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=None,
-        template_name="Free Workout",
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-        notes=payload.notes,
-    )
-    db.add(session)
     db.commit()
 
     return {
         "success": True,
+        "session_id": session.id,
         "exercises_saved": exercises_saved,
         "total_sets_saved": total_sets_saved,
         "new_prs": new_prs,
         "date": payload.date.isoformat(),
     }
 
-
 # ---------------------------------------------------------------------------
-# Workout History
+# Patch workout session notes
 # ---------------------------------------------------------------------------
 
-@router.get("/history")
-def list_workout_history(
-    limit: int = 50,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    """List completed workout sessions, newest first."""
-    sessions = (
-        db.query(models.WorkoutSession)
-        .filter(models.WorkoutSession.user_id == current_user.id)
-        .order_by(models.WorkoutSession.date.desc(), models.WorkoutSession.created_at.desc())
-        .limit(limit)
-        .all()
-    )
-    return [
-        {
-            "id": s.id,
-            "template_id": s.template_id,
-            "template_name": s.template_name,
-            "date": s.date.isoformat(),
-            "duration_seconds": s.duration_seconds,
-            "exercises_count": s.exercises_count,
-            "sets_count": s.sets_count,
-            "notes": s.notes,
-        }
-        for s in sessions
-    ]
+class SessionNotesIn(BaseModel):
+    notes: str = ""
 
 
-@router.delete("/history/{session_id}", status_code=204)
-def delete_workout_session(
+@router.patch("/history/{session_id}/notes")
+def update_session_notes(
     session_id: int,
+    payload: SessionNotesIn,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Delete a workout session record (does NOT delete the underlying lift logs)."""
+    """Update the notes for a completed workout session."""
     session = (
         db.query(models.WorkoutSession)
         .filter(
@@ -634,5 +585,6 @@ def delete_workout_session(
     )
     if not session:
         raise HTTPException(status_code=404, detail="Workout session not found")
-    db.delete(session)
+    session.notes = payload.notes.strip() or None
     db.commit()
+    return {"status": "updated", "notes": session.notes}

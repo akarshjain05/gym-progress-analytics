@@ -125,8 +125,14 @@
         <h2 class="wk-complete-title">Workout Complete!</h2>
         <div id="wcStats" class="wk-complete-stats"></div>
         <div id="wcPRs" class="wk-prs"></div>
+        <div class="wk-complete-notes">
+          <label class="wk-complete-notes-label">Session notes (optional)</label>
+          <textarea id="wcNotes" class="wk-notes-input"
+            placeholder="e.g. felt strong today, slept 8hrs, knee feeling good…"
+            rows="3" maxlength="500"></textarea>
+        </div>
         <div class="wk-modal-footer wk-complete-footer" style="flex-direction:column;gap:8px;">
-          <button class="btn btn-primary wk-btn-full" id="wcDoneBtn">Back to Workouts</button>
+          <button class="btn btn-primary wk-btn-full" id="wcSaveNotesBtn">Save &amp; Done</button>
           <button class="btn btn-secondary wk-btn-full" id="wcLiftsBtn">View in Lifts →</button>
         </div>
       </div>
@@ -275,6 +281,7 @@
               <span>💪 ${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
               <span>📊 ${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
             </div>
+            ${s.notes ? `<div class="wk-history-notes">${escHtml(s.notes)}</div>` : ''}
           </div>
         `).join('')}
       </div>
@@ -844,9 +851,24 @@
     modal.style.display = 'flex';
     loadHistory();
 
-    document.getElementById('wcDoneBtn').onclick = () => {
+    // Save notes then close
+    const saveAndClose = async () => {
+      const notes = (document.getElementById('wcNotes')?.value || '').trim();
+      // If user typed notes and we have a session ID, patch it
+      if (notes && result.session_id) {
+        try {
+          await apiRequest('/templates/history/' + result.session_id + '/notes', {
+            method: 'PATCH',
+            body: { notes },
+          });
+        } catch (e) {
+          console.warn('[workout] Could not save notes:', e);
+        }
+      }
       modal.style.display = 'none';
     };
+
+    document.getElementById('wcSaveNotesBtn').onclick = saveAndClose;
     document.getElementById('wcLiftsBtn').onclick = () => {
       modal.style.display = 'none';
       window.location.href = 'lifts.html';

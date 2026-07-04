@@ -188,6 +188,9 @@ function renderShell(activeId, pageTitle, subtitle) {
         </div>
         <ul class="nav-list" id="navList">
           ${navHtml}
+          <button class="theme-toggle-btn" id="sidebarThemeToggle" data-theme-toggle title="Toggle theme">
+            ☀️ Light mode
+          </button>
           <a class="nav-link nav-link-logout" id="logoutBtn">
             ${LOGOUT_ICON}
             <span>Log out</span>
@@ -215,6 +218,21 @@ function renderShell(activeId, pageTitle, subtitle) {
     Auth.clear();
     window.location.href = "index.html";
   });
+
+  // Theme toggle button in sidebar
+  const themeBtn = document.getElementById("sidebarThemeToggle");
+  if (themeBtn && window.IronlogTheme) {
+    const updateThemeBtn = () => {
+      const isDark = IronlogTheme.current() === 'dark';
+      themeBtn.textContent = isDark ? '☀️ Light mode' : '🌙 Dark mode';
+      themeBtn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    };
+    updateThemeBtn();
+    themeBtn.addEventListener('click', () => {
+      IronlogTheme.toggle();
+      updateThemeBtn();
+    });
+  }
 
   // Hamburger open
   document.getElementById("hamburgerBtn").addEventListener("click", openDrawer);

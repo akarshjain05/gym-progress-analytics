@@ -1,0 +1,276 @@
+/* ============================================================
+   IRONLOG — Theme & Feature CSS
+   Link as: <link rel="stylesheet" href="css/theme.css">
+   BEFORE style.css so variables are available globally.
+   ============================================================ */
+
+/* ── Dark theme (default) ────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg:           #141719;
+  --surface:      #2a2f35;
+  --surface-2:    #1e2327;
+  --border:       rgba(255,255,255,0.08);
+  --text-primary: #e8e0d5;
+  --text-secondary:#a09880;
+  --text-tertiary: #6b7280;
+  --accent:       #c0392b;
+  --accent-hover: #a93226;
+  --positive:     #27ae60;
+  --negative:     #c0392b;
+  --neutral:      #a09880;
+
+  /* Sidebar */
+  --sidebar-bg:   #1a1e21;
+  --sidebar-border: rgba(255,255,255,0.06);
+
+  /* Card */
+  --card-bg:      #2a2f35;
+  --card-border:  rgba(255,255,255,0.07);
+
+  /* Input */
+  --input-bg:     rgba(255,255,255,0.05);
+  --input-border: rgba(255,255,255,0.1);
+  --input-focus:  #c0392b;
+
+  /* Spinner */
+  --spinner-color: #c0392b;
+
+  color-scheme: dark;
+}
+
+/* ── Light theme ─────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:           #f4f1ec;
+  --surface:      #ffffff;
+  --surface-2:    #f9f7f4;
+  --border:       rgba(0,0,0,0.1);
+  --text-primary: #1a1e21;
+  --text-secondary:#5a5248;
+  --text-tertiary: #8a8278;
+  --accent:       #c0392b;
+  --accent-hover: #a93226;
+  --positive:     #1e8449;
+  --negative:     #c0392b;
+  --neutral:      #5a5248;
+
+  --sidebar-bg:   #1a1e21;        /* keep sidebar dark always */
+  --sidebar-border: rgba(255,255,255,0.06);
+
+  --card-bg:      #ffffff;
+  --card-border:  rgba(0,0,0,0.08);
+
+  --input-bg:     rgba(0,0,0,0.04);
+  --input-border: rgba(0,0,0,0.15);
+  --input-focus:  #c0392b;
+
+  --spinner-color: #c0392b;
+
+  color-scheme: light;
+}
+
+/* Apply theme to body and main containers */
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.card, .stat-card {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+
+input, select, textarea {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-primary) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--input-focus) !important;
+}
+
+/* Light mode text overrides */
+[data-theme="light"] .text-secondary,
+[data-theme="light"] .stat-label,
+[data-theme="light"] .text-tertiary {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .sidebar,
+[data-theme="light"] .mobile-drawer,
+[data-theme="light"] .mobile-topbar,
+[data-theme="light"] .mobile-bottom-nav,
+[data-theme="light"] .wk-active-topbar,
+[data-theme="light"] .wk-active-overlay {
+  /* Keep these dark always for readability */
+  background: #1a1e21 !important;
+}
+
+[data-theme="light"] .wk-modal,
+[data-theme="light"] .ob-modal {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] .wk-template-card,
+[data-theme="light"] .wk-history-card,
+[data-theme="light"] .session-group,
+[data-theme="light"] .pr-group,
+[data-theme="light"] .strength-scale-card,
+[data-theme="light"] .chart-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .lifts-select,
+[data-theme="light"] .wk-select,
+[data-theme="light"] .wk-input,
+[data-theme="light"] .ob-input,
+[data-theme="light"] .ob-select {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  color: #1a1e21 !important;
+}
+
+[data-theme="light"] .scale-marker-label {
+  background: #1a1e21;
+  color: #e8e0d5;
+}
+
+/* ── Theme toggle button (in sidebar/topbar) ─────────────── */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-family: Inter, sans-serif;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.theme-toggle-btn:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+/* ── Settings section on profile page ───────────────────── */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+
+.settings-info { flex: 1; min-width: 0; }
+.settings-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: Inter, sans-serif;
+  margin-bottom: 2px;
+}
+.settings-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: Inter, sans-serif;
+  line-height: 1.4;
+}
+
+.settings-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  padding: 8px 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.settings-btn:hover {
+  background: var(--input-bg);
+  border-color: var(--accent);
+}
+.settings-btn.settings-btn-active {
+  background: rgba(192,57,43,0.15);
+  border-color: rgba(192,57,43,0.4);
+  color: var(--accent);
+}
+.settings-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Workout session notes ───────────────────────────────── */
+.wk-notes-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: Inter, sans-serif;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.15s;
+}
+.wk-notes-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.wk-notes-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.wk-complete-notes {
+  padding: 0 20px 16px;
+}
+.wk-complete-notes-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-family: Inter, sans-serif;
+}
+
+.wk-history-notes {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: Inter, sans-serif;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--input-bg);
+  border-radius: 6px;
+  line-height: 1.4;
+  font-style: italic;
+}

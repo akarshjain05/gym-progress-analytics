@@ -10,8 +10,12 @@ from .database import Base, engine, SessionLocal
 from .seed_exercises import seed_exercises
 from .config import settings
 from .rate_limiter import limiter
-from .routers import auth, profile, weight, exercises, lifts, nutrition, goals, analytics, coach, workout_templates
-
+from .routers import (
+    auth, profile, weight, exercises, lifts,
+    nutrition, goals, analytics, coach, workout_templates,
+)
+from .push_notifications import router as push_router, PushSubscription
+from .export import router as export_router
 
 
 @asynccontextmanager
@@ -49,6 +53,8 @@ app.include_router(goals.router)
 app.include_router(analytics.router)
 app.include_router(coach.router)
 app.include_router(workout_templates.router)
+app.include_router(push_router)
+app.include_router(export_router)
 
 
 @app.get("/")
