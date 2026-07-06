@@ -30,6 +30,29 @@ const IronlogTheme = (function () {
     apply(current() === 'dark' ? 'light' : 'dark');
     // Update all toggle buttons on the page
     document.querySelectorAll('[data-theme-toggle]').forEach(updateBtn);
+    // Update Chart.js defaults so existing charts re-render with correct colors
+    updateChartDefaults();
+  }
+
+  function updateChartDefaults() {
+    if (typeof Chart === 'undefined') return;
+    const isDark = current() === 'dark';
+    const tickColor = isDark ? '#6b7280' : '#78716c';
+    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+    Chart.defaults.color = isDark ? '#a09880' : '#57534e';
+    Chart.defaults.borderColor = gridColor;
+    // Re-render all active charts
+    Object.values(Chart.instances || {}).forEach(chart => {
+      try {
+        if (chart.options.scales) {
+          Object.values(chart.options.scales).forEach(scale => {
+            if (scale.ticks) scale.ticks.color = tickColor;
+            if (scale.grid) scale.grid.color = gridColor;
+          });
+        }
+        chart.update('none'); // 'none' = no animation
+      } catch(e) {}
+    });
   }
 
   function updateBtn(btn) {
@@ -45,10 +68,16 @@ const IronlogTheme = (function () {
          </svg>`;
   }
 
-  // Apply on load
+  // Apply on load + set chart defaults immediately
   apply(current());
+  // Defer chart defaults until Chart.js is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateChartDefaults);
+  } else {
+    setTimeout(updateChartDefaults, 0);
+  }
 
-  return { toggle, current, apply, updateBtn };
+  return { toggle, current, apply, updateBtn, updateChartDefaults };
 })();
 
 

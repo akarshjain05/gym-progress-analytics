@@ -5,6 +5,15 @@
 // - Strength level with visual breakpoint scale for ALL exercises
 
 (function () {
+
+  function chartColors() {
+    const isDark = !document.documentElement.getAttribute('data-theme') ||
+                    document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+      tick:  isDark ? '#6b7280' : '#78716c',
+      grid:  isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
+    };
+  }
   renderShell("lifts", "Lifts", "Estimated 1RM, PRs, and strength trend per exercise.");
 
   const pageHeaderActions = document.getElementById("pageHeaderActions");
@@ -527,7 +536,7 @@
             tooltip: { callbacks: { label: tooltipLabel } }
           },
           scales: {
-            x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+            x: { grid: { color: chartColors().grid }, ticks: { color: chartColors().tick, font: { size: 11 } } },
             y: {
               grid: { color: "rgba(255,255,255,0.05)" },
               ticks: { color: "#a09880", font: { size: 11 }, stepSize: 1 },
@@ -563,8 +572,8 @@
             }
           },
           scales: {
-            x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
-            y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a09880", font: { size: 11 } } },
+            x: { grid: { color: chartColors().grid }, ticks: { color: chartColors().tick, font: { size: 11 } } },
+            y: { grid: { color: chartColors().grid }, ticks: { color: chartColors().tick, font: { size: 11 } } },
           }
         }
       });

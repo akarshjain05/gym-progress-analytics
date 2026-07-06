@@ -2,6 +2,17 @@ renderShell("weight", "Body Weight", "Log daily and watch the trend, not the noi
 
 let weightChart = null;
 
+function chartColors() {
+  const isDark = !document.documentElement.getAttribute('data-theme') ||
+                  document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    tick:   isDark ? '#6b7280' : '#78716c',
+    tickY:  isDark ? '#9ca5ac' : '#57534e',
+    grid:   isDark ? 'rgba(242,240,234,0.05)' : 'rgba(0,0,0,0.06)',
+    legend: isDark ? '#9ca5ac' : '#57534e',
+  };
+}
+
 document.getElementById("pageHeaderActions").innerHTML = `
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -164,11 +175,11 @@ function renderChart(series) {
       responsive: true,
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: "#9CA5AC", boxWidth: 12, font: { family: "Inter", size: 11.5 } } },
+        legend: { labels: { color: chartColors().legend, boxWidth: 12, font: { family: "Inter", size: 11.5 } } },
       },
       scales: {
-        x: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
-        y: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
+        x: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
+        y: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
       },
     },
   });

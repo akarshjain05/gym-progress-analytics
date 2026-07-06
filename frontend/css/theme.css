@@ -1,239 +1,516 @@
 /* ============================================================
-   IRONLOG — Theme & Feature CSS
-   Link as: <link rel="stylesheet" href="css/theme.css">
-   BEFORE style.css so variables are available globally.
+   IRONLOG — theme.css
+   Must be loaded FIRST before style.css.
+   Defines CSS variables for both dark and light themes,
+   then overrides every hardcoded color in style.css so
+   the light theme actually looks good.
    ============================================================ */
 
 /* ── Dark theme (default) ────────────────────────────────── */
 :root,
 [data-theme="dark"] {
-  --bg:           #141719;
-  --surface:      #2a2f35;
-  --surface-2:    #1e2327;
-  --border:       rgba(255,255,255,0.08);
-  --text-primary: #e8e0d5;
-  --text-secondary:#a09880;
-  --text-tertiary: #6b7280;
-  --accent:       #c0392b;
-  --accent-hover: #a93226;
-  --positive:     #27ae60;
-  --negative:     #c0392b;
-  --neutral:      #a09880;
+  --bg:              #141719;
+  --surface:         #2a2f35;
+  --surface-2:       #1e2327;
+  --surface-3:       #242a30;
+  --border:          rgba(255,255,255,0.08);
+  --border-strong:   rgba(255,255,255,0.14);
 
-  /* Sidebar */
-  --sidebar-bg:   #1a1e21;
-  --sidebar-border: rgba(255,255,255,0.06);
+  --text-primary:    #e8e0d5;
+  --text-secondary:  #a09880;
+  --text-tertiary:   #6b7280;
 
-  /* Card */
-  --card-bg:      #2a2f35;
-  --card-border:  rgba(255,255,255,0.07);
+  --accent:          #c0392b;
+  --accent-hover:    #a93226;
+  --accent-subtle:   rgba(192,57,43,0.12);
 
-  /* Input */
-  --input-bg:     rgba(255,255,255,0.05);
-  --input-border: rgba(255,255,255,0.1);
-  --input-focus:  #c0392b;
+  --positive:        #27ae60;
+  --negative:        #c0392b;
+  --neutral-text:    #a09880;
 
-  /* Spinner */
-  --spinner-color: #c0392b;
+  --plate-red:       #c0392b;
+  --plate-blue:      #2980b9;
+  --plate-green:     #27ae60;
+  --plate-gold:      #c9a84c;
+
+  --sidebar-bg:      #1a1e21;
+  --card-bg:         #2a2f35;
+  --input-bg:        rgba(255,255,255,0.05);
+  --input-border:    rgba(255,255,255,0.1);
+  --chart-grid:      rgba(255,255,255,0.05);
+  --chart-tick:      #6b7280;
+  --chart-tick-y:    #9ca5ac;
 
   color-scheme: dark;
 }
 
 /* ── Light theme ─────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg:           #f4f1ec;
-  --surface:      #ffffff;
-  --surface-2:    #f9f7f4;
-  --border:       rgba(0,0,0,0.1);
-  --text-primary: #1a1e21;
-  --text-secondary:#5a5248;
-  --text-tertiary: #8a8278;
-  --accent:       #c0392b;
-  --accent-hover: #a93226;
-  --positive:     #1e8449;
-  --negative:     #c0392b;
-  --neutral:      #5a5248;
+  --bg:              #f0ece4;
+  --surface:         #ffffff;
+  --surface-2:       #f7f4ef;
+  --surface-3:       #edeae3;
+  --border:          rgba(0,0,0,0.09);
+  --border-strong:   rgba(0,0,0,0.16);
 
-  --sidebar-bg:   #1a1e21;        /* keep sidebar dark always */
-  --sidebar-border: rgba(255,255,255,0.06);
+  --text-primary:    #1c1917;
+  --text-secondary:  #57534e;
+  --text-tertiary:   #78716c;
 
-  --card-bg:      #ffffff;
-  --card-border:  rgba(0,0,0,0.08);
+  --accent:          #c0392b;
+  --accent-hover:    #a93226;
+  --accent-subtle:   rgba(192,57,43,0.1);
 
-  --input-bg:     rgba(0,0,0,0.04);
-  --input-border: rgba(0,0,0,0.15);
-  --input-focus:  #c0392b;
+  --positive:        #15803d;
+  --negative:        #c0392b;
+  --neutral-text:    #57534e;
 
-  --spinner-color: #c0392b;
+  --plate-red:       #c0392b;
+  --plate-blue:      #1d4ed8;
+  --plate-green:     #15803d;
+  --plate-gold:      #92400e;
+
+  /* Sidebar stays dark always — gym UX */
+  --sidebar-bg:      #1a1e21;
+
+  --card-bg:         #ffffff;
+  --input-bg:        rgba(0,0,0,0.04);
+  --input-border:    rgba(0,0,0,0.14);
+  --chart-grid:      rgba(0,0,0,0.06);
+  --chart-tick:      #78716c;
+  --chart-tick-y:    #57534e;
 
   color-scheme: light;
 }
 
-/* Apply theme to body and main containers */
-body {
-  background: var(--bg);
-  color: var(--text-primary);
-  transition: background 0.2s ease, color 0.2s ease;
+/* ============================================================
+   BASE OVERRIDES — apply theme vars to every element
+   ============================================================ */
+
+html, body {
+  background: var(--bg) !important;
+  color: var(--text-primary) !important;
+  transition: background 0.25s ease, color 0.2s ease;
 }
 
-.card, .stat-card {
+/* ── Main layout ─────────────────────────────────────────── */
+.main-content,
+.app-shell {
+  background: var(--bg) !important;
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card,
+.stat-card,
+.chart-card,
+.session-group,
+.pr-group,
+.strength-scale-card,
+.wk-template-card,
+.wk-history-card,
+.wk-modal,
+.ob-modal,
+.coach-card,
+.coach-advice-card {
   background: var(--card-bg) !important;
-  border-color: var(--card-border) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
 }
 
-input, select, textarea {
+/* ── Typography ──────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6,
+.card-title,
+.stat-value,
+.stat-big,
+.wk-panel-title,
+.wk-tc-name,
+.wk-active-name,
+.wk-complete-title,
+.wk-history-name,
+.session-date-label,
+.pr-exercise,
+.pr-1rm,
+.strength-level-badge span,
+.ob-title,
+.insight-item,
+.drawer-link span {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary,
+.stat-label,
+.stat-delta,
+.stat-sub,
+.text-tertiary,
+.card-title .text-tertiary,
+.chart-title,
+.section-label,
+.wk-section-label,
+.wk-tc-desc,
+.wk-tc-ex-meta,
+.wk-tc-count,
+.session-meta,
+.session-chevron,
+.set-reps,
+.set-rpe,
+.set-note,
+.set-num,
+.pr-achieved,
+.pr-date,
+.wk-panel-target,
+.wk-panel-progress-txt,
+.wk-rest-label,
+.wk-set-num,
+.wk-set-reps,
+.wk-history-meta span,
+.ob-subtitle,
+.settings-sub,
+.strength-scale-title,
+.scale-label div,
+.scale-marker-label {
+  color: var(--text-secondary) !important;
+}
+
+/* ── Inputs & selects ────────────────────────────────────── */
+input,
+select,
+textarea,
+.lifts-select,
+.wk-select,
+.wk-input,
+.wk-notes-input,
+.ob-input,
+.ob-select,
+.select-input,
+.text-input {
   background: var(--input-bg) !important;
   border-color: var(--input-border) !important;
   color: var(--text-primary) !important;
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: var(--input-focus) !important;
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary) !important;
 }
 
-/* Light mode text overrides */
-[data-theme="light"] .text-secondary,
-[data-theme="light"] .stat-label,
-[data-theme="light"] .text-tertiary {
-  color: var(--text-secondary);
+input:focus,
+select:focus,
+textarea:focus,
+.lifts-select:focus,
+.wk-input:focus,
+.wk-notes-input:focus {
+  border-color: var(--accent) !important;
+  outline: none !important;
 }
 
-[data-theme="light"] .sidebar,
-[data-theme="light"] .mobile-drawer,
-[data-theme="light"] .mobile-topbar,
-[data-theme="light"] .mobile-bottom-nav,
-[data-theme="light"] .wk-active-topbar,
-[data-theme="light"] .wk-active-overlay {
-  /* Keep these dark always for readability */
-  background: #1a1e21 !important;
+/* select arrow icon needs recoloring in light mode */
+[data-theme="light"] .lifts-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2357534e' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
 }
 
-[data-theme="light"] .wk-modal,
-[data-theme="light"] .ob-modal {
-  background: #ffffff;
-  border-color: rgba(0,0,0,0.12);
+/* ── Tables ──────────────────────────────────────────────── */
+.data-table th {
+  color: var(--text-tertiary) !important;
+  border-bottom-color: var(--border) !important;
+}
+.data-table td {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border) !important;
+}
+[data-theme="light"] .data-table tr:hover td {
+  background: var(--surface-2) !important;
 }
 
-[data-theme="light"] .wk-template-card,
-[data-theme="light"] .wk-history-card,
-[data-theme="light"] .session-group,
-[data-theme="light"] .pr-group,
-[data-theme="light"] .strength-scale-card,
-[data-theme="light"] .chart-card {
-  background: #ffffff;
-  border-color: rgba(0,0,0,0.08);
+/* ── Nav links ───────────────────────────────────────────── */
+/* Sidebar stays dark — no overrides needed */
+.nav-link span,
+.nav-link svg,
+.drawer-link svg {
+  /* inherits from sidebar dark bg */
 }
 
-[data-theme="light"] .lifts-select,
-[data-theme="light"] .wk-select,
-[data-theme="light"] .wk-input,
-[data-theme="light"] .ob-input,
-[data-theme="light"] .ob-select {
-  background: rgba(0,0,0,0.04) !important;
-  border-color: rgba(0,0,0,0.15) !important;
-  color: #1a1e21 !important;
+/* Bottom nav adapts to theme */
+.mobile-bottom-nav {
+  background: var(--surface-2) !important;
+  border-top-color: var(--border) !important;
+}
+.bottom-nav-link {
+  color: var(--text-tertiary) !important;
+}
+.bottom-nav-link.active {
+  color: var(--accent) !important;
 }
 
+/* ── Page header ─────────────────────────────────────────── */
+.page-header h1 {
+  color: var(--text-primary) !important;
+}
+.subtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* ── Bar divider ─────────────────────────────────────────── */
+.rail {
+  background: var(--border) !important;
+}
+.label {
+  color: var(--text-tertiary) !important;
+}
+.collar {
+  background: var(--border) !important;
+}
+
+/* ── Insight list ────────────────────────────────────────── */
+.insight-list {
+  background: transparent !important;
+}
+.insight-item {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border) !important;
+}
+.insight-dot {
+  background: var(--accent) !important;
+}
+
+/* ── Loading overlay ─────────────────────────────────────── */
+#ironlog-loading {
+  background: var(--bg) !important;
+}
+
+/* ── Skeleton ────────────────────────────────────────────── */
+[data-theme="light"] .sk-line,
+[data-theme="light"] .sk-chart,
+[data-theme="light"] .sk-scale,
+[data-theme="light"] .sk-ring,
+[data-theme="light"] .sk-circle,
+[data-theme="light"] .sk-input,
+[data-theme="light"] .sk-btn,
+[data-theme="light"] .sk-pill,
+[data-theme="light"] .sk-vol-bar {
+  background: linear-gradient(
+    90deg,
+    #e5e0d8 0px,
+    #d5cfc6 40%,
+    #e5e0d8 80%
+  ) !important;
+  background-size: 800px 100% !important;
+}
+[data-theme="light"] .sk-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* ── Modals ──────────────────────────────────────────────── */
+.modal-overlay,
+.wk-modal-overlay {
+  /* backdrop stays dark */
+}
+.wk-modal-header,
+.modal-header {
+  border-bottom-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.wk-modal-footer,
+.modal-footer {
+  border-top-color: var(--border) !important;
+}
+.wk-label,
+.modal-title,
+.ob-label {
+  color: var(--text-secondary) !important;
+}
+.wk-empty-ex {
+  color: var(--text-tertiary) !important;
+}
+
+/* ── Strength scale ──────────────────────────────────────── */
 [data-theme="light"] .scale-marker-label {
-  background: #1a1e21;
-  color: #e8e0d5;
+  background: #1c1917 !important;
+  color: #f5f5f4 !important;
+}
+[data-theme="light"] .scale-seg {
+  opacity: 0.55;
+}
+[data-theme="light"] .scale-seg.active {
+  opacity: 1 !important;
 }
 
-/* ── Theme toggle button (in sidebar/topbar) ─────────────── */
-.theme-toggle-btn {
-  background: none;
+/* ── PR rows ─────────────────────────────────────────────── */
+.pr-group-header {
+  background: var(--surface-2) !important;
+  border-bottom-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.pr-group-table-header {
+  color: var(--text-tertiary) !important;
+  border-bottom-color: var(--border) !important;
+}
+.pr-row {
+  border-bottom-color: var(--border) !important;
+}
+[data-theme="light"] .pr-row:hover {
+  background: var(--surface-2) !important;
+}
+
+/* ── Session rows ────────────────────────────────────────── */
+.session-date-row:hover {
+  background: var(--surface-2) !important;
+}
+.session-sets {
+  border-top-color: var(--border) !important;
+}
+.set-row {
+  border-bottom-color: var(--border) !important;
+}
+.set-weight {
+  color: var(--text-primary) !important;
+}
+.set-row-header {
+  color: var(--text-tertiary) !important;
+}
+
+/* ── Workout page ────────────────────────────────────────── */
+.wk-active-overlay,
+.wk-active-topbar,
+.wk-exercise-tabs,
+.wk-rest-timer {
+  /* Active workout stays dark always — gym use */
+  background: #141719 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e8e0d5 !important;
+}
+.wk-set-row {
+  background: var(--input-bg) !important;
+  border-color: var(--border) !important;
+}
+.wk-set-row.done {
+  background: rgba(39,174,96,0.08) !important;
+  border-color: rgba(39,174,96,0.3) !important;
+}
+[data-theme="light"] .wk-tc-header {
+  border-bottom-color: var(--border) !important;
+}
+.wk-tc-ex {
+  border-bottom-color: var(--border) !important;
+}
+.wk-tc-footer {
+  border-top-color: var(--border) !important;
+}
+
+/* ── Coach page ──────────────────────────────────────────── */
+[data-theme="light"] .coach-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+.advice-text {
+  color: var(--text-primary) !important;
+}
+
+/* ── Onboarding modal ────────────────────────────────────── */
+[data-theme="light"] .ob-modal {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+[data-theme="light"] .ob-input-group {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+}
+[data-theme="light"] .ob-tip {
+  background: rgba(146,64,14,0.06) !important;
+  border-color: rgba(146,64,14,0.15) !important;
+}
+
+/* ── Profile settings cards ──────────────────────────────── */
+.settings-row {
+  border-bottom-color: var(--border) !important;
+}
+.settings-label {
+  color: var(--text-primary) !important;
+}
+.settings-btn {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.settings-btn:hover {
+  border-color: var(--accent) !important;
+}
+.settings-btn.settings-btn-active {
+  background: var(--accent-subtle) !important;
+  border-color: rgba(192,57,43,0.35) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 6px 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* ── Misc ────────────────────────────────────────────────── */
+[data-theme="light"] .empty-state p,
+[data-theme="light"] .wk-empty p,
+[data-theme="light"] .wk-empty h3 {
+  color: var(--text-secondary) !important;
+}
+[data-theme="light"] .wk-empty-icon {
+  color: var(--text-tertiary) !important;
+}
+[data-theme="light"] .brand-mark {
+  color: #ffffff !important;
+}
+[data-theme="light"] .hint,
+[data-theme="light"] .stat-delta.neutral {
+  color: var(--text-tertiary) !important;
+}
+
+/* ── Theme toggle button ─────────────────────────────────── */
+#sidebarThemeToggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #a09880;
+  cursor: pointer;
+  font-size: 12px;
   font-family: Inter, sans-serif;
+  font-weight: 500;
+  padding: 7px 12px;
+  margin: 4px 16px 8px;
+  width: calc(100% - 32px);
   transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
 }
-.theme-toggle-btn:hover {
-  background: var(--surface);
-  color: var(--text-primary);
+#sidebarThemeToggle:hover {
+  background: rgba(255,255,255,0.1);
+  color: #e8e0d5;
 }
 
-/* ── Settings section on profile page ───────────────────── */
-.grid-3 {
+/* ── Settings section grid ───────────────────────────────── */
+.settings-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
+  margin-top: 20px;
 }
 @media (max-width: 900px) {
-  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .settings-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 600px) {
-  .grid-3 { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
 }
 
-.settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.settings-row:last-child { border-bottom: none; }
-
-.settings-info { flex: 1; min-width: 0; }
-.settings-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: Inter, sans-serif;
-  margin-bottom: 2px;
-}
-.settings-sub {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-family: Inter, sans-serif;
-  line-height: 1.4;
-}
-
-.settings-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 13px;
-  font-family: Inter, sans-serif;
-  font-weight: 600;
-  padding: 8px 14px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
-}
-.settings-btn:hover {
-  background: var(--input-bg);
-  border-color: var(--accent);
-}
-.settings-btn.settings-btn-active {
-  background: rgba(192,57,43,0.15);
-  border-color: rgba(192,57,43,0.4);
-  color: var(--accent);
-}
-.settings-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ── Workout session notes ───────────────────────────────── */
+/* ── Workout notes ───────────────────────────────────────── */
 .wk-notes-input {
   width: 100%;
   box-sizing: border-box;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
   border-radius: 10px;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   font-size: 14px;
   font-family: Inter, sans-serif;
   padding: 10px 12px;
@@ -242,13 +519,12 @@ input:focus, select:focus, textarea:focus {
   transition: border-color 0.15s;
 }
 .wk-notes-input:focus {
-  outline: none;
-  border-color: var(--accent);
+  outline: none !important;
+  border-color: var(--accent) !important;
 }
 .wk-notes-input::placeholder {
-  color: var(--text-tertiary);
+  color: var(--text-tertiary) !important;
 }
-
 .wk-complete-notes {
   padding: 0 20px 16px;
 }
@@ -262,15 +538,50 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 8px;
   font-family: Inter, sans-serif;
 }
-
 .wk-history-notes {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
   font-family: Inter, sans-serif;
   margin-top: 6px;
   padding: 6px 10px;
-  background: var(--input-bg);
+  background: var(--surface-2) !important;
   border-radius: 6px;
   line-height: 1.4;
   font-style: italic;
+}
+
+/* ── Profile tabs ────────────────────────────────────────── */
+.profile-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+.profile-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: Inter, sans-serif;
+  padding: 10px 18px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.profile-tab:hover {
+  color: var(--text-primary);
+}
+.profile-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.profile-tab-content {
+  animation: tab-fadein 0.2s ease;
+}
+@keyframes tab-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

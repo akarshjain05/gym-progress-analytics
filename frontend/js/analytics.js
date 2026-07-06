@@ -2,6 +2,18 @@ renderShell("analytics", "Analytics", "The full picture, pulled together.");
 
 let changeChart = null, volumeChart = null, weightTrendChart = null, muscleVolumeChart = null;
 
+// Theme-aware chart colors
+function chartColors() {
+  const isDark = !document.documentElement.getAttribute('data-theme') ||
+                  document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    tick:     isDark ? '#6b7280' : '#78716c',
+    tickY:    isDark ? '#9ca5ac' : '#57534e',
+    grid:     isDark ? 'rgba(242,240,234,0.05)' : 'rgba(0,0,0,0.06)',
+    legend:   isDark ? '#9ca5ac' : '#57534e',
+  };
+}
+
 // One color per muscle group keeps the bars visually distinguishable rather
 // than all-one-color, without needing a full design pass per group.
 const MUSCLE_GROUP_COLORS = {
@@ -58,8 +70,9 @@ async function loadChangeChart() {
   const ctx = document.getElementById("changeCanvas");
   try {
     const exercises = await Api.listExercises();
-    const prs = await Api.personalRecords();
-    const loggedIds = new Set((prs.flat || []).map(p => p.exercise_id));
+    const prsResponse = await Api.personalRecords();
+    const prs = Array.isArray(prsResponse) ? prsResponse : (prsResponse.flat || []);
+    const loggedIds = new Set(prs.map(p => p.exercise_id));
     const relevant = exercises.filter(e => loggedIds.has(e.id));
 
     const results = await Promise.all(relevant.map(e => Api.liftProgress(e.id)));
@@ -89,8 +102,8 @@ async function loadChangeChart() {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#6B7480", font: { size: 11 }, callback: (v) => v + "%" }, grid: { color: "rgba(242,240,234,0.05)" } },
-          y: { ticks: { color: "#9CA5AC", font: { size: 12 } }, grid: { display: false } },
+          x: { ticks: { color: chartColors().tick, font: { size: 11 }, callback: (v) => v + "%" }, grid: { color: chartColors().grid } },
+          y: { ticks: { color: chartColors().tickY, font: { size: 12 } }, grid: { display: false } },
         },
       },
     });
@@ -128,8 +141,8 @@ async function loadWeightTrend() {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
-          y: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
+          x: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
+          y: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
         },
       },
     });
@@ -177,8 +190,8 @@ async function loadVolumeChart() {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { display: false } },
-          y: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
+          x: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { display: false } },
+          y: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
         },
       },
     });
@@ -220,8 +233,8 @@ async function loadMuscleGroupVolumeChart() {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#6B7480", font: { size: 11 } }, grid: { color: "rgba(242,240,234,0.05)" } },
-          y: { ticks: { color: "#9CA5AC", font: { size: 12 } }, grid: { display: false } },
+          x: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
+          y: { ticks: { color: chartColors().tickY, font: { size: 12 } }, grid: { display: false } },
         },
       },
     });
