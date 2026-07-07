@@ -74,6 +74,15 @@
   --sidebar-bg:      #1a1e21;
 }
 
+:root[data-theme="light"] .btn-secondary {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #1c1917 !important;
+}
+:root[data-theme="light"] .btn-secondary:hover {
+  background: rgba(0,0,0,0.08) !important;
+}
+
 /* Force sidebar text to remain light in light mode */
 :root[data-theme="light"] .sidebar .brand-text strong,
 :root[data-theme="light"] .sidebar .brand-text span,
@@ -135,6 +144,7 @@ html, body {
 .wk-history-card,
 .wk-modal,
 .ob-modal,
+.modal-box,
 .coach-card,
 .coach-advice-card {
   background: var(--card-bg) !important;
@@ -229,8 +239,10 @@ textarea:focus,
 }
 
 /* select arrow icon needs recoloring in light mode */
-[data-theme="light"] .lifts-select {
+:root[data-theme="light"] select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2357534e' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
 }
 
 /* ── Tables ──────────────────────────────────────────────── */

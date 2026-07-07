@@ -106,9 +106,13 @@
           <button class="modal-close" id="closeModal">✕</button>
         </div>
         <div class="modal-body">
+          <div class="field" id="modalMuscleGroupField">
+            <label class="field-label">Muscle Group</label>
+            <select id="modalMuscleGroup" class="select-input lifts-select"></select>
+          </div>
           <div class="field">
             <label class="field-label">Exercise</label>
-            <select id="modalExercise" class="select-input"></select>
+            <select id="modalExercise" class="select-input lifts-select"></select>
           </div>
           <div class="field">
             <label class="field-label">Date</label>
@@ -279,8 +283,37 @@
 
   function populateExerciseSelects() {
     populateMuscleGroupPills();
-    // Modal still uses grouped options
-    document.getElementById("modalExercise").innerHTML = buildGroupedExerciseOptions(exercises);
+    populateModalMuscleGroup();
+  }
+
+  function populateModalMuscleGroup() {
+    const groups = getGroupedExercises();
+    const selectMuscle = document.getElementById("modalMuscleGroup");
+    const selectExercise = document.getElementById("modalExercise");
+
+    if (!selectMuscle || !selectExercise) return;
+
+    const orderedGroups = MUSCLE_ORDER.filter(g => groups[g]);
+    const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
+    const allGroups = [...orderedGroups, ...extraGroups];
+
+    selectMuscle.innerHTML = allGroups.map(g =>
+      `<option value="${g}">${MUSCLE_LABELS[g] || g} (${groups[g].length})</option>`
+    ).join("");
+
+    selectMuscle.addEventListener("change", () => {
+      const g = selectMuscle.value;
+      if (groups[g]) {
+        selectExercise.innerHTML = groups[g].map(ex =>
+          `<option value="${ex.id}">${ex.name}</option>`
+        ).join("");
+      }
+    });
+
+    if (allGroups.length > 0) {
+      selectMuscle.value = allGroups[0];
+      selectMuscle.dispatchEvent(new Event("change"));
+    }
   }
 
   // ── Load progress ─────────────────────────────────────────────────────────
@@ -748,7 +781,18 @@
     document.getElementById("modalDate").value = todayIso();
     document.getElementById("modalNotes").value = "";
     addSetRow();
-    if (currentExerciseId) document.getElementById("modalExercise").value = currentExerciseId;
+    if (currentExerciseId) {
+      const ex = exercises.find(e => e.id == currentExerciseId);
+      if (ex) {
+        const mg = (ex.muscle_group || "other").toLowerCase();
+        const selectMuscle = document.getElementById("modalMuscleGroup");
+        if (selectMuscle) {
+          selectMuscle.value = mg;
+          selectMuscle.dispatchEvent(new Event("change"));
+        }
+        document.getElementById("modalExercise").value = currentExerciseId;
+      }
+    }
     document.getElementById("logModal").style.display = "flex";
   }
 
@@ -842,8 +886,7 @@
       const ex = await apiRequest("/exercises", { method: "POST", body: { name, muscle_group, category } });
       exercises.push(ex);
       populateMuscleGroupPills();
-      document.getElementById("modalExercise").innerHTML = buildGroupedExerciseOptions(exercises);
-      // Switch to the new exercise's muscle group
+      populateExerciseSelects();
       const newGroup = (ex.muscle_group || "other").toLowerCase();
       const mgSelect = document.getElementById("muscleGroupSelect");
       if (mgSelect) {
