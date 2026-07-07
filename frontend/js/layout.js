@@ -11,6 +11,8 @@ const NAV_ITEMS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6c0-3 2-6 6-7 4 1 6 4 6 7Z"/><path d="M12 14v7"/></svg>' },
   { id: "analytics", href: "analytics.html", label: "Analytics",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M11 19V4M18 19v-7"/></svg>' },
+  { id: "coach", href: "coach.html", label: "AI Coach",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 2.83V13M12 17h.01"/></svg>' },
   { id: "profile", href: "profile.html", label: "Profile",
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>' },
 ];
@@ -188,9 +190,6 @@ function renderShell(activeId, pageTitle, subtitle) {
         </div>
         <ul class="nav-list" id="navList">
           ${navHtml}
-          <button class="theme-toggle-btn" id="sidebarThemeToggle" data-theme-toggle title="Toggle theme">
-            ☀️ Light mode
-          </button>
           <a class="nav-link nav-link-logout" id="logoutBtn">
             ${LOGOUT_ICON}
             <span>Log out</span>
@@ -219,20 +218,7 @@ function renderShell(activeId, pageTitle, subtitle) {
     window.location.href = "index.html";
   });
 
-  // Theme toggle button in sidebar
-  const themeBtn = document.getElementById("sidebarThemeToggle");
-  if (themeBtn && window.IronlogTheme) {
-    const updateThemeBtn = () => {
-      const isDark = IronlogTheme.current() === 'dark';
-      themeBtn.textContent = isDark ? '☀️ Light mode' : '🌙 Dark mode';
-      themeBtn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-    };
-    updateThemeBtn();
-    themeBtn.addEventListener('click', () => {
-      IronlogTheme.toggle();
-      updateThemeBtn();
-    });
-  }
+  // Theme is toggled from Profile → Settings tab only
 
   // Hamburger open
   document.getElementById("hamburgerBtn").addEventListener("click", openDrawer);

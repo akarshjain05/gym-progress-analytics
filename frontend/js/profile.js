@@ -233,13 +233,20 @@ async function loadSettingsSection() {
   const pushSupported = IronlogPush && IronlogPush.isSupported();
   const pushSubscribed = pushSupported ? await IronlogPush.isSubscribed() : false;
 
+  // Check if VAPID is configured by fetching the public key
+  let vapidConfigured = false;
+  try {
+    const vk = await apiRequest('/push/vapid-public-key');
+    vapidConfigured = !!(vk && vk.public_key);
+  } catch(e) {}
+
   settingsEl.innerHTML = `
     <div class="card">
       <div class="card-title">Appearance</div>
       <div class="settings-row">
         <div class="settings-info">
           <div class="settings-label">Theme</div>
-          <div class="settings-sub">${isDark ? 'Dark mode active' : 'Light mode active'}</div>
+          <div class="settings-sub">${isDark ? 'Dark mode is active' : 'Light mode is active'}</div>
         </div>
         <button class="settings-btn" id="themeToggleBtn" data-theme-toggle>
           ${isDark ? '☀️ Switch to Light' : '🌙 Switch to Dark'}
@@ -249,11 +256,34 @@ async function loadSettingsSection() {
 
     <div class="card">
       <div class="card-title">Notifications</div>
-      ${pushSupported ? `
+      ${!pushSupported ? `
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="settings-label">Push notifications</div>
+            <div class="settings-sub" style="color:var(--text-tertiary);">
+              Not supported in this browser. Use Chrome or Edge on desktop, or Chrome on Android.
+            </div>
+          </div>
+        </div>
+      ` : !vapidConfigured ? `
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="settings-label">Push notifications</div>
+            <div class="settings-sub" style="color:var(--text-tertiary);">
+              Not yet configured on this server. Add <code>VAPID_PRIVATE_KEY</code> and
+              <code>VAPID_PUBLIC_KEY</code> to your Render environment variables to enable.
+            </div>
+          </div>
+        </div>
+      ` : `
         <div class="settings-row">
           <div class="settings-info">
             <div class="settings-label">Workout reminders</div>
-            <div class="settings-sub">${pushSubscribed ? 'You will be notified of new PRs and inactivity reminders' : 'Get notified of new PRs and when you have not trained in 3 days'}</div>
+            <div class="settings-sub">
+              ${pushSubscribed
+                ? 'You will be notified of new PRs and inactivity reminders.'
+                : 'Get notified when you hit a new PR or have not trained in 3 days.'}
+            </div>
           </div>
           <button class="settings-btn ${pushSubscribed ? 'settings-btn-active' : ''}" id="pushToggleBtn">
             ${pushSubscribed ? '🔔 Enabled' : '🔕 Enable'}
@@ -262,29 +292,19 @@ async function loadSettingsSection() {
         ${pushSubscribed ? `
         <div class="settings-row" style="padding-top:0;border-top:none;">
           <div class="settings-info">
-            <div class="settings-sub">Send a test notification to this device</div>
+            <div class="settings-sub">Send a test notification to confirm it works.</div>
           </div>
           <button class="settings-btn" id="pushTestBtn">Send test</button>
         </div>` : ''}
-      ` : `
-        <div class="settings-row">
-          <div class="settings-info">
-            <div class="settings-label">Push notifications</div>
-            <div class="settings-sub">Not supported in this browser. Use Chrome or Edge for push notifications.</div>
-          </div>
-        </div>
       `}
     </div>
 
     <div class="card">
       <div class="card-title">Your Data</div>
-      <p class="text-secondary" style="font-size:13px;margin-bottom:16px;line-height:1.6;">
-        Download everything IRONLOG stores about you — all lift logs, body weight, nutrition, and workout history. Your data, always.
-      </p>
-      <div class="settings-row" style="flex-wrap:wrap;gap:10px;">
+      <div class="settings-row">
         <div class="settings-info">
           <div class="settings-label">Export all data</div>
-          <div class="settings-sub">Includes lifts, weight, nutrition, workouts</div>
+          <div class="settings-sub">Download all lifts, weight, nutrition and workout history. Your data, always.</div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0;">
           <button class="settings-btn" id="exportJsonBtn">⬇ JSON</button>
@@ -307,12 +327,15 @@ async function loadSettingsSection() {
     btn.textContent = 'Please wait…';
     if (pushSubscribed) {
       const res = await IronlogPush.unsubscribe();
-      if (res.ok) showToast('Notifications disabled.');
-      else showToast(res.reason || 'Could not disable notifications.', 'error');
+      showToast(res.ok ? 'Notifications disabled.' : (res.reason || 'Could not disable.'));
     } else {
       const res = await IronlogPush.subscribe();
-      if (res.ok) showToast('Notifications enabled! You will get PR and inactivity alerts.');
-      else showToast(res.reason || 'Could not enable notifications.', 'error');
+      if (res.ok) {
+        showToast('Notifications enabled! You will get PR and inactivity alerts.');
+      } else {
+        // Show friendly message — don't show raw error
+        showToast('Could not enable: ' + (res.reason || 'Permission denied.'));
+      }
     }
     await loadSettingsSection();
   });
