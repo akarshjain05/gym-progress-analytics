@@ -78,11 +78,6 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
 
     try:
         from pywebpush import webpush, WebPushException
-        from py_vapid import Vapid
-
-        # py_vapid handles the key format correctly whether it's
-        # a raw base64url string or a PEM-encoded key
-        vapid = Vapid.from_string(private_key=vapid_private_key)
 
         payload = json.dumps({"title": title, "body": body, "url": url})
         webpush(
@@ -91,7 +86,7 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
                 "keys": {"p256dh": subscription.p256dh, "auth": subscription.auth},
             },
             data=payload,
-            vapid_private_key=vapid,
+            vapid_private_key=vapid_private_key,
             vapid_claims={"sub": vapid_claims_email},
         )
         return True, ""
