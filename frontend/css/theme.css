@@ -8,7 +8,7 @@
 
 /* ── Dark theme (default) ────────────────────────────────── */
 :root,
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   --bg:              #141719;
   --surface:         #2a2f35;
   --surface-2:       #1e2327;
@@ -45,7 +45,7 @@
 }
 
 /* ── Light theme ─────────────────────────────────────────── */
-[data-theme="light"] {
+:root[data-theme="light"] {
   --bg:              #f0ece4;
   --surface:         #ffffff;
   --surface-2:       #f7f4ef;
@@ -72,7 +72,32 @@
 
   /* Sidebar stays dark always — gym UX */
   --sidebar-bg:      #1a1e21;
+}
 
+/* Force sidebar text to remain light in light mode */
+:root[data-theme="light"] .sidebar .brand-text strong,
+:root[data-theme="light"] .sidebar .brand-text span,
+:root[data-theme="light"] .sidebar .nav-link span,
+:root[data-theme="light"] .sidebar .nav-link svg {
+  color: #e8e0d5 !important;
+}
+:root[data-theme="light"] .sidebar .nav-link {
+  color: #a09880 !important;
+}
+:root[data-theme="light"] .sidebar .nav-link:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #e8e0d5 !important;
+}
+:root[data-theme="light"] .sidebar .nav-link.active {
+  background: #5c2620 !important;
+  color: #f2b6ac !important;
+}
+:root[data-theme="light"] .sidebar {
+  background: #1a1e21 !important;
+  border-right-color: rgba(255,255,255,0.08) !important;
+}
+
+:root[data-theme="light"] {
   --card-bg:         #ffffff;
   --input-bg:        rgba(0,0,0,0.04);
   --input-border:    rgba(0,0,0,0.14);
