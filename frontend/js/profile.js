@@ -237,7 +237,7 @@ async function loadSettingsSection() {
   let vapidConfigured = false;
   try {
     const vk = await apiRequest('/push/vapid-public-key');
-    vapidConfigured = !!(vk && vk.public_key);
+    vapidConfigured = !!(vk && vk.configured);
   } catch(e) {}
 
   settingsEl.innerHTML = `

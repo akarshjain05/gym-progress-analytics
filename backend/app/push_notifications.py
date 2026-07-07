@@ -61,17 +61,17 @@ class PushSubscriptionIn(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _send_push(subscription: PushSubscription, title: str, body: str, url: str = "/workout.html") -> bool:
+def _send_push(subscription: PushSubscription, title: str, body: str, url: str = "/workout.html") -> tuple[bool, str]:
     """
     Send a Web Push notification using pywebpush.
-    Returns True on success, False if pywebpush not installed or VAPID not configured.
+    Returns (True, "") on success, (False, reason) on failure.
     """
-    vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
+    vapid_private_key = os.getenv("VAPID_PRIVATE_KEY", "").strip()
+    vapid_public_key = os.getenv("VAPID_PUBLIC_KEY", "").strip()
     vapid_claims_email = os.getenv("VAPID_CLAIMS_EMAIL", "mailto:admin@ironlog.app")
 
     if not vapid_private_key:
-        # VAPID not configured — silently skip (don't crash the app)
-        return False
+        return False, "VAPID_PRIVATE_KEY not set in environment"
 
     try:
         from pywebpush import webpush, WebPushException
@@ -85,10 +85,12 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
             vapid_private_key=vapid_private_key,
             vapid_claims={"sub": vapid_claims_email},
         )
-        return True
+        return True, ""
+    except ImportError:
+        return False, "pywebpush not installed — add it to requirements.txt"
     except Exception as e:
-        print(f"[push] Failed to send notification to user {subscription.user_id}: {e}")
-        return False
+        print(f"[push] Failed to send to user {subscription.user_id}: {e}")
+        return False, str(e)
 
 
 # ---------------------------------------------------------------------------
@@ -150,11 +152,11 @@ def send_test(
     if not sub:
         raise HTTPException(status_code=404, detail="No push subscription found. Enable notifications first.")
 
-    ok = _send_push(sub, "IRONLOG Test 🏋️", "Push notifications are working!", "/dashboard.html")
+    ok, reason = _send_push(sub, "IRONLOG Test", "Push notifications are working!", "/dashboard.html")
     if not ok:
         raise HTTPException(
             status_code=503,
-            detail="Push notification service not configured. Set VAPID_PRIVATE_KEY in environment."
+            detail=f"Push notification failed: {reason}"
         )
     return {"status": "sent"}
 
@@ -162,8 +164,12 @@ def send_test(
 @router.get("/vapid-public-key")
 def get_vapid_public_key():
     """Return the VAPID public key so the frontend can subscribe."""
-    key = os.getenv("VAPID_PUBLIC_KEY", "")
-    return {"public_key": key}
+    key = os.getenv("VAPID_PUBLIC_KEY", "").strip()
+    private_key = os.getenv("VAPID_PRIVATE_KEY", "").strip()
+    # Only return the key if both are configured
+    if key and private_key:
+        return {"public_key": key, "configured": True}
+    return {"public_key": "", "configured": False}
 
 
 # ---------------------------------------------------------------------------
@@ -177,9 +183,9 @@ def notify_new_pr(db: Session, user_id: int, exercise_name: str, new_1rm_kg: flo
     ).first()
     if not sub:
         return
-    _send_push(
+    ok, _ = _send_push(
         sub,
-        title="New PR! 🏆",
+        title="New PR!",
         body=f"You just hit a new {exercise_name} record: {new_1rm_kg}kg est. 1RM!",
         url="/lifts.html",
     )
@@ -204,8 +210,8 @@ def notify_inactivity_check(db: Session):
             days_ago = (date.today() - latest_log.date).days if latest_log else "a while"
             _send_push(
                 sub,
-                title="Time to train! 💪",
-                body=f"It's been {days_ago} days since your last workout. Let's get back on track!",
+                title="Time to train!",
+                body=f"It has been {days_ago} days since your last workout. Get back on track!",
                 url="/workout.html",
             )
 
