@@ -22,11 +22,7 @@
         <div class="sk-grid-4">
           ${repeat(4, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>')}
         </div>
-        <!-- Insights block -->
-        <div class="sk-card sk-mt16">
-          <div class="sk-line sk-line-sm"></div>
-          ${repeat(4, '<div class="sk-line sk-line-full sk-mt10"></div>')}
-        </div>
+
         <!-- Quick log -->
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>

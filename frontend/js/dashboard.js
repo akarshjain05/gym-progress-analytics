@@ -6,10 +6,9 @@ async function loadDashboard() {
 
   try {
     const user = Auth.getUser();
-    const [dash, weightSummary, insightsRes] = await Promise.all([
+    const [dash, weightSummary] = await Promise.all([
       Api.dashboard(),
       Api.weightSummary(),
-      Api.insights(),
     ]);
 
     const subtitleEl = document.getElementById("pageSubtitle");
@@ -74,11 +73,7 @@ async function loadDashboard() {
         </div>
       </div>
 
-      <div class="bar-divider"><div class="collar"></div><div class="rail"></div><div class="label">Insights</div><div class="rail"></div><div class="collar"></div></div>
 
-      <div class="card">
-        <ul class="insight-list" id="insightList"></ul>
-      </div>
 
       <div class="bar-divider"><div class="collar"></div><div class="rail"></div><div class="label">Quick log</div><div class="rail"></div><div class="collar"></div></div>
 
@@ -98,10 +93,7 @@ async function loadDashboard() {
       </div>
     `;
 
-    const insightList = document.getElementById("insightList");
-    insightList.innerHTML = insightsRes.insights.map(line => `
-      <li class="insight-item"><div class="insight-dot"></div><div>${escapeHtml(line)}</div></li>
-    `).join("");
+
 
   } catch (err) {
     handleApiError(err);
