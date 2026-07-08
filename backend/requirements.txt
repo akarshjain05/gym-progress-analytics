@@ -15,4 +15,3 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 slowapi==0.1.9
 pywebpush==1.14.0
-py_vapid==1.9.4
