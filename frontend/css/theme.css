@@ -465,12 +465,29 @@ textarea:focus,
   color: var(--text-primary) !important;
 }
 .settings-btn {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border) !important;
   background: var(--surface-2) !important;
-  border-color: var(--border) !important;
   color: var(--text-primary) !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  outline: none;
 }
 .settings-btn:hover {
-  border-color: var(--accent) !important;
+  background: var(--surface-3) !important;
+  border-color: var(--text-tertiary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.settings-btn:active {
+  transform: translateY(0);
 }
 .settings-btn.settings-btn-active {
   background: var(--accent-subtle) !important;
