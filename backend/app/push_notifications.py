@@ -57,41 +57,6 @@ class PushSubscriptionIn(BaseModel):
     keys: SubscriptionKeys
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _base64url_to_ec_private_key(b64url: str):
-    """
-    Convert a base64url-encoded raw EC private key (32 bytes, SECP256R1/P-256)
-    to a cryptography EllipticCurvePrivateKey object.
-    This is the format produced by `npx web-push generate-vapid-keys`.
-    """
-    import base64
-    from cryptography.hazmat.primitives.asymmetric.ec import (
-        EllipticCurvePrivateNumbers, SECP256R1, generate_private_key
-    )
-    from cryptography.hazmat.primitives.asymmetric.ec import (
-        EllipticCurvePublicNumbers
-    )
-    from cryptography.hazmat.backends import default_backend
-
-    # Fix base64url padding
-    padding = 4 - len(b64url) % 4
-    if padding != 4:
-        b64url += "=" * padding
-    raw = base64.urlsafe_b64decode(b64url)
-
-    # raw is 32 bytes = the private scalar d
-    d = int.from_bytes(raw, "big")
-
-    # Derive public key from private key scalar
-    from cryptography.hazmat.primitives.asymmetric.ec import (
-        derive_private_key
-    )
-    private_key = derive_private_key(d, SECP256R1(), default_backend())
-    return private_key
-
 
 def _send_push(subscription: PushSubscription, title: str, body: str, url: str = "/workout.html") -> tuple[bool, str]:
     """
@@ -110,10 +75,6 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
     try:
         from pywebpush import webpush, WebPushException
 
-        # Convert base64url string → EllipticCurvePrivateKey object
-        # This is what pywebpush 1.14.0 actually needs
-        private_key_obj = _base64url_to_ec_private_key(vapid_private_key_str)
-
         payload = json.dumps({"title": title, "body": body, "url": url})
         webpush(
             subscription_info={
@@ -121,7 +82,7 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
                 "keys": {"p256dh": subscription.p256dh, "auth": subscription.auth},
             },
             data=payload,
-            vapid_private_key=private_key_obj,
+            vapid_private_key=vapid_private_key_str,
             vapid_claims={"sub": vapid_claims_email},
         )
         return True, ""
