@@ -1,16 +1,223 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IRONLOG - Analytics & Tracking</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c0392b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IRONLOG">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="shortcut icon" href="/icons/icon-96.png">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/mobile.css">
+<title>IRONLOG — Gym Progress Analytics</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-mark">IL</div>
+      <h1>IRONLOG</h1>
+      <p>Track weight, lifts &amp; calories. See real progress.</p>
+    </div>
+
+    <div id="alertSlot"></div>
+
+    <!-- GOOGLE SIGN-IN -->
+    <div id="googleAuthSection" style="display:none;">
+      <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
+      <div class="bar-divider" style="margin:18px 0;">
+        <div class="collar"></div><div class="rail"></div>
+        <div class="label">or</div>
+        <div class="rail"></div><div class="collar"></div>
+      </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" name="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="flex-between mb-16" style="margin-top:-8px;">
+        <span></span>
+        <a href="forgot-password.html" style="font-size:12.5px;color:var(--text-secondary);">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" id="loginSubmitBtn">Log in</button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" style="display:none;">
+      <div class="field">
+        <label for="regUsername">Username</label>
+        <input id="regUsername" name="username" autocomplete="username" minlength="3" maxlength="30" required>
+      </div>
+      <div class="field">
+        <label for="regEmail">Email</label>
+        <input id="regEmail" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="regPassword">Password</label>
+        <input id="regPassword" name="password" type="password" autocomplete="new-password" minlength="6" required>
+        <span class="hint">At least 6 characters.</span>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" id="registerSubmitBtn">Create account</button>
+    </form>
+
+    <!-- COMPLETE GOOGLE SIGN-UP FORM -->
+    <form id="completeGoogleForm" style="display:none;">
+      <p class="text-secondary mb-16" style="font-size:13px;">
+        Signed in as <strong id="completeGoogleEmail" style="color:var(--text-primary);"></strong>.
+        Choose a username and password so you can also log in without Google later.
+      </p>
+      <div class="field">
+        <label for="cgUsername">Username</label>
+        <input id="cgUsername" autocomplete="username" minlength="3" maxlength="30" required>
+      </div>
+      <div class="field">
+        <label for="cgPassword">Password</label>
+        <input id="cgPassword" type="password" autocomplete="new-password" minlength="6" required>
+        <span class="hint">At least 6 characters.</span>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" id="completeGoogleSubmitBtn">Finish setting up</button>
+    </form>
+
+    <div class="auth-switch" id="authSwitchWrap">
+      <span id="switchToRegisterWrap">New here? <a id="switchToRegister">Create an account</a></span>
+      <span id="switchToLoginWrap" style="display:none;">Already have an account? <a id="switchToLogin">Log in</a></span>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+if (Auth.isLoggedIn()) window.location.href = "dashboard.html";
+
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const completeGoogleForm = document.getElementById("completeGoogleForm");
+const authSwitchWrap = document.getElementById("authSwitchWrap");
+const alertSlot = document.getElementById("alertSlot");
+
+function setAlert(message, type = "error") {
+  alertSlot.innerHTML = message ? `<div class="alert alert-${type}">${message}</div>` : "";
+}
+
+document.getElementById("switchToRegister").addEventListener("click", () => {
+  loginForm.style.display = "none";
+  registerForm.style.display = "block";
+  document.getElementById("switchToRegisterWrap").style.display = "none";
+  document.getElementById("switchToLoginWrap").style.display = "inline";
+  setAlert("");
+});
+document.getElementById("switchToLogin").addEventListener("click", () => {
+  registerForm.style.display = "none";
+  loginForm.style.display = "block";
+  document.getElementById("switchToLoginWrap").style.display = "none";
+  document.getElementById("switchToRegisterWrap").style.display = "inline";
+  setAlert("");
+});
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setAlert("");
+  const btn = document.getElementById("loginSubmitBtn");
+  btn.disabled = true; btn.textContent = "Logging in…";
+  try {
+    await Api.login(loginForm.username.value.trim(), loginForm.password.value);
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    setAlert(err.message || "Login failed.");
+    btn.disabled = false; btn.textContent = "Log in";
+  }
+});
+
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setAlert("");
+  const btn = document.getElementById("registerSubmitBtn");
+  btn.disabled = true; btn.textContent = "Creating account…";
+  try {
+    await Api.register(registerForm.username.value.trim(), registerForm.email.value.trim(), registerForm.password.value);
+    await Api.login(registerForm.username.value.trim(), registerForm.password.value);
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    setAlert(err.message || "Couldn't create account.");
+    btn.disabled = false; btn.textContent = "Create account";
+  }
+});
+
+let pendingSetupToken = null;
+
+async function handleGoogleCredentialResponse(response) {
+  setAlert("");
+  try {
+    const result = await Api.googleLogin(response.credential);
+    if (result.needs_setup) {
+      pendingSetupToken = result.setup_token;
+      document.getElementById("completeGoogleEmail").textContent = result.email;
+      loginForm.style.display = "none";
+      registerForm.style.display = "none";
+      authSwitchWrap.style.display = "none";
+      document.getElementById("googleAuthSection").style.display = "none";
+      completeGoogleForm.style.display = "block";
+    } else {
+      Auth.setToken(result.access_token);
+      const user = await Api.getProfile();
+      Auth.setUser(user);
+      window.location.href = "dashboard.html";
+    }
+  } catch (err) {
+    setAlert(err.message || "Google sign-in failed.");
+  }
+}
+window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
+
+completeGoogleForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setAlert("");
+  const btn = document.getElementById("completeGoogleSubmitBtn");
+  btn.disabled = true; btn.textContent = "Finishing up…";
+  try {
+    const username = document.getElementById("cgUsername").value.trim();
+    const password = document.getElementById("cgPassword").value;
+    const result = await Api.completeGoogleSignup(pendingSetupToken, username, password);
+    Auth.setToken(result.access_token);
+    const user = await Api.getProfile();
+    Auth.setUser(user);
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    setAlert(err.message || "Couldn't finish setting up your account.");
+    btn.disabled = false; btn.textContent = "Finish setting up";
+  }
+});
+
+function initGoogleSignIn() {
+  const clientId = window.IRONLOG_GOOGLE_CLIENT_ID;
+  if (!clientId) return;
+  if (typeof google === "undefined" || !google.accounts) return;
+  document.getElementById("googleAuthSection").style.display = "block";
+  google.accounts.id.initialize({
+    client_id: clientId,
+    callback: handleGoogleCredentialResponse,
+  });
+  google.accounts.id.renderButton(document.getElementById("googleSignInBtn"), {
+    theme: "outline", size: "large", width: 320, text: "continue_with",
+  });
+}
+window.addEventListener("load", () => setTimeout(initGoogleSignIn, 300));
+</script>
+<script src="js/pwa.js"></script>
+</body>
 </html>
