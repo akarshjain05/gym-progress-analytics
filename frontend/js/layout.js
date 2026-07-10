@@ -17,13 +17,12 @@ const NAV_ITEMS = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>' },
 ];
 
-const BARBELL_SVG = `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-  <rect x="1" y="8.75" width="18" height="2.5" rx="1.25" fill="#c9a84c"/>
-  <rect x="6.5" y="8.75" width="7" height="2.5" rx="1.25" fill="#e0bc60"/>
-  <rect x="1.2" y="5.5" width="2.8" height="9" rx="0.8" fill="#c0392b"/>
-  <rect x="16" y="5.5" width="2.8" height="9" rx="0.8" fill="#c0392b"/>
-  <rect x="5" y="7" width="1.2" height="6" rx="0.4" fill="#a07830"/>
-  <rect x="13.8" y="7" width="1.2" height="6" rx="0.4" fill="#a07830"/>
+const BARBELL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M2 12h20"/>
+  <path d="M4 8v8"/>
+  <path d="M20 8v8"/>
+  <path d="M7 9v6"/>
+  <path d="M17 9v6"/>
 </svg>`;
 
 const HAMBURGER_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -176,11 +175,14 @@ function renderShell(activeId, pageTitle, subtitle) {
     </a>
   `).join("");
 
+  const user = Auth.getUser() || {};
+  const isCollapsed = user.sidebar_collapsed ? "sidebar-collapsed" : "";
+
   document.body.innerHTML = `
     ${buildLoadingOverlay()}
     ${buildMobileDrawer(activeId)}
 
-    <div class="app-shell">
+    <div class="app-shell ${isCollapsed}">
       <aside class="sidebar">
         <div class="brand">
           <a href="dashboard.html" class="brand-with-logo" aria-label="IRONLOG home">
@@ -188,6 +190,9 @@ function renderShell(activeId, pageTitle, subtitle) {
             <div class="brand-text"><strong>IRONLOG</strong><span>Progress Analytics</span></div>
           </a>
         </div>
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="toggle-icon"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
         <ul class="nav-list" id="navList">
           ${navHtml}
           <a class="nav-link nav-link-logout" id="logoutBtn">
@@ -217,6 +222,30 @@ function renderShell(activeId, pageTitle, subtitle) {
     Auth.clear();
     window.location.href = "index.html";
   });
+
+  // Desktop sidebar toggle
+  const toggleBtn = document.getElementById("sidebarToggleBtn");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", async () => {
+      const shell = document.querySelector(".app-shell");
+      const collapsed = shell.classList.toggle("sidebar-collapsed");
+      
+      const currentUser = Auth.getUser();
+      if (currentUser) {
+        currentUser.sidebar_collapsed = collapsed;
+        localStorage.setItem("ironlog_user", JSON.stringify(currentUser));
+      }
+      
+      try {
+        await window.apiRequest("/profile/me", {
+          method: "PUT",
+          body: { sidebar_collapsed: collapsed }
+        });
+      } catch (err) {
+        console.error("Failed to sync sidebar state", err);
+      }
+    });
+  }
 
   // Theme is toggled from Profile → Settings tab only
 

@@ -23,6 +23,12 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
+        try:
+            from sqlalchemy import text
+            db.execute(text("ALTER TABLE users ADD COLUMN sidebar_collapsed BOOLEAN DEFAULT FALSE NOT NULL"))
+            db.commit()
+        except Exception:
+            db.rollback()
         seed_exercises(db)
     finally:
         db.close()

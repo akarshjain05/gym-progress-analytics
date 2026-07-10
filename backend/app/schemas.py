@@ -62,7 +62,7 @@ class ProfileUpdate(BaseModel):
     activity_level: Optional[ActivityLevel] = None
     unit_preference: Optional[UnitPref] = None
     goal_weight_kg: Optional[float] = Field(default=None, gt=0)
-
+    sidebar_collapsed: Optional[bool] = None
 
 class UserOut(BaseModel):
     id: int
@@ -74,6 +74,7 @@ class UserOut(BaseModel):
     activity_level: Optional[str] = None
     unit_preference: str
     goal_weight_kg: Optional[float] = None
+    sidebar_collapsed: bool = False
     has_google_login: bool = False
     has_password: bool = False
 
