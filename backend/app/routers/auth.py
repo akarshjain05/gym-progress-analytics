@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -62,9 +62,9 @@ def register(request: Request, payload: schemas.UserCreate, db: Session = Depend
     return user
 
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login")
 @limiter.limit("10/minute")
-def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
     if not user or not user.password_hash or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
@@ -73,7 +73,15 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        samesite="lax",
+        secure=not settings.frontend_url.startswith("http://localhost"),
+        max_age=settings.access_token_expire_minutes * 60
+    )
+    return {"message": "Login successful"}
 
 
 @router.post("/google", response_model=schemas.GoogleLoginOut)
@@ -105,9 +113,9 @@ def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session =
     return {"needs_setup": False, "access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/complete-google-signup", response_model=schemas.Token)
+@router.post("/complete-google-signup")
 @limiter.limit("5/minute")
-def complete_google_signup(request: Request, payload: schemas.CompleteGoogleSignupIn, db: Session = Depends(get_db)):
+def complete_google_signup(request: Request, response: Response, payload: schemas.CompleteGoogleSignupIn, db: Session = Depends(get_db)):
     google_id = decode_setup_token(payload.setup_token)
 
     user = db.query(models.User).filter(models.User.google_id == google_id).first()
@@ -124,7 +132,15 @@ def complete_google_signup(request: Request, payload: schemas.CompleteGoogleSign
     db.commit()
 
     access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        samesite="lax",
+        secure=not settings.frontend_url.startswith("http://localhost"),
+        max_age=settings.access_token_expire_minutes * 60
+    )
+    return {"message": "Signup complete and logged in"}
 
 
 @router.post("/forgot-password")
@@ -160,3 +176,8 @@ def reset_password(request: Request, payload: schemas.ResetPasswordIn, db: Sessi
     db.commit()
 
     return {"message": "Password reset successful. You can now log in with your new password."}
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("access_token", httponly=True, samesite="lax")
+    return {"message": "Logged out successfully"}
