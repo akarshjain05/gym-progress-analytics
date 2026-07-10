@@ -4,6 +4,9 @@ workout_templates.py — Workout Templates & Active Workout Router
 Endpoints:
   GET    /templates              — list user's templates
   POST   /templates              — create template
+  POST   /templates/free/finish  — finish free (no template) workout
+  GET    /templates/history      — list completed workout sessions
+  PATCH  /templates/history/{session_id}/notes — update session notes
   GET    /templates/{id}         — get template with exercises
   PUT    /templates/{id}         — update template name/description
   DELETE /templates/{id}         — delete template
@@ -91,6 +94,10 @@ class FinishWorkoutIn(BaseModel):
     notes: Optional[str] = None
 
 
+class SessionNotesIn(BaseModel):
+    notes: str = ""
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -153,8 +160,111 @@ def _tex_out(te: models.WorkoutTemplateExercise) -> dict:
     }
 
 
+def _finish_workout_logic(
+    payload: FinishWorkoutIn,
+    db: Session,
+    current_user: models.User,
+    template_id: Optional[int],
+    template_name: str,
+):
+    """Shared logic for finishing both template and free workouts."""
+    from .. import calculations as calc
+
+    if not payload.exercises:
+        raise HTTPException(status_code=400, detail="No exercises to save")
+
+    total_sets_saved = 0
+    exercises_saved = 0
+    new_prs = []
+
+    for ex_data in payload.exercises:
+        exercise = (
+            db.query(models.Exercise)
+            .filter(
+                models.Exercise.id == ex_data.exercise_id,
+                (
+                    (models.Exercise.created_by.is_(None)) |
+                    (models.Exercise.created_by == current_user.id)
+                ),
+            )
+            .first()
+        )
+        if not exercise:
+            continue
+
+        completed_sets = [s for s in ex_data.sets if s.completed]
+        if not completed_sets:
+            continue
+
+        existing_logs = (
+            db.query(models.LiftLog)
+            .filter(
+                models.LiftLog.user_id == current_user.id,
+                models.LiftLog.exercise_id == ex_data.exercise_id,
+            )
+            .all()
+        )
+        old_pr = max(
+            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
+            default=0.0,
+        )
+
+        set_number = 1
+        session_1rms = []
+        for set_data in completed_sets:
+            entry = models.LiftLog(
+                user_id=current_user.id,
+                exercise_id=ex_data.exercise_id,
+                date=payload.date,
+                weight_kg=set_data.weight_kg,
+                reps=set_data.reps,
+                rpe=set_data.rpe,
+                set_number=set_number,
+                notes=ex_data.notes,
+            )
+            db.add(entry)
+            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
+            set_number += 1
+            total_sets_saved += 1
+
+        exercises_saved += 1
+        if session_1rms:
+            session_best = max(session_1rms)
+            if session_best > old_pr:
+                new_prs.append({
+                    "exercise": exercise.name,
+                    "new_1rm_kg": round(session_best, 1),
+                    "old_1rm_kg": round(old_pr, 1),
+                })
+
+    if total_sets_saved == 0:
+        raise HTTPException(status_code=400, detail="No completed sets to save")
+
+    session = models.WorkoutSession(
+        user_id=current_user.id,
+        template_id=template_id,
+        template_name=template_name,
+        date=payload.date,
+        duration_seconds=payload.duration_seconds,
+        exercises_count=exercises_saved,
+        sets_count=total_sets_saved,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+
+    return {
+        "success": True,
+        "session_id": session.id,
+        "exercises_saved": exercises_saved,
+        "total_sets_saved": total_sets_saved,
+        "new_prs": new_prs,
+        "date": payload.date.isoformat(),
+    }
+
+
 # ---------------------------------------------------------------------------
-# Template CRUD
+# Template CRUD  (no path params — must come before /{template_id} routes)
 # ---------------------------------------------------------------------------
 
 @router.get("")
@@ -206,6 +316,98 @@ def create_template(
     db.refresh(template)
     return _template_out(template)
 
+
+# ---------------------------------------------------------------------------
+# Static-path routes — MUST be defined BEFORE /{template_id} routes
+# so FastAPI doesn't try to parse "free" or "history" as an integer.
+# ---------------------------------------------------------------------------
+
+@router.post("/free/finish")
+def finish_free_workout(
+    payload: FinishWorkoutIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Finish a free (no template) workout session."""
+    return _finish_workout_logic(payload, db, current_user, None, "Free Workout")
+
+
+@router.get("/history")
+def list_workout_history(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """List completed workout sessions for the user."""
+    sessions = (
+        db.query(models.WorkoutSession)
+        .filter(models.WorkoutSession.user_id == current_user.id)
+        .order_by(models.WorkoutSession.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "template_name": s.template_name,
+            "date": s.date.isoformat() if s.date else None,
+            "duration_seconds": s.duration_seconds,
+            "exercises_count": s.exercises_count,
+            "sets_count": s.sets_count,
+            "notes": s.notes,
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+        }
+        for s in sessions
+    ]
+
+
+@router.patch("/history/{session_id}/notes")
+def update_session_notes(
+    session_id: int,
+    payload: SessionNotesIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Update the notes for a completed workout session."""
+    session = (
+        db.query(models.WorkoutSession)
+        .filter(
+            models.WorkoutSession.id == session_id,
+            models.WorkoutSession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Workout session not found")
+    session.notes = payload.notes.strip() or None
+    db.commit()
+    return {"status": "updated", "notes": session.notes}
+
+
+@router.delete("/history/{session_id}", status_code=204)
+def delete_session(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Delete a completed workout session record (lift logs are preserved)."""
+    session = (
+        db.query(models.WorkoutSession)
+        .filter(
+            models.WorkoutSession.id == session_id,
+            models.WorkoutSession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Workout session not found")
+    db.delete(session)
+    db.commit()
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Dynamic-path routes — /{template_id} and sub-resources
+# ---------------------------------------------------------------------------
 
 @router.get("/{template_id}")
 def get_template(
@@ -351,7 +553,7 @@ def reorder_template_exercises(
 
 
 # ---------------------------------------------------------------------------
-# Finish workout — the core active workout save endpoint
+# Finish workout — the core active workout save endpoint (template-based)
 # ---------------------------------------------------------------------------
 
 @router.post("/{template_id}/finish")
@@ -372,248 +574,6 @@ def finish_workout(
     Skipped sets (completed=False) are not saved.
     Returns a summary: exercises logged, total sets, any new PRs detected.
     """
-    # Verify template belongs to user (or template_id=0 for free workout)
-    if template_id != 0:
-        _get_template(db, template_id, current_user)
-
-    if not payload.exercises:
-        raise HTTPException(status_code=400, detail="No exercises to save")
-
-    total_sets_saved = 0
-    exercises_saved = 0
-    new_prs = []
-
-    for ex_data in payload.exercises:
-        # Verify exercise access
-        exercise = (
-            db.query(models.Exercise)
-            .filter(
-                models.Exercise.id == ex_data.exercise_id,
-                (
-                    (models.Exercise.created_by.is_(None)) |
-                    (models.Exercise.created_by == current_user.id)
-                ),
-            )
-            .first()
-        )
-        if not exercise:
-            continue  # skip invalid exercise silently
-
-        completed_sets = [s for s in ex_data.sets if s.completed]
-        if not completed_sets:
-            continue
-
-        # Find existing PR for this exercise (to detect new PRs)
-        from .. import calculations as calc
-        existing_logs = (
-            db.query(models.LiftLog)
-            .filter(
-                models.LiftLog.user_id == current_user.id,
-                models.LiftLog.exercise_id == ex_data.exercise_id,
-            )
-            .all()
-        )
-        old_pr = max(
-            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
-            default=0.0,
-        )
-
-        # Save each completed set
-        set_number = 1
-        session_1rms = []
-        for set_data in completed_sets:
-            entry = models.LiftLog(
-                user_id=current_user.id,
-                exercise_id=ex_data.exercise_id,
-                date=payload.date,
-                weight_kg=set_data.weight_kg,
-                reps=set_data.reps,
-                rpe=set_data.rpe,
-                set_number=set_number,
-                notes=ex_data.notes,
-            )
-            db.add(entry)
-            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
-            set_number += 1
-            total_sets_saved += 1
-
-        exercises_saved += 1
-
-        # Check for new PR
-        if session_1rms:
-            session_best = max(session_1rms)
-            if session_best > old_pr:
-                new_prs.append({
-                    "exercise": exercise.name,
-                    "new_1rm_kg": round(session_best, 1),
-                    "old_1rm_kg": round(old_pr, 1),
-                })
-
-    if total_sets_saved == 0:
-        raise HTTPException(status_code=400, detail="No completed sets to save")
-
-    # Resolve template name for the session record
-    tmpl_name = "Free Workout"
-    if template_id != 0:
-        tmpl = db.query(models.WorkoutTemplate).filter(models.WorkoutTemplate.id == template_id).first()
-        if tmpl:
-            tmpl_name = tmpl.name
-
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=template_id if template_id != 0 else None,
-        template_name=tmpl_name,
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-    )
-    db.add(session)
-    db.commit()
-    db.refresh(session)
-
-    return {
-        "success": True,
-        "session_id": session.id,
-        "exercises_saved": exercises_saved,
-        "total_sets_saved": total_sets_saved,
-        "new_prs": new_prs,
-        "date": payload.date.isoformat(),
-    }
-
-
-# ---------------------------------------------------------------------------
-# Free workout finish (no template) — same logic, template_id = 0
-# ---------------------------------------------------------------------------
-
-@router.post("/free/finish")
-def finish_free_workout(
-    payload: FinishWorkoutIn,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    """Finish a free (no template) workout session."""
-    # Reuse finish_workout logic with a dummy template_id
-    # We handle the template check manually here
-    if not payload.exercises:
-        raise HTTPException(status_code=400, detail="No exercises to save")
-
-    total_sets_saved = 0
-    exercises_saved = 0
-    new_prs = []
-
-    for ex_data in payload.exercises:
-        exercise = (
-            db.query(models.Exercise)
-            .filter(
-                models.Exercise.id == ex_data.exercise_id,
-                (
-                    (models.Exercise.created_by.is_(None)) |
-                    (models.Exercise.created_by == current_user.id)
-                ),
-            )
-            .first()
-        )
-        if not exercise:
-            continue
-
-        completed_sets = [s for s in ex_data.sets if s.completed]
-        if not completed_sets:
-            continue
-
-        from .. import calculations as calc
-        existing_logs = (
-            db.query(models.LiftLog)
-            .filter(
-                models.LiftLog.user_id == current_user.id,
-                models.LiftLog.exercise_id == ex_data.exercise_id,
-            )
-            .all()
-        )
-        old_pr = max(
-            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
-            default=0.0,
-        )
-
-        set_number = 1
-        session_1rms = []
-        for set_data in completed_sets:
-            entry = models.LiftLog(
-                user_id=current_user.id,
-                exercise_id=ex_data.exercise_id,
-                date=payload.date,
-                weight_kg=set_data.weight_kg,
-                reps=set_data.reps,
-                rpe=set_data.rpe,
-                set_number=set_number,
-                notes=ex_data.notes,
-            )
-            db.add(entry)
-            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
-            set_number += 1
-            total_sets_saved += 1
-
-        exercises_saved += 1
-        if session_1rms:
-            session_best = max(session_1rms)
-            if session_best > old_pr:
-                new_prs.append({
-                    "exercise": exercise.name,
-                    "new_1rm_kg": round(session_best, 1),
-                    "old_1rm_kg": round(old_pr, 1),
-                })
-
-    if total_sets_saved == 0:
-        raise HTTPException(status_code=400, detail="No completed sets to save")
-
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=None,
-        template_name="Free Workout",
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-    )
-    db.add(session)
-    db.commit()
-    db.refresh(session)
-
-    return {
-        "success": True,
-        "session_id": session.id,
-        "exercises_saved": exercises_saved,
-        "total_sets_saved": total_sets_saved,
-        "new_prs": new_prs,
-        "date": payload.date.isoformat(),
-    }
-
-# ---------------------------------------------------------------------------
-# Patch workout session notes
-# ---------------------------------------------------------------------------
-
-class SessionNotesIn(BaseModel):
-    notes: str = ""
-
-
-@router.patch("/history/{session_id}/notes")
-def update_session_notes(
-    session_id: int,
-    payload: SessionNotesIn,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    """Update the notes for a completed workout session."""
-    session = (
-        db.query(models.WorkoutSession)
-        .filter(
-            models.WorkoutSession.id == session_id,
-            models.WorkoutSession.user_id == current_user.id,
-        )
-        .first()
-    )
-    if not session:
-        raise HTTPException(status_code=404, detail="Workout session not found")
-    session.notes = payload.notes.strip() or None
-    db.commit()
-    return {"status": "updated", "notes": session.notes}
+    # Verify template belongs to user
+    tmpl = _get_template(db, template_id, current_user)
+    return _finish_workout_logic(payload, db, current_user, template_id, tmpl.name)
