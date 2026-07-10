@@ -83,6 +83,7 @@ class LiftLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False, index=True)
+    session_id = Column(Integer, ForeignKey("workout_sessions.id"), nullable=True, index=True)
     date = Column(Date, nullable=False, default=date.today)
     weight_kg = Column(Float, nullable=False)
     reps = Column(Integer, nullable=False)
@@ -92,6 +93,7 @@ class LiftLog(Base):
 
     user = relationship("User", back_populates="lift_logs")
     exercise = relationship("Exercise")
+    session = relationship("WorkoutSession", back_populates="lift_logs")
 
 
 class CalorieLog(Base):
@@ -199,3 +201,4 @@ class WorkoutSession(Base):
 
     user = relationship("User", back_populates="workout_sessions")
     template = relationship("WorkoutTemplate")
+    lift_logs = relationship("LiftLog", back_populates="session", cascade="all, delete-orphan")

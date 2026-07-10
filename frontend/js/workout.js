@@ -138,6 +138,19 @@
         </div>
       </div>
     </div>
+
+    <!-- ── History Detail Modal ────────────────────────────────────────── -->
+    <div id="historyDetailModal" class="wk-modal-overlay" style="display:none;">
+      <div class="wk-modal" style="max-height:90vh; overflow-y:auto;">
+        <div class="wk-modal-header">
+          <h2 id="hdTitle" style="font-size:18px; margin:0;">Workout Details</h2>
+          <button class="wk-modal-close" id="closeHistoryDetailModal">✕</button>
+        </div>
+        <div class="wk-modal-body" id="hdBody">
+          <!-- Content dynamically loaded -->
+        </div>
+      </div>
+    </div>
   `;
 
   let workoutHistory = [];    // completed workout sessions
@@ -288,8 +301,16 @@
       </div>
     `).join('');
 
+    list.querySelectorAll('.wk-history-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.dataset.id);
+        showHistoryDetailModal(id);
+      });
+    });
+
     list.querySelectorAll('.wk-history-del').forEach(btn => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const id = parseInt(btn.dataset.id);
         if (!confirm('Delete this workout record? (The lift logs are preserved.)')) return;
         try {
@@ -302,6 +323,65 @@
         }
       });
     });
+  }
+
+  async function showHistoryDetailModal(sessionId) {
+    const modal = document.getElementById('historyDetailModal');
+    const body = document.getElementById('hdBody');
+    body.innerHTML = '<div class="ironlog-spinner" style="margin:40px auto;display:block;"></div>';
+    modal.style.display = 'flex';
+
+    try {
+      const data = await apiRequest(`/templates/history/${sessionId}`);
+      
+      let html = `<div style="margin-bottom:16px; color:#A0AEC0; font-size:14px;">
+        <div>⏱ ${fmtDuration(data.duration_seconds)}</div>
+        <div>📅 ${fmtDate(data.date)}</div>
+      </div>`;
+
+      if (data.notes) {
+        html += `<div style="padding:12px; background:#1A1D21; border-radius:8px; margin-bottom:16px; font-size:14px;">
+          <strong style="color:#E2E8F0;display:block;margin-bottom:4px;">Session Notes:</strong>
+          ${escHtml(data.notes)}
+        </div>`;
+      }
+
+      data.exercises.forEach(ex => {
+        html += `<div style="margin-bottom:20px;">
+          <div style="font-weight:600; color:#E2E8F0; margin-bottom:8px;">${escHtml(ex.exercise_name)}</div>
+          <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+            <thead>
+              <tr style="color:#A0AEC0; border-bottom:1px solid #2D3748;">
+                <th style="padding:4px 0;">Set</th>
+                <th>kg</th>
+                <th>Reps</th>
+                <th>RPE</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ex.sets.map(s => `
+                <tr style="border-bottom:1px solid #1A1D21;">
+                  <td style="padding:8px 0; color:#E2E8F0;">${s.set_number}</td>
+                  <td style="color:#E2E8F0;">${s.weight_kg}</td>
+                  <td style="color:#E2E8F0;">${s.reps}</td>
+                  <td style="color:#A0AEC0;">${s.rpe || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      });
+      
+      if (data.exercises.length === 0) {
+          html += `<div style="color:#A0AEC0; font-style:italic;">No logged sets found for this workout.</div>`;
+      }
+      
+      body.innerHTML = html;
+
+    } catch (err) {
+      body.innerHTML = `<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`;
+      handleApiError(err);
+    }
   }
 
   // ── Create / Edit Template Modal ──────────────────────────────────────────
@@ -466,6 +546,9 @@
   });
   document.getElementById('cancelTemplateModal').addEventListener('click', () => {
     document.getElementById('templateModal').style.display = 'none';
+  });
+  document.getElementById('closeHistoryDetailModal').addEventListener('click', () => {
+    document.getElementById('historyDetailModal').style.display = 'none';
   });
   document.getElementById('createTemplateBtn').addEventListener('click', openCreateTemplate);
   document.getElementById('createFirstBtn')?.addEventListener('click', openCreateTemplate);

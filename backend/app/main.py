@@ -29,6 +29,13 @@ async def lifespan(app: FastAPI):
             db.commit()
         except Exception:
             db.rollback()
+
+        try:
+            db.execute(text("ALTER TABLE lift_logs ADD COLUMN session_id INTEGER REFERENCES workout_sessions(id)"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         seed_exercises(db)
     finally:
         db.close()

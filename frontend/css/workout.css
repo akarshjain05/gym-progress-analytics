@@ -435,6 +435,7 @@
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 12px; padding: 14px 16px;
   margin-bottom: 8px;
+  cursor: pointer;
   transition: border-color 0.15s, transform 0.1s;
 }
 .wk-history-card:hover {

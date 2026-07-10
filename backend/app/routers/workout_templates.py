@@ -173,8 +173,28 @@ def _finish_workout_logic(
     if not payload.exercises:
         raise HTTPException(status_code=400, detail="No exercises to save")
 
-    total_sets_saved = 0
-    exercises_saved = 0
+    total_sets_saved = sum(
+        1 for ex in payload.exercises for s in ex.sets if s.completed
+    )
+    if total_sets_saved == 0:
+        raise HTTPException(status_code=400, detail="No completed sets to save")
+        
+    exercises_saved = sum(
+        1 for ex in payload.exercises if any(s.completed for s in ex.sets)
+    )
+
+    session = models.WorkoutSession(
+        user_id=current_user.id,
+        template_id=template_id,
+        template_name=template_name,
+        date=payload.date,
+        duration_seconds=payload.duration_seconds,
+        exercises_count=exercises_saved,
+        sets_count=total_sets_saved,
+    )
+    db.add(session)
+    db.flush()
+
     new_prs = []
 
     for ex_data in payload.exercises:
@@ -215,6 +235,7 @@ def _finish_workout_logic(
             entry = models.LiftLog(
                 user_id=current_user.id,
                 exercise_id=ex_data.exercise_id,
+                session_id=session.id,
                 date=payload.date,
                 weight_kg=set_data.weight_kg,
                 reps=set_data.reps,
@@ -225,9 +246,7 @@ def _finish_workout_logic(
             db.add(entry)
             session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
             set_number += 1
-            total_sets_saved += 1
 
-        exercises_saved += 1
         if session_1rms:
             session_best = max(session_1rms)
             if session_best > old_pr:
@@ -237,19 +256,6 @@ def _finish_workout_logic(
                     "old_1rm_kg": round(old_pr, 1),
                 })
 
-    if total_sets_saved == 0:
-        raise HTTPException(status_code=400, detail="No completed sets to save")
-
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=template_id,
-        template_name=template_name,
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-    )
-    db.add(session)
     db.commit()
     db.refresh(session)
 
@@ -360,7 +366,60 @@ def list_workout_history(
     ]
 
 
-@router.patch("/history/{session_id}/notes")
+@router.get("/history/{session_id}")
+def get_workout_session_details(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Get full details of a workout session including all completed sets."""
+    from sqlalchemy.orm import joinedload
+    session = (
+        db.query(models.WorkoutSession)
+        .options(joinedload(models.WorkoutSession.lift_logs).joinedload(models.LiftLog.exercise))
+        .filter(
+            models.WorkoutSession.id == session_id,
+            models.WorkoutSession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Workout session not found")
+
+    # Group lift_logs by exercise
+    # Note: lift_logs is populated via joinedload
+    exercises_map = {}
+    for log in session.lift_logs:
+        if log.exercise_id not in exercises_map:
+            exercises_map[log.exercise_id] = {
+                "exercise_id": log.exercise_id,
+                "exercise_name": log.exercise.name,
+                "sets": []
+            }
+        exercises_map[log.exercise_id]["sets"].append({
+            "id": log.id,
+            "weight_kg": log.weight_kg,
+            "reps": log.reps,
+            "rpe": log.rpe,
+            "set_number": log.set_number,
+        })
+        
+    # Sort sets by set_number
+    for ex in exercises_map.values():
+        ex["sets"].sort(key=lambda s: s.get("set_number") or 0)
+
+    return {
+        "id": session.id,
+        "template_id": session.template_id,
+        "template_name": session.template_name,
+        "date": session.date.isoformat() if session.date else None,
+        "duration_seconds": session.duration_seconds,
+        "exercises_count": session.exercises_count,
+        "sets_count": session.sets_count,
+        "notes": session.notes,
+        "created_at": session.created_at.isoformat() if session.created_at else None,
+        "exercises": list(exercises_map.values())
+    }
 def update_session_notes(
     session_id: int,
     payload: SessionNotesIn,
