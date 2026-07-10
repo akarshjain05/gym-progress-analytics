@@ -816,6 +816,8 @@
       showCompletionModal(result, duration);
 
     } catch (err) {
+      console.error('[finishWorkout] Error:', err);
+      alert('Finish workout failed: ' + (err.message || err));
       handleApiError(err, 'Could not save workout.');
       if (btn) { btn.disabled = false; btn.textContent = 'Finish'; }
     }
