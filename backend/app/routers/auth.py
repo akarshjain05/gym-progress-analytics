@@ -157,7 +157,14 @@ def forgot_password(request: Request, payload: schemas.ForgotPasswordIn, db: Ses
         reset_link = f"{settings.frontend_url}/reset-password.html?token={raw_token}"
         send_password_reset_email(user.email, reset_link)
 
-    return {"message": "If that email is registered, a password reset link has been sent."}
+    response_data = {"message": "If that email is registered, a password reset link has been sent."}
+    
+    # For demo/portfolio purposes: if no email service is configured, return the link
+    # directly in the response so users can test the flow without checking Docker logs.
+    if user and user.password_hash and not settings.brevo_api_key:
+        response_data["reset_link"] = reset_link
+
+    return response_data
 
 
 @router.post("/reset-password")
