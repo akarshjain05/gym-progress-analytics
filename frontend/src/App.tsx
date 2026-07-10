@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Workouts from './pages/Workouts';
+import Analytics from './pages/Analytics';
 import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
 import { AuthProvider } from './context/AuthContext';
@@ -22,7 +24,8 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              {/* Other routes will go here */}
+              <Route path="/workouts" element={<Workouts />} />
+              <Route path="/analytics" element={<Analytics />} />
             </Route>
           </Routes>
         </BrowserRouter>

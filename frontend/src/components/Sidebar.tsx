@@ -19,9 +19,9 @@ export default function Sidebar() {
           <Activity size={20} />
           <span>Workouts</span>
         </Link>
-        <Link to="/history" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-background text-text transition-colors">
+        <Link to="/analytics" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-background text-text transition-colors">
           <Calendar size={20} />
-          <span>History</span>
+          <span>Analytics</span>
         </Link>
         <Link to="/settings" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-background text-text transition-colors">
           <Settings size={20} />
