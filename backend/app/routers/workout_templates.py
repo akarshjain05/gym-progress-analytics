@@ -452,7 +452,25 @@ def finish_workout(
     if total_sets_saved == 0:
         raise HTTPException(status_code=400, detail="No completed sets to save")
 
+    # Resolve template name for the session record
+    tmpl_name = "Free Workout"
+    if template_id != 0:
+        tmpl = db.query(models.WorkoutTemplate).filter(models.WorkoutTemplate.id == template_id).first()
+        if tmpl:
+            tmpl_name = tmpl.name
+
+    session = models.WorkoutSession(
+        user_id=current_user.id,
+        template_id=template_id if template_id != 0 else None,
+        template_name=tmpl_name,
+        date=payload.date,
+        duration_seconds=payload.duration_seconds,
+        exercises_count=exercises_saved,
+        sets_count=total_sets_saved,
+    )
+    db.add(session)
     db.commit()
+    db.refresh(session)
 
     return {
         "success": True,
@@ -548,7 +566,18 @@ def finish_free_workout(
     if total_sets_saved == 0:
         raise HTTPException(status_code=400, detail="No completed sets to save")
 
+    session = models.WorkoutSession(
+        user_id=current_user.id,
+        template_id=None,
+        template_name="Free Workout",
+        date=payload.date,
+        duration_seconds=payload.duration_seconds,
+        exercises_count=exercises_saved,
+        sets_count=total_sets_saved,
+    )
+    db.add(session)
     db.commit()
+    db.refresh(session)
 
     return {
         "success": True,
