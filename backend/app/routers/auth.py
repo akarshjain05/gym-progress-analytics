@@ -87,7 +87,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
         secure=not settings.frontend_url.startswith("http://localhost"),
         max_age=settings.access_token_expire_minutes * 60
     )
-    return {"message": "Login successful"}
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/google", response_model=schemas.GoogleLoginOut)
