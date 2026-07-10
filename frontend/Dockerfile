@@ -1,5 +1,4 @@
-FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY . /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM caddy:2-alpine
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY . /usr/share/caddy/html
+EXPOSE 80 443

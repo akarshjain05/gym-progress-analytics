@@ -1,0 +1,12 @@
+98.86.178.101.nip.io {
+    root * /usr/share/caddy/html
+    file_server
+
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+
+    handle {
+        try_files {path} {path}/ /index.html
+    }
+}
