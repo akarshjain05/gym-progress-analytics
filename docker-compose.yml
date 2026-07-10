@@ -44,7 +44,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/1
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:8080
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:8080,http://98.86.178.101,http://98.86.178.101.nip.io
       - SECRET_KEY=dev-secret-change-me-in-production-12345
     depends_on:
       db:
