@@ -39,6 +39,7 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
       - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -60,6 +61,28 @@ services:
     command: celery -A app.worker.celery_app worker --loglevel=info
     volumes:
       - ./backend:/app
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.worker.celery_app beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file: .env
     environment:
       - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
       - CELERY_BROKER_URL=redis://redis:6379/0

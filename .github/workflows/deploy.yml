@@ -11,11 +11,17 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY
           script: |
             cd gym-progress-analytics
+            echo "VAPID_PUBLIC_KEY=$VAPID_PUBLIC_KEY" > .env
+            echo "VAPID_PRIVATE_KEY=$VAPID_PRIVATE_KEY" >> .env
             git pull
             docker compose up -d --build

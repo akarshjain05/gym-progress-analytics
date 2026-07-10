@@ -12,14 +12,19 @@ celery_app.conf.update(
     accept_content=['json'],
     result_serializer='json',
     timezone='UTC',
-    enable_utc=True,
     task_track_started=True,
     task_time_limit=3600,
+    beat_schedule={
+        'daily-inactivity-check': {
+            'task': 'run_inactivity_check',
+            'schedule': 86400.0, # Run every 24 hours
+        },
+    }
 )
 
 from sqlalchemy.orm import Session
 from .database import SessionLocal
-from . import models, calculations as calc
+from . import models, calculations as calc, push_notifications
 from collections import defaultdict
 from datetime import timedelta, timezone, datetime
 
@@ -31,6 +36,14 @@ def ist_today():
 def ist_week_start():
     today = ist_today()
     return today - timedelta(days=today.weekday())
+
+@celery_app.task(name="run_inactivity_check")
+def run_inactivity_check():
+    db: Session = SessionLocal()
+    try:
+        push_notifications.notify_inactivity_check(db)
+    finally:
+        db.close()
 
 @celery_app.task(name="generate_insights")
 def generate_insights(user_id: int):
