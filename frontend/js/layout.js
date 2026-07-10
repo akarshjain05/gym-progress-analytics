@@ -1,20 +1,57 @@
+const ICON_STYLE = 'width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"';
+
 const NAV_ITEMS = [
   { id: "dashboard", href: "dashboard.html", label: "Dashboard",
-    icon: '<i data-lucide="layout-dashboard"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="14" y="3" width="7" height="11" rx="1.5" fill="currentColor" />
+      <rect x="14" y="16" width="7" height="5" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="3" y="12" width="7" height="9" rx="1.5" fill="currentColor" />
+    </svg>` },
   { id: "weight", href: "weight.html", label: "Body Weight",
-    icon: '<i data-lucide="scale"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="14" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
+      <path d="M9 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "lifts", href: "lifts.html", label: "Lifts",
-    icon: '<i data-lucide="dumbbell"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <path d="M6 5v14M18 5v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="2" y="8" width="4" height="8" rx="1" fill="currentColor" />
+      <rect x="18" y="8" width="4" height="8" rx="1" fill="currentColor" />
+      <path d="M6 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "workout", href: "workout.html", label: "Workouts",
-    icon: '<i data-lucide="clipboard-list"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="5" y="4" width="14" height="17" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9 2h6v3H9V2Z" fill="currentColor"/>
+      <path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "nutrition", href: "nutrition.html", label: "Nutrition",
-    icon: '<i data-lucide="apple"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 21a9 9 0 0 0 9-9c0-1.5-.5-3-1.5-4H4.5C3.5 9 3 10.5 3 12a9 9 0 0 0 9 9Z" fill="currentColor"/>
+      <path d="M12 3v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "analytics", href: "analytics.html", label: "Analytics",
-    icon: '<i data-lucide="bar-chart-3"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="4" y="13" width="4" height="7" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="10" y="7" width="4" height="13" rx="1" fill="currentColor" />
+      <rect x="16" y="3" width="4" height="17" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+    </svg>` },
   { id: "coach", href: "coach.html", label: "AI Coach",
-    icon: '<i data-lucide="bot"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="4" y="8" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9 14h.01M15 14h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M12 8V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="12" cy="4" r="1.5" fill="currentColor"/>
+      <path d="M2 13h2M20 13h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "profile", href: "profile.html", label: "Profile",
-    icon: '<i data-lucide="user"></i>' },
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M5 20c0-2.5 2-5 7-5s7 2.5 7 5" fill="currentColor" />
+    </svg>` },
 ];
 
 const BARBELL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -281,9 +318,4 @@ function renderShell(activeId, pageTitle, subtitle) {
     }
   }
   setupLoadingAutoHide();
-
-  // Initialize Lucide icons
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
 }
