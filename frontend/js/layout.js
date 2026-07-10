@@ -1,20 +1,20 @@
 const NAV_ITEMS = [
   { id: "dashboard", href: "dashboard.html", label: "Dashboard",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>' },
+    icon: '<i data-lucide="layout-dashboard"></i>' },
   { id: "weight", href: "weight.html", label: "Body Weight",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6" stroke-linecap="round"/></svg>' },
+    icon: '<i data-lucide="scale"></i>' },
   { id: "lifts", href: "lifts.html", label: "Lifts",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M18 12h2M6 8v8M18 8v8M9 12h6M9 6v12M15 6v12"/></svg>' },
+    icon: '<i data-lucide="dumbbell"></i>' },
   { id: "workout", href: "workout.html", label: "Workouts",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg>' },
+    icon: '<i data-lucide="clipboard-list"></i>' },
   { id: "nutrition", href: "nutrition.html", label: "Nutrition",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6c0-3 2-6 6-7 4 1 6 4 6 7Z"/><path d="M12 14v7"/></svg>' },
+    icon: '<i data-lucide="apple"></i>' },
   { id: "analytics", href: "analytics.html", label: "Analytics",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M11 19V4M18 19v-7"/></svg>' },
+    icon: '<i data-lucide="bar-chart-3"></i>' },
   { id: "coach", href: "coach.html", label: "AI Coach",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 2.83V13M12 17h.01"/></svg>' },
+    icon: '<i data-lucide="bot"></i>' },
   { id: "profile", href: "profile.html", label: "Profile",
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>' },
+    icon: '<i data-lucide="user"></i>' },
 ];
 
 const BARBELL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -277,9 +277,13 @@ function renderShell(activeId, pageTitle, subtitle) {
     };
     const skPage = skeletonMap[activeId];
     if (skPage) {
-      requestAnimationFrame(() => window.Skeleton.show(skPage));
+      window.Skeleton.show(skPage);
     }
   }
-
   setupLoadingAutoHide();
+
+  // Initialize Lucide icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 }
