@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .. import schemas, models
@@ -65,7 +66,12 @@ def register(request: Request, payload: schemas.UserCreate, db: Session = Depend
 @router.post("/login")
 @limiter.limit("10/minute")
 def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    user = db.query(models.User).filter(
+        or_(
+            models.User.username == form_data.username,
+            models.User.email == form_data.username
+        )
+    ).first()
     if not user or not user.password_hash or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
