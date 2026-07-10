@@ -947,11 +947,18 @@
           const file = new File([blob], 'ironlog-workout.png', { type: 'image/png' });
           
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: 'IRONLOG Workout',
-              text: 'Just crushed a workout on IRONLOG! 💪'
-            });
+            try {
+              await navigator.share({
+                files: [file],
+                title: 'IRONLOG Workout',
+                text: 'Just crushed a workout on IRONLOG! 💪'
+              });
+            } catch (shareErr) {
+              // Ignore AbortError when user cancels the share dialog
+              if (shareErr.name !== 'AbortError') {
+                console.error("Error sharing:", shareErr);
+              }
+            }
           } else {
             // Fallback to download
             const url = URL.createObjectURL(blob);
