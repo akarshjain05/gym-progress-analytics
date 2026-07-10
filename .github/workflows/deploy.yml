@@ -14,14 +14,18 @@ jobs:
         env:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY
+          envs: VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY,BREVO_API_KEY,BREVO_SENDER_EMAIL
           script: |
             cd gym-progress-analytics
             echo "VAPID_PUBLIC_KEY=$VAPID_PUBLIC_KEY" > .env
             echo "VAPID_PRIVATE_KEY=$VAPID_PRIVATE_KEY" >> .env
+            echo "BREVO_API_KEY=$BREVO_API_KEY" >> .env
+            echo "BREVO_SENDER_EMAIL=$BREVO_SENDER_EMAIL" >> .env
             git pull
             docker compose up -d --build

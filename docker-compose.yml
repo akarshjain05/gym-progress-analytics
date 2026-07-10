@@ -47,6 +47,8 @@ services:
       - REDIS_URL=redis://redis:6379/1
       - CORS_ORIGINS=http://localhost:5173,http://localhost:8080,http://98.86.178.101,http://98.86.178.101.nip.io
       - FRONTEND_URL=http://98.86.178.101.nip.io
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
       - SECRET_KEY=dev-secret-change-me-in-production-12345
       - GOOGLE_CLIENT_ID=614450704706-8n5dla8lbbji9edv96hpa3qdosq6us9k.apps.googleusercontent.com
     depends_on:
