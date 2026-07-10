@@ -15,6 +15,7 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 slowapi==0.1.9
 pywebpush==2.3.0
-py_vapid==1.9.4celery==5.4.0
+py_vapid==1.9.4
+celery==5.4.0
 redis==5.0.4
 alembic==1.13.1
