@@ -97,8 +97,17 @@ function renderStats(summary) {
   const explainer = document.getElementById("tdeeExplainerCard");
 
   if (!summary.has_calorie_data) {
-    el.innerHTML = `<div class="card"><p class="text-secondary">No calorie entries yet. Log a few days to see your trend and TDEE estimate.</p></div>`;
+    el.innerHTML = buildEmptyState(
+      "No calories logged",
+      "Log a few days to see your trend and TDEE estimate.",
+      "Log calories now",
+      "#"
+    );
     explainer.style.display = "none";
+    setTimeout(() => {
+      const btn = el.querySelector('.btn-primary');
+      if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('openLogBtn').click(); });
+    }, 0);
     return;
   }
 

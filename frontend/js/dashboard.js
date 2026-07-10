@@ -53,25 +53,39 @@ async function loadDashboard() {
         </div>`;
     }
 
-    content.innerHTML = `
-      <div class="grid grid-stats">
-        <div class="card stat-card">
-          <div class="stat-label">Current weight</div>
-          <div class="stat-value">${dash.current_weight_kg !== null ? fmtKg(dash.current_weight_kg) : "—"}<span class="unit">kg</span></div>
-          <div class="stat-delta ${weightDelta.cls}">${weightDelta.text} (30d)</div>
-        </div>
-        ${goalCardHtml}
-        <div class="card stat-card">
-          <div class="stat-label">Avg calories (7d)</div>
-          <div class="stat-value">${dash.avg_calories_last_7_days !== null ? Math.round(dash.avg_calories_last_7_days) : "—"}<span class="unit">kcal</span></div>
-          <div class="stat-delta neutral">${dash.total_calorie_entries} days logged total</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">Logging streak</div>
-          <div class="stat-value">${dash.current_streak_days}<span class="unit">days</span></div>
-          <div class="stat-delta neutral">Longest streak: ${dash.longest_streak_days} days</div>
-        </div>
-      </div>
+      let statsGridHtml = "";
+      if (dash.current_weight_kg === null && dash.current_streak_days === 0 && dash.avg_calories_last_7_days === null) {
+        statsGridHtml = buildEmptyState(
+          "Welcome to IRONLOG", 
+          "You haven't logged any data yet. Start by logging your weight, a workout, or your calories below.", 
+          "Log your first workout", 
+          "workout.html"
+        );
+      } else {
+        statsGridHtml = `
+          <div class="grid grid-stats">
+            <div class="card stat-card">
+              <div class="stat-label">Current weight</div>
+              <div class="stat-value">${dash.current_weight_kg !== null ? fmtKg(dash.current_weight_kg) : "—"}<span class="unit">kg</span></div>
+              <div class="stat-delta ${weightDelta.cls}">${weightDelta.text} (30d)</div>
+            </div>
+            ${goalCardHtml}
+            <div class="card stat-card">
+              <div class="stat-label">Avg calories (7d)</div>
+              <div class="stat-value">${dash.avg_calories_last_7_days !== null ? Math.round(dash.avg_calories_last_7_days) : "—"}<span class="unit">kcal</span></div>
+              <div class="stat-delta neutral">${dash.total_calorie_entries} days logged total</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-label">Logging streak</div>
+              <div class="stat-value">${dash.current_streak_days}<span class="unit">days</span></div>
+              <div class="stat-delta neutral">Longest streak: ${dash.longest_streak_days} days</div>
+            </div>
+          </div>
+        `;
+      }
+
+      content.innerHTML = `
+        ${statsGridHtml}
 
 
 

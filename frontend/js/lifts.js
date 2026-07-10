@@ -84,11 +84,7 @@
       </div>
 
       <!-- No data -->
-      <div id="noDataMsg" style="display:none;" class="empty-state">
-        <div class="empty-icon">🏋️</div>
-        <p>No sessions logged for this exercise yet.</p>
-        <button class="btn btn-primary" id="logFirstBtn">Log your first session</button>
-      </div>
+      <div id="noDataMsg" style="display:none;"></div>
 
       <!-- Personal Records section -->
       <div class="section-block" id="prSection" style="display:none;">
@@ -326,7 +322,18 @@
 
       if (!data.has_data) {
         document.getElementById("progressSection").style.display = "none";
-        document.getElementById("noDataMsg").style.display = "block";
+        const noDataEl = document.getElementById("noDataMsg");
+        noDataEl.innerHTML = buildEmptyState(
+          "No sessions logged",
+          "You haven't logged any data for this exercise yet.",
+          "Log your first session",
+          "#"
+        );
+        noDataEl.style.display = "block";
+        setTimeout(() => {
+          const btn = noDataEl.querySelector('.btn-primary');
+          if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openLogModal(exerciseId); });
+        }, 0);
         return;
       }
 

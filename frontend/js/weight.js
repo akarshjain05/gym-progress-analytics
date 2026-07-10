@@ -110,7 +110,22 @@ window.deleteEntry = deleteEntry;
 function renderSummary(summary) {
   const el = document.getElementById("summaryStats");
   if (!summary.has_data) {
-    el.innerHTML = `<div class="card"><p class="text-secondary">No entries yet. Log your first weigh-in to start tracking trend.</p></div>`;
+    el.innerHTML = buildEmptyState(
+      "No entries yet",
+      "Log your first weigh-in to start tracking your trend.",
+      "Log weight now",
+      "#"
+    );
+    // Bind click to open the form
+    setTimeout(() => {
+      const btn = el.querySelector('.btn-primary');
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('openLogBtn').click();
+        });
+      }
+    }, 0);
     return;
   }
   const totalDelta = fmtDelta(summary.total_change_kg, " kg");

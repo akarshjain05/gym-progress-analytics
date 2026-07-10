@@ -26,13 +26,82 @@ class ApiError extends Error {
   }
 }
 
+// ── Offline Sync Logic (IndexedDB) ──────────────────────────────────────────
+const OfflineSync = {
+  db: null,
+  async init() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("ironlog_offline_db", 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("queue")) {
+          db.createObjectStore("queue", { keyPath: "id", autoIncrement: true });
+        }
+      };
+      request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+      request.onerror = (e) => reject(e.target.error);
+    });
+  },
+  async enqueue(path, method, headers, body, form) {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction("queue", "readwrite");
+      const store = tx.objectStore("queue");
+      store.add({ path, method, headers, body, form, timestamp: Date.now() });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async flush() {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction("queue", "readonly");
+      const store = tx.objectStore("queue");
+      const request = store.getAll();
+      request.onsuccess = async () => {
+        const items = request.result;
+        if (items.length === 0) return resolve();
+        console.log(`[OfflineSync] Flushing ${items.length} items to server...`);
+        for (const item of items) {
+          try {
+            await fetch(`${API_BASE_URL}${item.path}`, {
+              method: item.method,
+              headers: item.headers,
+              body: item.body === undefined ? undefined : (item.form ? item.body : JSON.stringify(item.body)),
+            });
+            // Delete from queue on success
+            await new Promise((res) => {
+              const delTx = this.db.transaction("queue", "readwrite");
+              delTx.objectStore("queue").delete(item.id);
+              delTx.oncomplete = res;
+            });
+          } catch (err) {
+            console.warn(`[OfflineSync] Failed to sync item ${item.id}`, err);
+            // Stop flushing if we hit a network error again
+            break;
+          }
+        }
+        if (window.showToast) window.showToast("Offline changes synced!");
+        resolve();
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+};
+
+window.addEventListener('online', () => {
+  OfflineSync.flush().catch(console.error);
+});
+// Also try to flush on startup
+OfflineSync.flush().catch(console.error);
+
 async function apiRequest(path, { method = "GET", body, auth = true, form = false } = {}) {
   const headers = {};
   if (!form && body !== undefined) headers["Content-Type"] = "application/json";
   if (auth) {
     const token = Auth.getToken();
     if (!token) {
-      window.location.href = "index.html";
+      window.location.href = "login.html";
       throw new ApiError("Not authenticated", 401);
     }
     headers["Authorization"] = `Bearer ${token}`;
@@ -46,12 +115,18 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
       body: body === undefined ? undefined : (form ? body : JSON.stringify(body)),
     });
   } catch (networkErr) {
+    if (method !== "GET" && auth) {
+      await OfflineSync.enqueue(path, method, headers, body, form);
+      if (window.showToast) window.showToast("You're offline. Saved locally and will sync later.");
+      // Return a dummy object to prevent the UI from crashing
+      return { _offline: true, message: "Saved offline", id: "offline-" + Date.now() };
+    }
     throw new ApiError("Can't reach the server. Check your connection or try again shortly.", 0);
   }
 
   if (resp.status === 401 && auth) {
     Auth.clear();
-    window.location.href = "index.html";
+    window.location.href = "login.html";
     throw new ApiError("Session expired - please log in again.", 401);
   }
 

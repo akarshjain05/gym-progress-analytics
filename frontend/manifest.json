@@ -2,7 +2,7 @@
   "name": "IRONLOG — Gym Progress Analytics",
   "short_name": "IRONLOG",
   "description": "Track your lifts, weight, and nutrition. Real trend analysis.",
-  "start_url": "/index.html",
+  "start_url": "/login.html",
   "display": "standalone",
   "background_color": "#1e2327",
   "theme_color": "#c0392b",

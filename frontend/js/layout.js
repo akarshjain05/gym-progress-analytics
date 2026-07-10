@@ -74,6 +74,21 @@ const LOGOUT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
 </svg>`;
 
+function buildEmptyState(title, message, ctaText, ctaHref) {
+  return `
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+        </svg>
+      </div>
+      <h3>${title}</h3>
+      <p>${message}</p>
+      ${ctaText ? `<a href="${ctaHref}" class="btn btn-primary">${ctaText}</a>` : ''}
+    </div>
+  `;
+}
+
 // ── Loading overlay ───────────────────────────────────────────────────────────
 function buildLoadingOverlay() {
   return `<div id="ironlog-loading" role="status" aria-label="Loading">
@@ -202,7 +217,7 @@ function closeDrawer() {
 
 function renderShell(activeId, pageTitle, subtitle) {
   if (!Auth.isLoggedIn()) {
-    window.location.href = "index.html";
+    window.location.href = "login.html";
     throw new Error("IRONLOG: not authenticated, redirecting to login.");
   }
 
@@ -257,7 +272,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   // Desktop logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     Auth.clear();
-    window.location.href = "index.html";
+    window.location.href = "login.html";
   });
 
   // Desktop sidebar toggle
@@ -298,7 +313,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   // Drawer logout
   document.getElementById("drawerLogoutBtn").addEventListener("click", () => {
     Auth.clear();
-    window.location.href = "index.html";
+    window.location.href = "login.html";
   });
 
   // Close drawer on Escape key

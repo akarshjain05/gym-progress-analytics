@@ -12,6 +12,7 @@ const API_CACHE = 'ironlog-api-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/login.html',
   '/dashboard.html',
   '/weight.html',
   '/lifts.html',
