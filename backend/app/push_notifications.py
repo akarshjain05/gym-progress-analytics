@@ -89,6 +89,10 @@ def _send_push(subscription: PushSubscription, title: str, body: str, url: str =
     except ImportError as e:
         return False, f"Missing dependency: {e}"
     except Exception as e:
+        # Check if it's a WebPushException with a 410 or 404 response
+        if getattr(e, "response", None) is not None:
+            if e.response.status_code in [410, 404]:
+                return False, "410_GONE"
         print(f"[push] Failed to send to user {subscription.user_id}: {e}")
         return False, str(e)
 
@@ -154,6 +158,10 @@ def send_test(
 
     ok, reason = _send_push(sub, "IRONLOG Test", "Push notifications are working!", "/dashboard.html")
     if not ok:
+        if reason == "410_GONE":
+            db.delete(sub)
+            db.commit()
+            raise HTTPException(status_code=410, detail="Push subscription expired. Please re-enable notifications.")
         raise HTTPException(
             status_code=503,
             detail=f"Push notification failed: {reason}"
@@ -183,12 +191,15 @@ def notify_new_pr(db: Session, user_id: int, exercise_name: str, new_1rm_kg: flo
     ).first()
     if not sub:
         return
-    ok, _ = _send_push(
+    ok, reason = _send_push(
         sub,
         title="New PR!",
-        body=f"You just hit a new {exercise_name} record: {new_1rm_kg}kg est. 1RM!",
+        body=f"Congratulations on your new {exercise_name} 1RM: {new_1rm_kg}kg!",
         url="/lifts.html",
     )
+    if not ok and reason == "410_GONE":
+        db.delete(sub)
+        db.commit()
 
 
 def notify_inactivity_check(db: Session):
@@ -208,12 +219,15 @@ def notify_inactivity_check(db: Session):
         )
         if latest_log is None or latest_log.date <= three_days_ago:
             days_ago = (date.today() - latest_log.date).days if latest_log else "a while"
-            _send_push(
+            ok, reason = _send_push(
                 sub,
                 title="Time to train!",
                 body=f"It has been {days_ago} days since your last workout. Get back on track!",
                 url="/workout.html",
             )
+            if not ok and reason == "410_GONE":
+                db.delete(sub)
+                db.commit()
 
 
 @router.post("/check-inactivity")
