@@ -217,8 +217,8 @@ function closeDrawer() {
 
 function renderShell(activeId, pageTitle, subtitle) {
   if (!Auth.isLoggedIn()) {
-    window.location.href = "login.html";
-    throw new Error("IRONLOG: not authenticated, redirecting to login.");
+    window.location.href = "index.html";
+    throw new Error("IRONLOG: not authenticated, redirecting to home.");
   }
 
   const navHtml = NAV_ITEMS.map(item => `
@@ -272,7 +272,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   // Desktop logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     Auth.clear();
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   });
 
   // Desktop sidebar toggle
@@ -313,7 +313,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   // Drawer logout
   document.getElementById("drawerLogoutBtn").addEventListener("click", () => {
     Auth.clear();
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   });
 
   // Close drawer on Escape key

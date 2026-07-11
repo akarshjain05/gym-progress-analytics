@@ -101,7 +101,7 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
   if (auth) {
     const token = Auth.getToken();
     if (!token) {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
       throw new ApiError("Not authenticated", 401);
     }
     headers["Authorization"] = `Bearer ${token}`;
@@ -126,7 +126,7 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
 
   if (resp.status === 401 && auth) {
     Auth.clear();
-    window.location.href = "login.html";
+    window.location.href = "index.html";
     throw new ApiError("Session expired - please log in again.", 401);
   }
 
