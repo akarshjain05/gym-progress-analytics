@@ -1,6 +1,6 @@
-from backend.app.database import SessionLocal
-from backend.app.models import User
-from backend.app.demo_templates import create_demo_templates
+from app.database import SessionLocal
+from app.models import User
+from app.demo_templates import create_demo_templates
 
 def main():
     print("Connecting to DB...")

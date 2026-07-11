@@ -57,6 +57,7 @@ def register(request: Request, payload: schemas.UserCreate, db: Session = Depend
         username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
