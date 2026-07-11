@@ -233,6 +233,9 @@ const Api = {
   deleteTemplateExercise(templateId, exerciseId) { return apiRequest(`/templates/${templateId}/exercises/${exerciseId}`, { method: "DELETE" }); },
   reorderTemplateExercises(templateId, payload) { return apiRequest(`/templates/${templateId}/reorder`, { method: "POST", body: payload }); },
   finishWorkout(templateId, payload) { return apiRequest(`/templates/${templateId}/finish`, { method: "POST", body: payload }); },
+  shareTemplate(id) { return apiRequest(`/templates/${id}/share`, { method: "POST" }); },
+  getSharedTemplate(shareId) { return apiRequest(`/templates/shared/${shareId}`); },
+  importSharedTemplate(shareId) { return apiRequest(`/templates/shared/${shareId}/import`, { method: "POST" }); },
 
   // --- coach ---
   getCoachAnalysis() { return apiRequest("/coach/analysis"); },

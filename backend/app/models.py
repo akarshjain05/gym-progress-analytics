@@ -142,6 +142,7 @@ class WorkoutTemplate(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String, nullable=False)            # "Push Day A"
     description = Column(Text, nullable=True)        # optional note
+    share_id = Column(String, unique=True, index=True, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
                         onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

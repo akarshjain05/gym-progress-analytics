@@ -22,6 +22,7 @@ Endpoints:
 
 from datetime import date as date_type, datetime, timezone
 from typing import Optional
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -138,6 +139,7 @@ def _template_out(t: models.WorkoutTemplate) -> dict:
         "id": t.id,
         "name": t.name,
         "description": t.description,
+        "share_id": t.share_id,
         "created_at": t.created_at.isoformat() if t.created_at else None,
         "updated_at": t.updated_at.isoformat() if t.updated_at else None,
         "exercise_count": len(t.exercises),
@@ -462,6 +464,93 @@ def delete_session(
     db.delete(session)
     db.commit()
     return None
+
+
+# ---------------------------------------------------------------------------
+# Template Sharing Routes
+# ---------------------------------------------------------------------------
+
+@router.post("/{template_id}/share")
+def share_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Generate a share link for a template."""
+    t = _get_template(db, template_id, current_user)
+    if not t.share_id:
+        t.share_id = str(uuid.uuid4())
+        db.commit()
+    return {"share_id": t.share_id}
+
+
+@router.get("/shared/{share_id}")
+def get_shared_template(
+    share_id: str,
+    db: Session = Depends(get_db),
+):
+    """Public endpoint to preview a shared template."""
+    t = (
+        db.query(models.WorkoutTemplate)
+        .filter(models.WorkoutTemplate.share_id == share_id)
+        .first()
+    )
+    if not t:
+        raise HTTPException(status_code=404, detail="Shared template not found")
+    
+    return {
+        "id": t.id,
+        "name": t.name,
+        "description": t.description,
+        "creator_username": t.user.username if t.user else "Unknown",
+        "exercise_count": len(t.exercises),
+        "exercises": [_tex_out(te) for te in sorted(t.exercises, key=lambda x: x.position)],
+    }
+
+
+@router.post("/shared/{share_id}/import")
+def import_shared_template(
+    share_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Import a shared template into the current user's account."""
+    t = (
+        db.query(models.WorkoutTemplate)
+        .filter(models.WorkoutTemplate.share_id == share_id)
+        .first()
+    )
+    if not t:
+        raise HTTPException(status_code=404, detail="Shared template not found")
+    
+    if t.user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="You cannot import your own template")
+
+    new_name = f"{t.name} (by {t.user.username})" if t.user else f"{t.name} (Imported)"
+    new_template = models.WorkoutTemplate(
+        user_id=current_user.id,
+        name=new_name,
+        description=t.description,
+    )
+    db.add(new_template)
+    db.flush()
+
+    for te in t.exercises:
+        new_te = models.WorkoutTemplateExercise(
+            template_id=new_template.id,
+            exercise_id=te.exercise_id,
+            position=te.position,
+            target_sets=te.target_sets,
+            target_reps=te.target_reps,
+            target_weight_kg=te.target_weight_kg,
+            rest_seconds=te.rest_seconds,
+            notes=te.notes,
+        )
+        db.add(new_te)
+    
+    db.commit()
+    db.refresh(new_template)
+    return _template_out(new_template)
 
 
 # ---------------------------------------------------------------------------

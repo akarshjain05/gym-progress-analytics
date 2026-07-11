@@ -208,6 +208,7 @@
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escHtml(t.name)}</div>
           <div class="wk-tc-actions">
+            <button class="wk-icon-btn wk-share-btn" data-id="${t.id}" title="Share">🔗</button>
             <button class="wk-icon-btn wk-edit-btn" data-id="${t.id}" title="Edit">✏️</button>
             <button class="wk-icon-btn wk-del-btn" data-id="${t.id}" title="Delete">🗑️</button>
           </div>
@@ -231,6 +232,9 @@
 
     grid.querySelectorAll('.wk-start-btn').forEach(btn => {
       btn.addEventListener('click', () => startWorkout(parseInt(btn.dataset.id)));
+    });
+    grid.querySelectorAll('.wk-share-btn').forEach(btn => {
+      btn.addEventListener('click', () => shareTemplate(parseInt(btn.dataset.id)));
     });
     grid.querySelectorAll('.wk-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => openEditTemplate(parseInt(btn.dataset.id)));
@@ -536,6 +540,22 @@
       templates = templates.filter(t => t.id !== id);
       renderTemplates();
       showToast('Template deleted.');
+    } catch (err) {
+      handleApiError(err);
+    }
+  }
+
+  async function shareTemplate(id) {
+    try {
+      const res = await Api.shareTemplate(id);
+      const shareUrl = `${window.location.origin}/import.html?share_id=${res.share_id}`;
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Share link copied to clipboard!');
+      } else {
+        prompt('Copy this share link:', shareUrl);
+      }
     } catch (err) {
       handleApiError(err);
     }

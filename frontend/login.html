@@ -136,7 +136,8 @@ loginForm.addEventListener("submit", async (e) => {
   btn.disabled = true; btn.textContent = "Logging in…";
   try {
     await Api.login(loginForm.username.value.trim(), loginForm.password.value);
-    window.location.href = "dashboard.html";
+    const urlParams = new URLSearchParams(window.location.search);
+    window.location.href = urlParams.get("next") || "dashboard.html";
   } catch (err) {
     setAlert(err.message || "Login failed.");
     btn.disabled = false; btn.textContent = "Log in";
@@ -151,7 +152,8 @@ registerForm.addEventListener("submit", async (e) => {
   try {
     await Api.register(registerForm.username.value.trim(), registerForm.email.value.trim(), registerForm.password.value);
     await Api.login(registerForm.username.value.trim(), registerForm.password.value);
-    window.location.href = "dashboard.html";
+    const urlParams = new URLSearchParams(window.location.search);
+    window.location.href = urlParams.get("next") || "dashboard.html";
   } catch (err) {
     setAlert(err.message || "Couldn't create account.");
     btn.disabled = false; btn.textContent = "Create account";
@@ -176,7 +178,8 @@ async function handleGoogleCredentialResponse(response) {
       Auth.setToken(result.access_token);
       const user = await Api.getProfile();
       Auth.setUser(user);
-      window.location.href = "dashboard.html";
+      const urlParams = new URLSearchParams(window.location.search);
+      window.location.href = urlParams.get("next") || "dashboard.html";
     }
   } catch (err) {
     setAlert(err.message || "Google sign-in failed.");
@@ -196,7 +199,8 @@ completeGoogleForm.addEventListener("submit", async (e) => {
     Auth.setToken(result.access_token);
     const user = await Api.getProfile();
     Auth.setUser(user);
-    window.location.href = "dashboard.html";
+    const urlParams = new URLSearchParams(window.location.search);
+    window.location.href = urlParams.get("next") || "dashboard.html";
   } catch (err) {
     setAlert(err.message || "Couldn't finish setting up your account.");
     btn.disabled = false; btn.textContent = "Finish setting up";
