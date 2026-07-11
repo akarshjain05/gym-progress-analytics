@@ -20,6 +20,7 @@ from ..security import (
     generate_reset_token,
     hash_reset_token,
 )
+from ..demo_templates import create_demo_templates
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -56,10 +57,12 @@ def register(request: Request, payload: schemas.UserCreate, db: Session = Depend
         username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
-    )
     db.add(user)
     db.commit()
     db.refresh(user)
+    
+    create_demo_templates(db, user.id)
+    
     return user
 
 
@@ -136,6 +139,8 @@ def complete_google_signup(request: Request, response: Response, payload: schema
     user.username = payload.username
     user.password_hash = hash_password(payload.password)
     db.commit()
+
+    create_demo_templates(db, user.id)
 
     access_token = create_access_token(data={"sub": user.username})
     response.set_cookie(
