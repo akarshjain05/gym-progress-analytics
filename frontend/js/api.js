@@ -268,6 +268,75 @@ function handleApiError(err, fallback = "Something went wrong. Try again.") {
   showToast(err instanceof ApiError ? err.message : fallback);
 }
 
+// --- custom modals ---
+window.appAlert = function(title, message, icon = '⚠️') {
+  return new Promise((resolve) => {
+    let modal = document.getElementById('ironlogAlertModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'ironlogAlertModal';
+      modal.className = 'wk-modal-overlay';
+      modal.style.zIndex = '9999';
+      modal.innerHTML = `
+        <div class="wk-modal" style="max-width:350px; text-align:center; padding-top:32px;">
+          <div id="ironlogAlertIcon" style="font-size:40px; margin-bottom:16px;">⚠️</div>
+          <h2 id="ironlogAlertTitle" style="font-size:20px; margin:0 0 12px 0;">Alert</h2>
+          <div id="ironlogAlertMessage" style="color:#A0AEC0; font-size:15px; margin-bottom:24px;"></div>
+          <div class="wk-modal-footer" id="ironlogAlertFooter" style="justify-content:center; gap:12px;">
+            <button class="btn btn-secondary" id="ironlogAlertCancel" style="display:none;">Cancel</button>
+            <button class="btn btn-primary" id="ironlogAlertOk">OK</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    document.getElementById('ironlogAlertIcon').textContent = icon;
+    document.getElementById('ironlogAlertTitle').textContent = title;
+    document.getElementById('ironlogAlertMessage').textContent = message;
+    document.getElementById('ironlogAlertCancel').style.display = 'none';
+    
+    document.getElementById('ironlogAlertOk').onclick = () => {
+      modal.style.display = 'none';
+      resolve(true);
+    };
+    
+    modal.style.display = 'flex';
+  });
+};
+
+window.appConfirm = function(title, message, okText = 'OK', cancelText = 'Cancel', icon = '❓') {
+  return new Promise((resolve) => {
+    let modal = document.getElementById('ironlogAlertModal');
+    if (!modal) {
+      window.appAlert(title, message, icon);
+      modal = document.getElementById('ironlogAlertModal');
+    } else {
+      document.getElementById('ironlogAlertIcon').textContent = icon;
+      document.getElementById('ironlogAlertTitle').textContent = title;
+      document.getElementById('ironlogAlertMessage').textContent = message;
+      modal.style.display = 'flex';
+    }
+    
+    const cancelBtn = document.getElementById('ironlogAlertCancel');
+    cancelBtn.style.display = 'block';
+    cancelBtn.textContent = cancelText;
+    
+    const okBtn = document.getElementById('ironlogAlertOk');
+    okBtn.textContent = okText;
+    
+    cancelBtn.onclick = () => {
+      modal.style.display = 'none';
+      resolve(false);
+    };
+    
+    okBtn.onclick = () => {
+      modal.style.display = 'none';
+      resolve(true);
+    };
+  });
+};
+
 // --- small formatting helpers used across pages ---
 function fmtKg(v, decimals = 1) {
   if (v === null || v === undefined) return "—";

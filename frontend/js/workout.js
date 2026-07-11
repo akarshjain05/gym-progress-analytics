@@ -316,7 +316,8 @@
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = parseInt(btn.dataset.id);
-        if (!confirm('Delete this workout record? (The lift logs are preserved.)')) return;
+        const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? (The lift logs are preserved.)', 'Delete', 'Cancel', '🗑️');
+        if (!confirmed) return;
         try {
           await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
           workoutHistory = workoutHistory.filter(s => s.id !== id);
@@ -550,8 +551,9 @@
   });
 
   async function deleteTemplate(id) {
-    const t = templates.find(t => t.id === id);
-    if (!confirm(`Delete "${t?.name || 'this template'}"? This cannot be undone.`)) return;
+    const t = templates.find(x => x.id === id);
+    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel', '🗑️');
+    if (!confirmed) return;
     try {
       await apiRequest(`/templates/${id}`, { method: 'DELETE' });
       templates = templates.filter(t => t.id !== id);
@@ -892,8 +894,9 @@
   }
 
   // ── Finish workout ─────────────────────────────────────────────────────────
-  document.getElementById('awFinishBtn').addEventListener('click', () => {
-    if (confirm('Finish workout? All logged sets will be saved.')) {
+  document.getElementById('awFinishBtn').addEventListener('click', async () => {
+    const confirmed = await window.appConfirm('Finish Workout', 'Finish workout? All logged sets will be saved.', 'Finish Workout', 'Keep Going', '💪');
+    if (confirmed) {
       finishWorkout();
     }
   });
@@ -914,7 +917,7 @@
       }));
 
     if (!exercisesPayload.length) {
-      alert('Please log at least one completed set before finishing the workout.');
+      window.appAlert('No Sets Logged', 'Please log at least one completed set before finishing the workout.', '⚠️');
       return;
     }
 
