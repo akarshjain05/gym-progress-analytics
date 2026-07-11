@@ -155,6 +155,23 @@
 
   let workoutHistory = [];    // completed workout sessions
 
+  const fmtDate = (d) => {
+    const dt = new Date(d + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    if (dt.getTime() === today.getTime()) return 'Today';
+    if (dt.getTime() === yesterday.getTime()) return 'Yesterday';
+    return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  };
+
+  const fmtDuration = (sec) => {
+    if (!sec) return '—';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
+    return `${m}m ${s}s`;
+  };
+
   // ── Load data ────────────────────────────────────────────────────────────
   async function init() {
     try {
@@ -264,23 +281,6 @@
       if (!byDate[s.date]) byDate[s.date] = [];
       byDate[s.date].push(s);
     }
-
-    const fmtDate = (d) => {
-      const dt = new Date(d + 'T00:00:00');
-      const today = new Date(); today.setHours(0,0,0,0);
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      if (dt.getTime() === today.getTime()) return 'Today';
-      if (dt.getTime() === yesterday.getTime()) return 'Yesterday';
-      return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    };
-
-    const fmtDuration = (sec) => {
-      if (!sec) return '—';
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
-      return `${m}m ${s}s`;
-    };
 
     list.innerHTML = Object.keys(byDate).map(date => `
       <div class="wk-history-date-group">
