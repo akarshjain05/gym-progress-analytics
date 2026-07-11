@@ -433,3 +433,8 @@ input::placeholder { color: var(--text-tertiary); }
   max-width: 400px;
 }
 
+
+/* Template card dropdown menu */
+.wk-dropdown-item:hover {
+  background-color: #2D3748 !important;
+}

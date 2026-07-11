@@ -224,10 +224,13 @@
       <div class="wk-template-card" data-id="${t.id}">
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escHtml(t.name)}</div>
-          <div class="wk-tc-actions">
-            <button class="wk-icon-btn wk-share-btn" data-id="${t.id}" title="Share">🔗</button>
-            <button class="wk-icon-btn wk-edit-btn" data-id="${t.id}" title="Edit">✏️</button>
-            <button class="wk-icon-btn wk-del-btn" data-id="${t.id}" title="Delete">🗑️</button>
+          <div class="wk-tc-actions" style="position:relative;">
+            <button class="wk-icon-btn wk-menu-btn" data-id="${t.id}">⋮</button>
+            <div class="wk-dropdown-menu" id="wk-menu-${t.id}" style="display:none; position:absolute; right:0; top:24px; background:#1A1D21; border:1px solid #2D3748; border-radius:8px; overflow:hidden; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.5); min-width:120px;">
+              <button class="wk-dropdown-item wk-share-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px;">Share</button>
+              <button class="wk-dropdown-item wk-edit-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Edit</button>
+              <button class="wk-dropdown-item wk-del-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#FC8181; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Delete</button>
+            </div>
           </div>
         </div>
         ${t.description ? `<div class="wk-tc-desc">${escHtml(t.description)}</div>` : ''}
@@ -250,14 +253,24 @@
     grid.querySelectorAll('.wk-start-btn').forEach(btn => {
       btn.addEventListener('click', () => startWorkout(parseInt(btn.dataset.id)));
     });
+    grid.querySelectorAll('.wk-menu-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const menu = document.getElementById(`wk-menu-${id}`);
+        const isVisible = menu.style.display === 'block';
+        document.querySelectorAll('.wk-dropdown-menu').forEach(m => m.style.display = 'none');
+        if (!isVisible) menu.style.display = 'block';
+      });
+    });
     grid.querySelectorAll('.wk-share-btn').forEach(btn => {
-      btn.addEventListener('click', () => shareTemplate(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); shareTemplate(parseInt(btn.dataset.id)); });
     });
     grid.querySelectorAll('.wk-edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => openEditTemplate(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openEditTemplate(parseInt(btn.dataset.id)); });
     });
     grid.querySelectorAll('.wk-del-btn').forEach(btn => {
-      btn.addEventListener('click', () => deleteTemplate(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); deleteTemplate(parseInt(btn.dataset.id)); });
     });
   }
 
@@ -1134,3 +1147,7 @@
 
   init();
 })();
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.wk-dropdown-menu').forEach(m => m.style.display = 'none');
+});
