@@ -380,7 +380,24 @@
           html += `<div style="color:#A0AEC0; font-style:italic;">No logged sets found for this workout.</div>`;
       }
       
+      html += `<div style="margin-top:24px; padding-top:16px; border-top:1px solid #2D3748;">
+        <button class="btn btn-secondary wk-btn-full" id="historyShareBtn" style="background:#3E7CB1;color:white;border-color:#3E7CB1;width:100%;padding:12px;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;">📸 Share to IG Story</button>
+      </div>`;
+      
       body.innerHTML = html;
+
+      const durationStr = data.duration_seconds
+        ? Math.floor(data.duration_seconds/60) + 'm ' + (data.duration_seconds%60) + 's'
+        : '—';
+        
+      document.getElementById('historyShareBtn').onclick = () => {
+        generateShareImage('historyShareBtn', {
+          exercises_saved: data.exercises_count,
+          total_sets_saved: data.sets_count,
+          durationStr: durationStr,
+          new_prs: [] 
+        });
+      };
 
     } catch (err) {
       body.innerHTML = `<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`;
@@ -978,112 +995,121 @@
       window.location.href = 'lifts.html';
     };
 
-    document.getElementById('wcShareBtn').onclick = async () => {
-      if (!window.html2canvas) {
-        showToast("Sharing is loading, please try again in a second.");
-        return;
-      }
-      
-      const shareBtn = document.getElementById('wcShareBtn');
-      const origText = shareBtn.innerHTML;
-      shareBtn.innerHTML = "Generating Image...";
-      shareBtn.disabled = true;
-
-      // Create a temporary hidden container for the share image
-      const shareContainer = document.createElement("div");
-      shareContainer.style.position = "absolute";
-      shareContainer.style.left = "-9999px";
-      shareContainer.style.top = "-9999px";
-      
-      // The actual square card
-      const card = document.createElement("div");
-      card.style.width = "1080px";
-      card.style.height = "1080px";
-      card.style.background = "#15181B";
-      card.style.color = "#F2F0EA";
-      card.style.display = "flex";
-      card.style.flexDirection = "column";
-      card.style.justifyContent = "center";
-      card.style.alignItems = "center";
-      card.style.fontFamily = "'Inter', sans-serif";
-      card.style.padding = "80px";
-      card.style.boxSizing = "border-box";
-      card.style.backgroundImage = "radial-gradient(circle at 15% 0%, rgba(226,64,45,0.1), transparent 50%), radial-gradient(circle at 85% 100%, rgba(62,124,177,0.1), transparent 50%)";
-
-      card.innerHTML = `
-        <div style="font-size: 64px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 24px; color: #E2402D;">Workout Complete</div>
-        <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${result.exercises_saved} Exercises • ${result.total_sets_saved} Sets • ${durationStr}</div>
-        
-        <div style="width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-bottom: auto;">
-          ${result.new_prs && result.new_prs.length > 0 ? 
-            result.new_prs.slice(0, 4).map(pr => `
-              <div style="background: #1E2227; border-radius: 20px; padding: 40px; border: 2px solid rgba(242, 240, 234, 0.1);">
-                <div style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">${escHtml(pr.exercise)}</div>
-                <div style="font-size: 48px; color: #D4A33B; font-weight: 800;">${pr.new_1rm_kg}kg <span style="font-size: 24px; color: #9CA5AC; font-weight: 400;">est. 1RM</span></div>
-                <div style="color: #4F9D69; font-size: 28px; font-weight: 600; margin-top: 16px;">+${Math.round((pr.new_1rm_kg - (pr.old_1rm_kg||0))*10)/10}kg PR 🏆</div>
-              </div>
-            `).join('')
-          : 
-            `<div style="grid-column: span 2; text-align: center; color: #6B7480; font-size: 32px; font-style: italic; margin-top: 80px;">Another solid day in the books.</div>`
-          }
-        </div>
-        
-        <div style="display: flex; align-items: center; gap: 24px; margin-top: 60px;">
-          <div style="width: 80px; height: 80px; background: #E2402D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; font-family: 'Oswald', sans-serif;">IL</div>
-          <div style="font-size: 36px; font-weight: 700; letter-spacing: 2px;">IRONLOG</div>
-        </div>
-      `;
-      
-      shareContainer.appendChild(card);
-      document.body.appendChild(shareContainer);
-
-      try {
-        const canvas = await html2canvas(card, {
-          scale: 1, // 1080x1080 is large enough
-          useCORS: true,
-          backgroundColor: "#15181B"
-        });
-        
-        canvas.toBlob(async (blob) => {
-          if (!blob) throw new Error("Failed to generate image blob");
-          
-          const file = new File([blob], 'ironlog-workout.png', { type: 'image/png' });
-          
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-              await navigator.share({
-                files: [file],
-                title: 'IRONLOG Workout',
-                text: 'Just crushed a workout on IRONLOG! 💪'
-              });
-            } catch (shareErr) {
-              // Ignore AbortError when user cancels the share dialog
-              if (shareErr.name !== 'AbortError') {
-                console.error("Error sharing:", shareErr);
-              }
-            }
-          } else {
-            // Fallback to download
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ironlog-workout.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }
-        }, 'image/png');
-        
-      } catch (e) {
-        console.error("Error generating share image:", e);
-        showToast("Couldn't generate image. Try again.");
-      } finally {
-        document.body.removeChild(shareContainer);
-        shareBtn.innerHTML = origText;
-        shareBtn.disabled = false;
-      }
+    document.getElementById('wcShareBtn').onclick = () => {
+      generateShareImage('wcShareBtn', {
+        exercises_saved: result.exercises_saved,
+        total_sets_saved: result.total_sets_saved,
+        durationStr: durationStr,
+        new_prs: result.new_prs
+      });
     };
+  }
+
+  async function generateShareImage(btnId, data) {
+    if (!window.html2canvas) {
+      showToast("Sharing is loading, please try again in a second.");
+      return;
+    }
+    
+    const shareBtn = document.getElementById(btnId);
+    const origText = shareBtn.innerHTML;
+    shareBtn.innerHTML = "Generating Image...";
+    shareBtn.disabled = true;
+
+    // Create a temporary hidden container for the share image
+    const shareContainer = document.createElement("div");
+    shareContainer.style.position = "absolute";
+    shareContainer.style.left = "-9999px";
+    shareContainer.style.top = "-9999px";
+    
+    // The actual square card
+    const card = document.createElement("div");
+    card.style.width = "1080px";
+    card.style.height = "1080px";
+    card.style.background = "#15181B";
+    card.style.color = "#F2F0EA";
+    card.style.display = "flex";
+    card.style.flexDirection = "column";
+    card.style.justifyContent = "center";
+    card.style.alignItems = "center";
+    card.style.fontFamily = "'Inter', sans-serif";
+    card.style.padding = "80px";
+    card.style.boxSizing = "border-box";
+    card.style.backgroundImage = "radial-gradient(circle at 15% 0%, rgba(226,64,45,0.1), transparent 50%), radial-gradient(circle at 85% 100%, rgba(62,124,177,0.1), transparent 50%)";
+
+    card.innerHTML = `
+      <div style="font-size: 64px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 24px; color: #E2402D;">Workout Complete</div>
+      <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${data.exercises_saved} Exercises • ${data.total_sets_saved} Sets • ${data.durationStr}</div>
+      
+      <div style="width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-bottom: auto;">
+        ${data.new_prs && data.new_prs.length > 0 ? 
+          data.new_prs.slice(0, 4).map(pr => `
+            <div style="background: #1E2227; border-radius: 20px; padding: 40px; border: 2px solid rgba(242, 240, 234, 0.1);">
+              <div style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">${escHtml(pr.exercise)}</div>
+              <div style="font-size: 48px; color: #D4A33B; font-weight: 800;">${pr.new_1rm_kg}kg <span style="font-size: 24px; color: #9CA5AC; font-weight: 400;">est. 1RM</span></div>
+              <div style="color: #4F9D69; font-size: 28px; font-weight: 600; margin-top: 16px;">+${Math.round((pr.new_1rm_kg - (pr.old_1rm_kg||0))*10)/10}kg PR 🏆</div>
+            </div>
+          `).join('')
+        : 
+          `<div style="grid-column: span 2; text-align: center; color: #6B7480; font-size: 32px; font-style: italic; margin-top: 80px;">Another solid day in the books.</div>`
+        }
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: 24px; margin-top: 60px;">
+        <div style="width: 80px; height: 80px; background: #E2402D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; font-family: 'Oswald', sans-serif;">IL</div>
+        <div style="font-size: 36px; font-weight: 700; letter-spacing: 2px;">IRONLOG</div>
+      </div>
+    `;
+    
+    shareContainer.appendChild(card);
+    document.body.appendChild(shareContainer);
+
+    try {
+      const canvas = await html2canvas(card, {
+        scale: 1, // 1080x1080 is large enough
+        useCORS: true,
+        backgroundColor: "#15181B"
+      });
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error("Failed to generate image blob");
+        
+        const file = new File([blob], 'ironlog-workout.png', { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'IRONLOG Workout',
+              text: 'Just crushed a workout on IRONLOG! 💪'
+            });
+          } catch (shareErr) {
+            // Ignore AbortError when user cancels the share dialog
+            if (shareErr.name !== 'AbortError') {
+              console.error("Error sharing:", shareErr);
+            }
+          }
+        } else {
+          // Fallback to download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'ironlog-workout.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png');
+      
+    } catch (e) {
+      console.error("Error generating share image:", e);
+      showToast("Couldn't generate image. Try again.");
+    } finally {
+      document.body.removeChild(shareContainer);
+      shareBtn.innerHTML = origText;
+      shareBtn.disabled = false;
+    }
   }
 
   document.getElementById('startFreeBtn').addEventListener('click', () => startWorkout(0));
