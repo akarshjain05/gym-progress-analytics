@@ -914,12 +914,15 @@
       }));
 
     if (!exercisesPayload.length) {
-      showToast('No completed sets to save.', 'error');
+      alert('Please log at least one completed set before finishing the workout.');
       return;
     }
 
-    const btn = document.getElementById('awFinishBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    const topBtn = document.getElementById('awFinishBtn');
+    const btmBtn = document.getElementById('awFinishBtnBottom');
+    
+    if (topBtn) { topBtn.disabled = true; topBtn.textContent = 'Saving…'; }
+    if (btmBtn) { btmBtn.disabled = true; btmBtn.textContent = 'Saving…'; }
 
     try {
       const endpoint = awTemplateId
@@ -933,11 +936,17 @@
 
       document.getElementById('activeWorkout').style.display = 'none';
       document.body.style.overflow = '';
+      
+      // Reset button states for future workouts
+      if (topBtn) { topBtn.disabled = false; topBtn.textContent = 'Finish'; }
+      if (btmBtn) { btmBtn.disabled = false; btmBtn.textContent = 'Finish Workout 🎉'; }
+      
       showCompletionModal(result, duration);
 
     } catch (err) {
       handleApiError(err, 'Could not save workout.');
-      if (btn) { btn.disabled = false; btn.textContent = 'Finish'; }
+      if (topBtn) { topBtn.disabled = false; topBtn.textContent = 'Finish'; }
+      if (btmBtn) { btmBtn.disabled = false; btmBtn.textContent = 'Finish Workout 🎉'; }
     }
   }
 
