@@ -26,6 +26,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -122,9 +123,9 @@ def _get_exercise(db: Session, exercise_id: int, user: models.User) -> models.Ex
         db.query(models.Exercise)
         .filter(
             models.Exercise.id == exercise_id,
-            (
-                (models.Exercise.created_by.is_(None)) |
-                (models.Exercise.created_by == user.id)
+            or_(
+                models.Exercise.created_by.is_(None),
+                models.Exercise.created_by == user.id
             ),
         )
         .first()
@@ -204,9 +205,9 @@ def _finish_workout_logic(
             db.query(models.Exercise)
             .filter(
                 models.Exercise.id == ex_data.exercise_id,
-                (
-                    (models.Exercise.created_by.is_(None)) |
-                    (models.Exercise.created_by == current_user.id)
+                or_(
+                    models.Exercise.created_by.is_(None),
+                    models.Exercise.created_by == current_user.id
                 ),
             )
             .first()
@@ -237,7 +238,6 @@ def _finish_workout_logic(
             entry = models.LiftLog(
                 user_id=current_user.id,
                 exercise_id=ex_data.exercise_id,
-                session_id=session.id,
                 date=payload.date,
                 weight_kg=set_data.weight_kg,
                 reps=set_data.reps,
@@ -245,6 +245,7 @@ def _finish_workout_logic(
                 set_number=set_number,
                 notes=ex_data.notes,
             )
+            session.lift_logs.append(entry)
             db.add(entry)
             session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
             set_number += 1
