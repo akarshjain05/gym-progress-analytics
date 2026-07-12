@@ -29,4 +29,3 @@ jobs:
             echo "BREVO_SENDER_EMAIL=$BREVO_SENDER_EMAIL" >> .env
             git pull
             docker compose up -d --build
-            docker compose exec -T backend python add_demo_templates_to_existing_users.py
