@@ -671,9 +671,9 @@
     }
 
     const html = sessions.map((session, idx) => {
-      const setsHtml = session.sets.map(set => `
+      const setsHtml = session.sets.map((set, setIdx) => `
         <div class="set-row" data-id="${set.id}">
-          <span class="set-num">${set.set_number != null ? "#" + set.set_number : "—"}</span>
+          <span class="set-num">#${setIdx + 1}</span>
           <span class="set-weight">${set.weight_kg} kg</span>
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
