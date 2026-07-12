@@ -636,7 +636,7 @@
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
           <span class="set-note">${set.notes || ""}</span>
-          <button class="set-delete-btn" data-logid="${set.id}" title="Delete set">🗑</button>
+          <button class="set-delete-btn" data-logid="${set.id}" title="Delete set" style="font-size: 14px; opacity: 0.6; padding: 4px;">✕</button>
         </div>
       `).join("");
 
@@ -682,7 +682,8 @@
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const logId = btn.dataset.logid;
-        if (!confirm("Delete this set?")) return;
+        const confirmed = await window.appConfirm('Delete Set', 'Delete this set?', 'Delete', 'Cancel', '⚠️');
+        if (!confirmed) return;
         try {
           await apiRequest(`/lifts/${logId}`, { method: "DELETE" });
           loadProgress(currentExerciseId);

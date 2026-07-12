@@ -305,7 +305,7 @@
                 <span class="wk-history-icon">${s.template_id ? '📋' : '🏋️'}</span>
                 ${escHtml(s.template_name)}
               </div>
-              <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete">🗑️</button>
+              <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete" style="font-size: 16px;">✕</button>
             </div>
             <div class="wk-history-meta">
               <span>⏱ ${fmtDuration(s.duration_seconds)}</span>
@@ -329,7 +329,7 @@
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = parseInt(btn.dataset.id);
-        const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? (The lift logs are preserved.)', 'Delete', 'Cancel', '🗑️');
+        const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? This will also delete all logged sets from this session.', 'Delete', 'Cancel', '⚠️');
         if (!confirmed) return;
         try {
           await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
@@ -565,7 +565,7 @@
 
   async function deleteTemplate(id) {
     const t = templates.find(x => x.id === id);
-    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel', '🗑️');
+    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel', '⚠️');
     if (!confirmed) return;
     try {
       await apiRequest(`/templates/${id}`, { method: 'DELETE' });
