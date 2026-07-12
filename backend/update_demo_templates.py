@@ -1,5 +1,5 @@
 from app.database import SessionLocal
-from app.models import User, WorkoutTemplate, TemplateExercise
+from app.models import User, WorkoutTemplate
 from app.demo_templates import create_demo_templates
 
 def main():
