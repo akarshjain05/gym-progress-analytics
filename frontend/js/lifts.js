@@ -688,7 +688,7 @@
 
       const isFirst = idx === 0; // expand latest session by default
       return `
-        <div class="session-group">
+        <div class="session-group" style="overflow: visible !important;">
           <div class="session-date-row" data-idx="${idx}">
             <span class="session-date-label">${formatFullDate(session.date)}</span>
             <span class="session-meta">${session.set_count} sets · ${session.volume_kg} kg vol · Best 1RM: ${session.best_1rm_kg} kg</span>
