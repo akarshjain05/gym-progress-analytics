@@ -14,6 +14,7 @@ from ..security import (
     hash_password,
     verify_password,
     create_access_token,
+    create_refresh_token,
     verify_google_id_token,
     create_setup_token,
     decode_setup_token,
@@ -91,7 +92,8 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
         secure=not settings.frontend_url.startswith("http://localhost"),
         max_age=settings.access_token_expire_minutes * 60
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(data={"sub": user.username})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 @router.post("/google", response_model=schemas.GoogleLoginOut)
@@ -120,7 +122,8 @@ def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session =
         return {"needs_setup": True, "setup_token": setup_token, "email": user.email}
 
     access_token = create_access_token(data={"sub": user.username})
-    return {"needs_setup": False, "access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(data={"sub": user.username})
+    return {"needs_setup": False, "access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 @router.post("/complete-google-signup")
@@ -152,7 +155,8 @@ def complete_google_signup(request: Request, response: Response, payload: schema
         secure=not settings.frontend_url.startswith("http://localhost"),
         max_age=settings.access_token_expire_minutes * 60
     )
-    return {"message": "Signup complete and logged in"}
+    refresh_token = create_refresh_token(data={"sub": user.username})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 @router.post("/forgot-password")
@@ -196,7 +200,44 @@ def reset_password(request: Request, payload: schemas.ResetPasswordIn, db: Sessi
 
     return {"message": "Password reset successful. You can now log in with your new password."}
 
+
+@router.post("/refresh", response_model=schemas.Token)
+def refresh_token(payload: schemas.TokenRefreshIn, db: Session = Depends(get_db)):
+    from jose import jwt, JWTError
+    try:
+        token_data = jwt.decode(payload.refresh_token, settings.secret_key, algorithms=[settings.algorithm])
+        if token_data.get("type") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        username = token_data.get("sub")
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+            
+        # Check blacklist
+        is_blacklisted = db.query(models.BlacklistedToken).filter(models.BlacklistedToken.token == payload.refresh_token).first()
+        if is_blacklisted:
+            raise HTTPException(status_code=401, detail="Token has been revoked")
+            
+        user = db.query(models.User).filter(models.User.username == username).first()
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+            
+        access_token = create_access_token(data={"sub": user.username})
+        new_refresh_token = create_refresh_token(data={"sub": user.username})
+        
+        # Blacklist old refresh token to prevent reuse
+        db.add(models.BlacklistedToken(token=payload.refresh_token))
+        db.commit()
+        
+        return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
 @router.post("/logout")
-def logout(response: Response):
+def logout(payload: schemas.TokenRefreshIn, response: Response, db: Session = Depends(get_db)):
+    # Blacklist the refresh token
+    is_blacklisted = db.query(models.BlacklistedToken).filter(models.BlacklistedToken.token == payload.refresh_token).first()
+    if not is_blacklisted:
+        db.add(models.BlacklistedToken(token=payload.refresh_token))
+        db.commit()
     response.delete_cookie("access_token", httponly=True, samesite="lax")
     return {"message": "Logged out successfully"}

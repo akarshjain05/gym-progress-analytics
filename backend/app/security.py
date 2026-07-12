@@ -30,7 +30,14 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "type": "access"})
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(days=7))
+    to_encode.update({"exp": expire, "type": "refresh"})
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
@@ -47,7 +54,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         # google_setup tokens are a different, more limited kind of token (see
         # create_setup_token below) and must never be usable as a normal
         # access token, even though they're signed with the same secret.
-        if payload.get("type") == "google_setup":
+        if payload.get("type") in ["google_setup", "refresh"]:
             raise credentials_exception
         username: str = payload.get("sub")
         if username is None:
