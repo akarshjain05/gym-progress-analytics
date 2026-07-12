@@ -12,6 +12,9 @@ from app.main import app
 from app.database import Base, get_db
 from app.seed_exercises import seed_exercises
 
+# Disable rate limiting for integration tests
+app.state.limiter.enabled = False
+
 
 @pytest.fixture()
 def client(tmp_path):
@@ -149,7 +152,8 @@ def test_personal_records_endpoint(client):
     client.post("/lifts", json={"exercise_id": bench["id"], "date": "2026-01-01", "weight_kg": 80, "reps": 5}, headers=headers)
     client.post("/lifts", json={"exercise_id": squat["id"], "date": "2026-01-01", "weight_kg": 120, "reps": 3}, headers=headers)
 
-    prs = client.get("/lifts/personal-records", headers=headers).json()
+    prs_response = client.get("/lifts/personal-records", headers=headers).json()
+    prs = prs_response.get("flat", [])
     assert len(prs) == 2
     pr_names = {p["exercise"] for p in prs}
     assert pr_names == {"Bench Press", "Squat"}

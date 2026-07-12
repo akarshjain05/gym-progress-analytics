@@ -109,7 +109,7 @@ def test_strength_standard_classification():
 
 
 def test_strength_standard_unknown_exercise_returns_none():
-    assert calc.classify_strength_level("bicep curl", "male", 80, 30) is None
+    assert calc.classify_strength_level("unknown exercise xyz", "male", 80, 30) is None
 
 
 if __name__ == "__main__":
