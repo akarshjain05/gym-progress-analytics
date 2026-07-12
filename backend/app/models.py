@@ -26,6 +26,8 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    failed_login_attempts = Column(Integer, default=0, nullable=False, server_default='0')
+    locked_until = Column(DateTime, nullable=True)
 
     google_id = Column(String, unique=True, index=True, nullable=True)
 

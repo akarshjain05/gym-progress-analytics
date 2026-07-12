@@ -77,12 +77,40 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             models.User.email == form_data.username
         )
     ).first()
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if user and user.locked_until and user.locked_until > now:
+        minutes_left = int((user.locked_until - now).total_seconds() / 60) + 1
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Account is locked due to too many failed attempts. Try again in {minutes_left} minutes.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     if not user or not user.password_hash or not verify_password(form_data.password, user.password_hash):
+        if user:
+            user.failed_login_attempts += 1
+            if user.failed_login_attempts >= 5:
+                user.locked_until = now + timedelta(minutes=15)
+                db.commit()
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Account locked due to too many failed attempts. Try again in 15 minutes.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            db.commit()
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    if user.failed_login_attempts > 0 or user.locked_until is not None:
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.commit()
     access_token = create_access_token(data={"sub": user.username})
     response.set_cookie(
         key="access_token",
