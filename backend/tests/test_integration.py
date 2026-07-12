@@ -15,6 +15,10 @@ from app.seed_exercises import seed_exercises
 # Disable rate limiting for integration tests
 app.state.limiter.enabled = False
 
+# Run Celery tasks synchronously in tests
+from app.worker import celery_app
+celery_app.conf.update(task_always_eager=True)
+
 
 @pytest.fixture()
 def client(tmp_path):
