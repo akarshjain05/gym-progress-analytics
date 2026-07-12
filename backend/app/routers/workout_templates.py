@@ -451,7 +451,7 @@ def delete_session(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Delete a completed workout session record (lift logs are preserved)."""
+    """Delete a completed workout session record and its associated lift logs."""
     session = (
         db.query(models.WorkoutSession)
         .filter(
@@ -462,6 +462,9 @@ def delete_session(
     )
     if not session:
         raise HTTPException(status_code=404, detail="Workout session not found")
+    # Delete associated lift logs explicitly
+    db.query(models.LiftLog).filter(models.LiftLog.session_id == session_id).delete()
+    
     db.delete(session)
     db.commit()
     return None

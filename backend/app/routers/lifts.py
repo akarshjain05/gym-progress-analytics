@@ -104,8 +104,21 @@ def delete_lift(
     )
     if not entry:
         raise HTTPException(status_code=404, detail="Lift log not found")
+    session_id = entry.session_id
     db.delete(entry)
     db.commit()
+    
+    if session_id:
+        remaining = db.query(models.LiftLog).filter(models.LiftLog.session_id == session_id).all()
+        session = db.query(models.WorkoutSession).filter(models.WorkoutSession.id == session_id).first()
+        if session:
+            if not remaining:
+                db.delete(session)
+            else:
+                session.sets_count = len(remaining)
+                session.exercises_count = len({r.exercise_id for r in remaining})
+            db.commit()
+            
     return None
 
 
