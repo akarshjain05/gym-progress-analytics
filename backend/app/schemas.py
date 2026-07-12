@@ -130,6 +130,17 @@ class LiftLogIn(BaseModel):
     def round_rpe(cls, v):
         return round(v * 2) / 2 if v is not None else v  # snap to nearest 0.5
 
+class LiftLogUpdate(BaseModel):
+    weight_kg: Optional[float] = Field(None, ge=0, le=600)
+    reps: Optional[int] = Field(None, gt=0, le=100)
+    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+    @field_validator("rpe")
+    @classmethod
+    def round_rpe(cls, v):
+        return round(v * 2) / 2 if v is not None else v
+
 
 class LiftLogOut(LiftLogIn):
     id: int

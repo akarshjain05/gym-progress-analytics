@@ -17,11 +17,51 @@
   renderShell("lifts", "Lifts", "Estimated 1RM, PRs, and strength trend per exercise.");
 
   const pageHeaderActions = document.getElementById("pageHeaderActions");
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.set-menu-container')) {
+      document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
+    }
+  });
   pageHeaderActions.innerHTML = `<button class="btn btn-primary" id="logSessionBtn">+ Log a session</button>`;
 
   const content = document.getElementById("pageContent");
   content.innerHTML = `
     <div id="liftsPage">
+    <!-- Edit Set Modal -->
+    <div id="editSetModal" class="wk-modal-overlay" style="display:none; z-index:9999;">
+      <div class="wk-modal" style="max-width:350px;">
+        <h2 style="margin:0 0 16px 0;">Edit Set</h2>
+        <form id="editSetForm" style="display:flex; flex-direction:column; gap:12px;">
+          <input type="hidden" id="editSetId">
+          <div style="display:flex; gap:12px;">
+            <div style="flex:1;">
+              <label class="form-label">Weight (kg)</label>
+              <input type="number" id="editSetWeight" step="0.1" class="form-control" required>
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Reps</label>
+              <input type="number" id="editSetReps" class="form-control" required>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <div style="flex:1;">
+              <label class="form-label">RPE (Optional)</label>
+              <input type="number" id="editSetRPE" step="0.5" class="form-control" min="1" max="10">
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Notes</label>
+            <textarea id="editSetNotes" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="wk-modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('editSetModal').style.display='none'">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="editSetSaveBtn">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
       <!-- Two-step exercise selector -->
       <div class="lifts-selector-row">
@@ -636,7 +676,13 @@
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
           <span class="set-note">${set.notes || ""}</span>
-          <button class="set-delete-btn" data-logid="${set.id}" title="Delete set" style="font-size: 14px; opacity: 0.6; padding: 4px;">✕</button>
+          <div style="position:relative;" class="set-menu-container">
+            <button class="set-menu-btn" title="Options" style="font-size: 18px; opacity: 0.6; padding: 4px; background: none; border: none; color: inherit; cursor: pointer;" onclick="event.stopPropagation(); const d = this.nextElementSibling; const isVis = d.style.display === 'block'; document.querySelectorAll('.set-dropdown').forEach(x => x.style.display='none'); if(!isVis) d.style.display='block';">⋮</button>
+            <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:#2D3748; border-radius:6px; padding:4px 0; z-index:10; box-shadow:0 4px 6px rgba(0,0,0,0.3); min-width:100px;">
+              <div class="wk-dropdown-item set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="padding:8px 16px; cursor:pointer; font-size:14px; white-space:nowrap;">Edit set</div>
+              <div class="wk-dropdown-item set-delete-btn" data-logid="${set.id}" style="padding:8px 16px; cursor:pointer; font-size:14px; color:#FC8181; white-space:nowrap;">Delete set</div>
+            </div>
+          </div>
         </div>
       `).join("");
 
@@ -691,6 +737,21 @@
         } catch (err) {
           handleApiError(err);
         }
+      });
+    });
+
+    // Edit set buttons
+    container.querySelectorAll(".set-edit-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
+        const log = JSON.parse(btn.dataset.log.replace(/&apos;/g, "'"));
+        document.getElementById("editSetId").value = log.id;
+        document.getElementById("editSetWeight").value = log.weight_kg;
+        document.getElementById("editSetReps").value = log.reps;
+        document.getElementById("editSetRPE").value = log.rpe || "";
+        document.getElementById("editSetNotes").value = log.notes || "";
+        document.getElementById("editSetModal").style.display = "flex";
       });
     });
   }
@@ -908,11 +969,37 @@
         loadProgress(ex.id);
       }, 50);
       document.getElementById("customModal").style.display = "none";
-      showToast("Exercise added!");
+      showToast("Exercise created!");
+      loadProgress(ex.id);
     } catch (err) {
       handleApiError(err);
     } finally {
       btn.disabled = false;
+    }
+  });
+
+  document.getElementById("editSetForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const logId = document.getElementById("editSetId").value;
+    const payload = {
+      weight_kg: parseFloat(document.getElementById("editSetWeight").value),
+      reps: parseInt(document.getElementById("editSetReps").value, 10),
+      rpe: document.getElementById("editSetRPE").value ? parseFloat(document.getElementById("editSetRPE").value) : null,
+      notes: document.getElementById("editSetNotes").value || null
+    };
+    const btn = document.getElementById("editSetSaveBtn");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+      await apiRequest(`/lifts/${logId}`, { method: "PUT", body: payload });
+      document.getElementById("editSetModal").style.display = "none";
+      loadProgress(currentExerciseId);
+      loadPersonalRecords();
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save";
     }
   });
 

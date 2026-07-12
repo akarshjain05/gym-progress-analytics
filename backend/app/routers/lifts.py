@@ -91,6 +91,38 @@ def list_lifts(
     return q.order_by(models.LiftLog.date.asc()).all()
 
 
+@router.put("/{log_id}", response_model=schemas.LiftLogOut)
+def update_lift(
+    log_id: int,
+    payload: schemas.LiftLogUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    entry = (
+        db.query(models.LiftLog)
+        .filter(models.LiftLog.id == log_id, models.LiftLog.user_id == current_user.id)
+        .first()
+    )
+    if not entry:
+        raise HTTPException(status_code=404, detail="Lift log not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(entry, key, value)
+
+    db.commit()
+    db.refresh(entry)
+
+    # Recalculate session metrics if part of a session
+    if entry.session_id and ("weight_kg" in update_data or "reps" in update_data):
+        session = db.query(models.WorkoutSession).filter_by(id=entry.session_id).first()
+        if session:
+            # Recompute total duration (not affected), but volume could be?
+            pass # We don't store volume directly on the session, so no need to recalculate.
+            
+    return entry
+
+
 @router.delete("/{log_id}", status_code=204)
 def delete_lift(
     log_id: int,
