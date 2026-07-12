@@ -15,9 +15,9 @@ def create_demo_templates(db: Session, user_id: int):
 
     # Map exercise names to their IDs
     exercise_names = [
-        "Bench Press", "Overhead Press", "Incline Dumbbell Press", "Tricep Pushdown",
-        "Deadlift", "Lat Pulldown", "Barbell Row", "Bicep Curl",
-        "Squat", "Leg Press", "Leg Extension", "Leg Curl"
+        "Bench Press", "Incline Dumbbell Press", "Overhead Press", "Lateral Raise", "Tricep Pushdown", "Overhead Cable Tricep Extension",
+        "Pull-up", "Barbell Row", "Lat Pulldown", "Face Pull", "Barbell Curl", "Hammer Curl",
+        "Squat", "Romanian Deadlift", "Leg Press", "Leg Curl", "Leg Extension", "Standing Calf Raise"
     ]
     
     exercises = db.query(models.Exercise).filter(models.Exercise.name.in_(exercise_names)).all()
@@ -30,19 +30,23 @@ def create_demo_templates(db: Session, user_id: int):
             "description": "Chest, Shoulders, and Triceps focus.",
             "exercises": [
                 {"name": "Bench Press", "sets": 3, "reps": 8},
-                {"name": "Overhead Press", "sets": 3, "reps": 10},
                 {"name": "Incline Dumbbell Press", "sets": 3, "reps": 10},
+                {"name": "Overhead Press", "sets": 3, "reps": 10},
+                {"name": "Lateral Raise", "sets": 3, "reps": 15},
                 {"name": "Tricep Pushdown", "sets": 3, "reps": 12},
+                {"name": "Overhead Cable Tricep Extension", "sets": 3, "reps": 12},
             ]
         },
         {
             "name": "Pull Day",
             "description": "Back and Biceps focus.",
             "exercises": [
-                {"name": "Deadlift", "sets": 3, "reps": 5},
-                {"name": "Lat Pulldown", "sets": 3, "reps": 10},
+                {"name": "Pull-up", "sets": 3, "reps": 8},
                 {"name": "Barbell Row", "sets": 3, "reps": 10},
-                {"name": "Bicep Curl", "sets": 3, "reps": 12},
+                {"name": "Lat Pulldown", "sets": 3, "reps": 10},
+                {"name": "Face Pull", "sets": 3, "reps": 15},
+                {"name": "Barbell Curl", "sets": 3, "reps": 10},
+                {"name": "Hammer Curl", "sets": 3, "reps": 12},
             ]
         },
         {
@@ -50,9 +54,11 @@ def create_demo_templates(db: Session, user_id: int):
             "description": "Quads, Hamstrings, and Calves focus.",
             "exercises": [
                 {"name": "Squat", "sets": 3, "reps": 8},
+                {"name": "Romanian Deadlift", "sets": 3, "reps": 10},
                 {"name": "Leg Press", "sets": 3, "reps": 10},
-                {"name": "Leg Extension", "sets": 3, "reps": 15},
                 {"name": "Leg Curl", "sets": 3, "reps": 15},
+                {"name": "Leg Extension", "sets": 3, "reps": 15},
+                {"name": "Standing Calf Raise", "sets": 3, "reps": 15},
             ]
         }
     ]
