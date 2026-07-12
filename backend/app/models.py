@@ -191,7 +191,7 @@ class WorkoutSession(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    template_id = Column(Integer, ForeignKey("workout_templates.id"), nullable=True)  # null for free workout
+    template_id = Column(Integer, ForeignKey("workout_templates.id", ondelete="SET NULL"), nullable=True)  # null for free workout
     template_name = Column(String, nullable=False, default="Free Workout")
     date = Column(Date, nullable=False, default=date.today)
     duration_seconds = Column(Integer, nullable=True)
