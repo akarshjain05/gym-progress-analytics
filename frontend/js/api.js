@@ -113,6 +113,7 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
       method,
       headers,
       body: body === undefined ? undefined : (form ? body : JSON.stringify(body)),
+      cache: method === 'GET' ? 'no-cache' : 'default',
     });
   } catch (networkErr) {
     if (method !== "GET" && auth) {

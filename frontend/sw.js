@@ -4,9 +4,9 @@
 // IMPORTANT: bump this version number every time you deploy new JS/CSS.
 // This forces the browser to fetch fresh files instead of serving stale
 // cached versions — the root cause of "old code still running" bugs.
-const CACHE_NAME = 'ironlog-v13';
-const STATIC_CACHE = 'ironlog-static-v13';
-const API_CACHE = 'ironlog-api-v13';
+const CACHE_NAME = 'ironlog-v18';
+const STATIC_CACHE = 'ironlog-static-v18';
+const API_CACHE = 'ironlog-api-v18';
 
 // All frontend pages and assets to cache for offline use
 const STATIC_ASSETS = [
@@ -42,11 +42,12 @@ self.addEventListener('install', (event) => {
       console.log('[SW] Pre-caching static assets');
       // Use individual adds so one 404 doesn't abort the whole install
       return Promise.allSettled(
-        STATIC_ASSETS.map((url) =>
-          cache.add(url).catch((err) => {
+        STATIC_ASSETS.map((url) => {
+          const req = new Request(url + '?_cb=' + Date.now(), { cache: 'reload' });
+          return fetch(req).then(response => cache.put(url, response)).catch((err) => {
             console.warn('[SW] Failed to cache:', url, err);
-          })
-        )
+          });
+        })
       );
     }).then(() => self.skipWaiting())
   );
