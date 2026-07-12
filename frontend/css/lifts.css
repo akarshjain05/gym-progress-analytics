@@ -205,13 +205,14 @@
 .session-group {
   background: var(--surface, #2a2f35);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+  border-radius: 12px; margin-bottom: 8px;
 }
 .session-date-row {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px; cursor: pointer;
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
+  border-radius: 12px 12px 0 0;
 }
 .session-date-row:hover { background: rgba(255,255,255,0.03); }
 .session-date-label {
