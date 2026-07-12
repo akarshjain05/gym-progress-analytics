@@ -32,28 +32,30 @@
     <!-- Edit Set Modal -->
     <div id="editSetModal" class="wk-modal-overlay" style="display:none; z-index:9999;">
       <div class="wk-modal" style="max-width:350px;">
-        <h2 style="margin:0 0 16px 0;">Edit Set</h2>
-        <form id="editSetForm" style="display:flex; flex-direction:column; gap:12px;">
-          <input type="hidden" id="editSetId">
-          <div style="display:flex; gap:12px;">
-            <div style="flex:1;">
-              <label class="form-label">Weight (kg)</label>
-              <input type="number" id="editSetWeight" step="0.1" class="form-control" required>
+        <div class="wk-modal-header">
+          <h2 style="margin:0; font-size:18px;">Edit Set</h2>
+        </div>
+        <form id="editSetForm" style="display:flex; flex-direction:column;">
+          <div class="wk-modal-body" style="display:flex; flex-direction:column; gap:16px;">
+            <input type="hidden" id="editSetId">
+            <div style="display:flex; gap:12px;">
+              <div style="flex:1;">
+                <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Weight (kg)</label>
+                <input type="number" id="editSetWeight" step="0.1" class="form-control" required style="width:100%; box-sizing:border-box;">
+              </div>
+              <div style="flex:1;">
+                <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Reps</label>
+                <input type="number" id="editSetReps" class="form-control" required style="width:100%; box-sizing:border-box;">
+              </div>
             </div>
-            <div style="flex:1;">
-              <label class="form-label">Reps</label>
-              <input type="number" id="editSetReps" class="form-control" required>
+            <div>
+              <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">RPE (Optional)</label>
+              <input type="number" id="editSetRPE" step="0.5" class="form-control" min="1" max="10" style="width:100%; box-sizing:border-box;">
             </div>
-          </div>
-          <div style="display:flex; gap:12px;">
-            <div style="flex:1;">
-              <label class="form-label">RPE (Optional)</label>
-              <input type="number" id="editSetRPE" step="0.5" class="form-control" min="1" max="10">
+            <div>
+              <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Notes</label>
+              <textarea id="editSetNotes" class="form-control" rows="2" style="width:100%; box-sizing:border-box; resize:vertical;"></textarea>
             </div>
-          </div>
-          <div>
-            <label class="form-label">Notes</label>
-            <textarea id="editSetNotes" class="form-control" rows="2"></textarea>
           </div>
           <div class="wk-modal-footer">
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('editSetModal').style.display='none'">Cancel</button>
