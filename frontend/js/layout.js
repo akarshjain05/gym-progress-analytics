@@ -129,12 +129,25 @@ function setupLoadingAutoHide() {
 
 // ── Mobile drawer nav ─────────────────────────────────────────────────────────
 function buildMobileDrawer(activeId) {
-  const navLinks = NAV_ITEMS.map(item => `
+  const user = Auth.getUser() || {};
+  let navLinks = NAV_ITEMS.map(item => `
     <a class="drawer-link ${item.id === activeId ? 'active' : ''}" href="${item.href}">
       ${item.icon}
       <span>${item.label}</span>
     </a>
   `).join('');
+
+  if (user.role === 'admin') {
+    navLinks += `
+      <a class="drawer-link ${activeId === 'admin' ? 'active' : ''}" href="admin.html">
+        <svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Admin Panel</span>
+      </a>
+    `;
+  }
 
   return `
     <!-- Overlay backdrop -->
@@ -187,7 +200,19 @@ function buildMobileDrawer(activeId) {
 
 // ── Bottom nav (5 main items only, no profile — it's in drawer) ───────────────
 function buildBottomNav(activeId) {
-  const bottomItems = NAV_ITEMS.filter(i => i.id !== 'profile');
+  const user = Auth.getUser() || {};
+  let bottomItems = NAV_ITEMS.filter(i => i.id !== 'profile');
+  
+  if (user.role === 'admin') {
+    bottomItems.push({
+      id: 'admin', href: 'admin.html', label: 'Admin',
+      icon: `<svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`
+    });
+  }
+
   const links = bottomItems.map(item => `
     <a href="${item.href}" class="bottom-nav-link ${item.id === activeId ? 'active' : ''}" aria-label="${item.label}">
       ${item.icon}
