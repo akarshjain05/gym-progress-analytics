@@ -65,6 +65,12 @@ async def lifespan(app: FastAPI):
             db.rollback()
 
         try:
+            db.execute(text("ALTER TABLE body_measurements ADD COLUMN unit VARCHAR DEFAULT 'cm' NOT NULL"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
             db.execute(text("ALTER TABLE workout_templates ADD COLUMN share_id VARCHAR UNIQUE"))
             db.commit()
         except Exception:
