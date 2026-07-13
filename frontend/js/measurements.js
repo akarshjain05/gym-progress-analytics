@@ -104,7 +104,9 @@ document.getElementById("pageContent").innerHTML = `
         <option value="shoulders">Shoulders</option>
       </select>
     </div>
-    <canvas id="measurementCanvas" height="90"></canvas>
+    <div style="position: relative; height: 300px; width: 100%;">
+      <canvas id="measurementCanvas"></canvas>
+    </div>
   </div>
 
   <div class="card">

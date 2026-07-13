@@ -22,84 +22,22 @@ from . import models
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # The goals table will be created by metadata.create_all if it doesn't exist
-    Base.metadata.create_all(bind=engine)
+    import subprocess
+    import os
     
+    # Automatically run alembic upgrade head on startup
+    # We do this via subprocess so it uses the alembic CLI context cleanly
+    try:
+        subprocess.run(
+            ["alembic", "upgrade", "head"],
+            cwd=os.path.dirname(os.path.dirname(__file__)),
+            check=True
+        )
+    except Exception as e:
+        print(f"Warning: Alembic migration failed to run automatically: {e}")
+
     db = SessionLocal()
     try:
-        # Migrate goal_lifts to goals if goal_lifts exists
-        try:
-            old_goals = db.execute(text("SELECT id, user_id, exercise_id, target_weight_kg, target_reps, created_at FROM goal_lifts")).fetchall()
-            for row in old_goals:
-                db.execute(text("""
-                    INSERT INTO goals (user_id, goal_type, exercise_id, target_weight_kg, target_reps, created_at)
-                    VALUES (:u, 'lift', :e, :w, :r, :c)
-                """), {"u": row.user_id, "e": row.exercise_id, "w": row.target_weight_kg, "r": row.target_reps, "c": row.created_at})
-            db.execute(text("DROP TABLE goal_lifts"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN sidebar_collapsed BOOLEAN DEFAULT FALSE NOT NULL"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE lift_logs ADD COLUMN session_id INTEGER REFERENCES workout_sessions(id)"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0 NOT NULL"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN locked_until TIMESTAMP"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE body_measurements ADD COLUMN unit VARCHAR DEFAULT 'cm' NOT NULL"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE workout_templates ADD COLUMN share_id VARCHAR UNIQUE"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT TRUE NOT NULL"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN email_verification_token VARCHAR"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN email_verification_expires TIMESTAMP"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
-        try:
-            db.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR DEFAULT 'user' NOT NULL"))
-            db.commit()
-        except Exception:
-            db.rollback()
-
         if settings.initial_admin_username:
             try:
                 db.execute(
