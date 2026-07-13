@@ -43,7 +43,7 @@ class User(Base):
     weight_logs = relationship("BodyWeightLog", back_populates="user", cascade="all, delete-orphan")
     lift_logs = relationship("LiftLog", back_populates="user", cascade="all, delete-orphan")
     calorie_logs = relationship("CalorieLog", back_populates="user", cascade="all, delete-orphan")
-    goal_lifts = relationship("GoalLift", back_populates="user", cascade="all, delete-orphan")
+    goals = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     workout_templates = relationship("WorkoutTemplate", back_populates="user", cascade="all, delete-orphan")
     workout_sessions = relationship("WorkoutSession", back_populates="user", cascade="all, delete-orphan")
 
@@ -121,17 +121,35 @@ class CalorieLog(Base):
     __table_args__ = (UniqueConstraint("user_id", "date", name="uq_calories_per_user_per_day"),)
 
 
-class GoalLift(Base):
-    __tablename__ = "goal_lifts"
+class Goal(Base):
+    __tablename__ = "goals"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False, index=True)
-    target_weight_kg = Column(Float, nullable=False)
-    target_reps = Column(Integer, nullable=True, default=1)
+    goal_type = Column(String, nullable=False) # 'weight', 'nutrition', 'frequency', 'lift'
+    
+    # Lift Goal
+    exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=True)
+    target_weight_kg = Column(Float, nullable=True)
+    target_reps = Column(Integer, nullable=True)
+    
+    # Body Weight Goal
+    target_body_weight_kg = Column(Float, nullable=True)
+    
+    # Nutrition Goal
+    target_calories = Column(Float, nullable=True)
+    target_protein_g = Column(Float, nullable=True)
+    
+    # Frequency Goal
+    target_workouts_per_week = Column(Integer, nullable=True)
+    
+    # Shared Fields
+    target_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    is_completed = Column(Boolean, default=False, nullable=False, server_default='false')
+    completed_at = Column(DateTime, nullable=True)
 
-    user = relationship("User", back_populates="goal_lifts")
+    user = relationship("User", back_populates="goals")
     exercise = relationship("Exercise")
 
 

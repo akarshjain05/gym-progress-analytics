@@ -206,13 +206,40 @@ class CalorieLogOut(CalorieLogIn):
 
 # ---------- Goals ----------
 
-class GoalLiftIn(BaseModel):
-    exercise_id: int
-    target_weight_kg: float = Field(gt=0, le=600)
-    target_reps: Optional[int] = Field(default=1, gt=0, le=100)
+class GoalIn(BaseModel):
+    goal_type: str
+    target_date: Optional[date] = None
+    
+    exercise_id: Optional[int] = None
+    target_weight_kg: Optional[float] = None
+    target_reps: Optional[int] = None
+    
+    target_body_weight_kg: Optional[float] = None
+    
+    target_calories: Optional[float] = None
+    target_protein_g: Optional[float] = None
+    
+    target_workouts_per_week: Optional[int] = None
 
 
-class GoalLiftOut(GoalLiftIn):
+class GoalOut(BaseModel):
     id: int
+    user_id: int
+    goal_type: str
+    target_date: Optional[date] = None
+    created_at: datetime
+    is_completed: bool
+    completed_at: Optional[datetime] = None
+    
+    exercise_id: Optional[int] = None
+    target_weight_kg: Optional[float] = None
+    target_reps: Optional[int] = None
+    
+    target_body_weight_kg: Optional[float] = None
+    
+    target_calories: Optional[float] = None
+    target_protein_g: Optional[float] = None
+    
+    target_workouts_per_week: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)

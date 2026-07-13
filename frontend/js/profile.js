@@ -73,21 +73,6 @@ document.getElementById("pageContent").innerHTML = `
         </form>
       </div>
 
-      <div class="card">
-        <div class="card-title">Lift goals</div>
-        <form id="goalForm" class="mb-16">
-          <div class="field">
-            <label for="gExercise">Exercise</label>
-            <select id="gExercise"></select>
-          </div>
-          <div class="form-row">
-            <div class="field"><label for="gWeight">Target weight (kg)</label><input type="number" id="gWeight" min="1" step="0.5" required placeholder="e.g. 120"></div>
-            <div class="field"><label for="gReps">At reps</label><input type="number" id="gReps" min="1" value="1"></div>
-          </div>
-          <button type="submit" class="btn btn-secondary btn-block">Set goal</button>
-        </form>
-        <div id="goalListWrap"></div>
-      </div>
     </div>
   </div>
 
@@ -136,64 +121,6 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   }
 });
 
-async function loadGoalExerciseOptions() {
-  const exercises = await Api.listExercises();
-  document.getElementById("gExercise").innerHTML = buildGroupedExerciseOptions(exercises);
-}
-
-document.getElementById("goalForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    await Api.setLiftGoal({
-      exercise_id: parseInt(document.getElementById("gExercise").value),
-      target_weight_kg: parseFloat(document.getElementById("gWeight").value),
-      target_reps: parseInt(document.getElementById("gReps").value || "1"),
-    });
-    showToast("Goal set.");
-    document.getElementById("gWeight").value = "";
-    await loadGoals();
-  } catch (err) {
-    handleApiError(err);
-  }
-});
-
-async function deleteGoal(id) {
-  if (!confirm("Remove this goal?")) return;
-  try {
-    await Api.deleteLiftGoal(id);
-    showToast("Goal removed.");
-    await loadGoals();
-  } catch (err) {
-    handleApiError(err);
-  }
-}
-window.deleteGoal = deleteGoal;
-
-async function loadGoals() {
-  const wrap = document.getElementById("goalListWrap");
-  try {
-    const [goals, exercises] = await Promise.all([Api.listLiftGoals(), Api.listExercises()]);
-    const exMap = Object.fromEntries(exercises.map(e => [e.id, e.name]));
-    if (!goals.length) {
-      wrap.innerHTML = `<div class="empty-state" style="padding:24px;"><p>No lift goals yet.</p></div>`;
-      return;
-    }
-    wrap.innerHTML = goals.map(g => `
-      <div class="flex-between" style="padding:10px 0;border-bottom:1px solid var(--border);">
-        <div>
-          <strong style="font-size:13.5px;">${escapeHtml(exMap[g.exercise_id] || "Exercise")}</strong>
-          <div class="text-tertiary" style="font-size:12px;">${fmtKg(g.target_weight_kg)} kg × ${g.target_reps}</div>
-        </div>
-        <button class="icon-btn" onclick="deleteGoal(${g.id})" title="Remove">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
-        </button>
-      </div>
-    `).join("");
-  } catch (err) {
-    handleApiError(err);
-  }
-}
-
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
@@ -216,8 +143,6 @@ function escapeHtml(str) {
   });
 
   await loadProfile();
-  await loadGoalExerciseOptions();
-  await loadGoals();
 })();
 
 // ── Settings section (theme + push + export) ──────────────────────────────

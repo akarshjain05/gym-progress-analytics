@@ -16,15 +16,31 @@ from .routers import (
 )
 from .push_notifications import router as push_router, PushSubscription
 from .export import router as export_router
+from sqlalchemy import text
+from . import models
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # The goals table will be created by metadata.create_all if it doesn't exist
     Base.metadata.create_all(bind=engine)
+    
     db = SessionLocal()
     try:
+        # Migrate goal_lifts to goals if goal_lifts exists
         try:
-            from sqlalchemy import text
+            old_goals = db.execute(text("SELECT id, user_id, exercise_id, target_weight_kg, target_reps, created_at FROM goal_lifts")).fetchall()
+            for row in old_goals:
+                db.execute(text("""
+                    INSERT INTO goals (user_id, goal_type, exercise_id, target_weight_kg, target_reps, created_at)
+                    VALUES (:u, 'lift', :e, :w, :r, :c)
+                """), {"u": row.user_id, "e": row.exercise_id, "w": row.target_weight_kg, "r": row.target_reps, "c": row.created_at})
+            db.execute(text("DROP TABLE goal_lifts"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
             db.execute(text("ALTER TABLE users ADD COLUMN sidebar_collapsed BOOLEAN DEFAULT FALSE NOT NULL"))
             db.commit()
         except Exception:

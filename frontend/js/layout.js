@@ -33,6 +33,11 @@ const NAV_ITEMS = [
       <path d="M12 21a9 9 0 0 0 9-9c0-1.5-.5-3-1.5-4H4.5C3.5 9 3 10.5 3 12a9 9 0 0 0 9 9Z" fill="currentColor"/>
       <path d="M12 3v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
+  { id: "goals", href: "goals.html", label: "Goals",
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>` },
   { id: "analytics", href: "analytics.html", label: "Analytics",
     icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="13" width="4" height="7" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>

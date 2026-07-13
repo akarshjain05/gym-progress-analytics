@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -9,49 +10,39 @@ from .lifts import _get_owned_exercise
 router = APIRouter(prefix="/goals", tags=["goals"])
 
 
-@router.post("", response_model=schemas.GoalLiftOut, status_code=201)
-def set_lift_goal(
-    payload: schemas.GoalLiftIn,
+@router.post("", response_model=schemas.GoalOut, status_code=201)
+def create_goal(
+    payload: schemas.GoalIn,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    _get_owned_exercise(db, payload.exercise_id, current_user)
-    existing = (
-        db.query(models.GoalLift)
-        .filter(models.GoalLift.user_id == current_user.id, models.GoalLift.exercise_id == payload.exercise_id)
-        .first()
-    )
-    if existing:
-        existing.target_weight_kg = payload.target_weight_kg
-        existing.target_reps = payload.target_reps
-        db.commit()
-        db.refresh(existing)
-        return existing
-
-    goal = models.GoalLift(user_id=current_user.id, **payload.model_dump())
+    if payload.goal_type == "lift" and payload.exercise_id:
+        _get_owned_exercise(db, payload.exercise_id, current_user)
+        
+    goal = models.Goal(user_id=current_user.id, **payload.model_dump())
     db.add(goal)
     db.commit()
     db.refresh(goal)
     return goal
 
 
-@router.get("", response_model=list[schemas.GoalLiftOut])
-def list_lift_goals(
+@router.get("", response_model=list[schemas.GoalOut])
+def list_goals(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    return db.query(models.GoalLift).filter(models.GoalLift.user_id == current_user.id).all()
+    return db.query(models.Goal).filter(models.Goal.user_id == current_user.id).order_by(models.Goal.created_at.desc()).all()
 
 
 @router.delete("/{goal_id}", status_code=204)
-def delete_lift_goal(
+def delete_goal(
     goal_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
     goal = (
-        db.query(models.GoalLift)
-        .filter(models.GoalLift.id == goal_id, models.GoalLift.user_id == current_user.id)
+        db.query(models.Goal)
+        .filter(models.Goal.id == goal_id, models.Goal.user_id == current_user.id)
         .first()
     )
     if not goal:
@@ -59,3 +50,27 @@ def delete_lift_goal(
     db.delete(goal)
     db.commit()
     return None
+
+@router.post("/{goal_id}/toggle-completion", response_model=schemas.GoalOut)
+def toggle_goal_completion(
+    goal_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    goal = (
+        db.query(models.Goal)
+        .filter(models.Goal.id == goal_id, models.Goal.user_id == current_user.id)
+        .first()
+    )
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+        
+    goal.is_completed = not goal.is_completed
+    if goal.is_completed:
+        goal.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    else:
+        goal.completed_at = None
+        
+    db.commit()
+    db.refresh(goal)
+    return goal

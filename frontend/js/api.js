@@ -250,9 +250,10 @@ const Api = {
   nutritionSummary() { return apiRequest("/nutrition/summary"); },
 
   // --- goals ---
-  setLiftGoal(payload) { return apiRequest("/goals", { method: "POST", body: payload }); },
-  listLiftGoals() { return apiRequest("/goals"); },
-  deleteLiftGoal(id) { return apiRequest(`/goals/${id}`, { method: "DELETE" }); },
+  setGoal(payload) { return apiRequest("/goals", { method: "POST", body: payload }); },
+  listGoals() { return apiRequest("/goals"); },
+  deleteGoal(id) { return apiRequest(`/goals/${id}`, { method: "DELETE" }); },
+  toggleGoalCompletion(id) { return apiRequest(`/goals/${id}/toggle-completion`, { method: "POST" }); },
 
   // --- analytics ---
   dashboard() { return apiRequest("/analytics/dashboard"); },
