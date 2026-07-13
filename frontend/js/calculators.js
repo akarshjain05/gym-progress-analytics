@@ -193,7 +193,7 @@ window.CalculatorsPage = {
     }
 
     const perSide = (target - bar) / 2;
-    document.getElementById('platePerSide').textContent = \`\${perSide} kg\`;
+    document.getElementById('platePerSide').textContent = `${perSide} kg`;
 
     const plates = [25, 20, 15, 10, 5, 2.5, 1.25];
     const plateCounts = [];
@@ -212,7 +212,7 @@ window.CalculatorsPage = {
     plateCounts.forEach(p => {
       for (let i=0; i<p.count; i++) {
         let cls = p.weight.toString().replace('.', '-');
-        visualHtml += \`<div class="plate plate-\${cls}">\${p.weight}</div>\`;
+        visualHtml += `<div class="plate plate-${cls}">${p.weight}</div>`;
       }
     });
     
@@ -234,7 +234,7 @@ window.CalculatorsPage = {
     }
     
     if (reps === 1) {
-      out.textContent = \`\${weight} kg\`;
+      out.textContent = `${weight} kg`;
       return;
     }
     
@@ -246,7 +246,7 @@ window.CalculatorsPage = {
       estimated = Math.max(epley, brzycki);
     }
     
-    out.textContent = \`\${Math.round(estimated * 10) / 10} kg\`;
+    out.textContent = `${Math.round(estimated * 10) / 10} kg`;
   },
   
   async calcBodyMetrics() {
@@ -255,10 +255,10 @@ window.CalculatorsPage = {
     const g = document.getElementById('bmGender').value;
     try {
       const res = await Api.Calculators.getBodyMetrics({ weight_kg: w, height_cm: h, gender: g });
-      document.getElementById('resBmi').textContent = \`\${res.bmi.value} (\${res.bmi.category})\`;
-      document.getElementById('resLbm').textContent = res.lbm_kg ? \`\${res.lbm_kg} kg\` : 'N/A';
-      document.getElementById('resIbw').textContent = res.ibw_kg ? \`\${res.ibw_kg} kg\` : 'N/A';
-      document.getElementById('resFfmi').textContent = \`\${res.ffmi.normalized} (\${res.ffmi.category})\`;
+      document.getElementById('resBmi').textContent = `${res.bmi.value} (${res.bmi.category})`;
+      document.getElementById('resLbm').textContent = res.lbm_kg ? `${res.lbm_kg} kg` : 'N/A';
+      document.getElementById('resIbw').textContent = res.ibw_kg ? `${res.ibw_kg} kg` : 'N/A';
+      document.getElementById('resFfmi').textContent = `${res.ffmi.normalized} (${res.ffmi.category})`;
       document.getElementById('bmResult').style.display = 'flex';
     } catch (e) {
       alert("Error: " + e.message);
@@ -284,9 +284,9 @@ window.CalculatorsPage = {
     const g = document.getElementById('macGoal').value;
     try {
       const res = await Api.Calculators.getMacros({ calories: c, goal: g });
-      document.getElementById('resPro').textContent = \`\${res.protein_g}g\`;
-      document.getElementById('resCarb').textContent = \`\${res.carbs_g}g\`;
-      document.getElementById('resFat').textContent = \`\${res.fat_g}g\`;
+      document.getElementById('resPro').textContent = `${res.protein_g}g`;
+      document.getElementById('resCarb').textContent = `${res.carbs_g}g`;
+      document.getElementById('resFat').textContent = `${res.fat_g}g`;
       document.getElementById('macResult').style.display = 'flex';
     } catch (e) {
       alert("Error: " + e.message);
