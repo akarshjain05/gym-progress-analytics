@@ -112,7 +112,7 @@ document.getElementById("pageContent").innerHTML = `
   <div class="card">
     <div class="card-title">History</div>
     <div class="table-wrapper">
-      <table class="table" style="width:100%">
+      <table class="data-table" style="width:100%">
         <thead>
           <tr>
             <th>Date</th>
