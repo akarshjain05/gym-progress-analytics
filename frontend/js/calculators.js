@@ -54,7 +54,7 @@ const CALCULATORS_HTML = `
         <h2>Body Metrics</h2>
       </div>
       <div class="calc-body">
-        <form id="bodyMetricsForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcBodyMetrics();">
+        <form id="bodyMetricsForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcBodyMetrics();" style="display: flex; flex-direction: column; gap: 1rem;">
           <div class="calc-row">
             <div class="form-group">
               <label>Weight (kg)</label>
@@ -90,7 +90,7 @@ const CALCULATORS_HTML = `
         <h2>Powerlifting Scores</h2>
       </div>
       <div class="calc-body">
-        <form id="powerForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcPowerlifting();">
+        <form id="powerForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcPowerlifting();" style="display: flex; flex-direction: column; gap: 1rem;">
           <div class="calc-row">
             <div class="form-group">
               <label>Body Weight (kg)</label>
@@ -124,7 +124,7 @@ const CALCULATORS_HTML = `
         <h2>Macro Split</h2>
       </div>
       <div class="calc-body">
-        <form id="macroForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcMacros();">
+        <form id="macroForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcMacros();" style="display: flex; flex-direction: column; gap: 1rem;">
           <div class="form-group">
             <label>Daily Calories</label>
             <input type="number" id="macCals" class="form-control" required placeholder="e.g. 2500">
