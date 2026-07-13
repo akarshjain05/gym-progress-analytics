@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
           <table class="table" style="width:100%">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th>Actions</th>
+                <th style="text-align:center;">ID</th>
+                <th style="text-align:center;">Username</th>
+                <th style="text-align:center;">Email</th>
+                <th style="text-align:center;">Role</th>
+                <th style="text-align:center;">Joined</th>
+                <th style="text-align:center;">Actions</th>
               </tr>
             </thead>
             <tbody id="usersTableBody">
@@ -97,12 +97,12 @@ async function loadUsers() {
     }
     tbody.innerHTML = users.map(u => `
       <tr>
-        <td>#${u.id}</td>
-        <td>${u.username || '<span class="text-secondary">Not set</span>'}</td>
-        <td>${u.email} ${u.email_verified ? '<span style="color:var(--success);font-size:12px;">(Verified)</span>' : ''}</td>
-        <td><span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-neutral'}">${capitalize(u.role)}</span></td>
-        <td>${fmtDate(u.created_at.split("T")[0])}</td>
-        <td>
+        <td style="text-align:center; vertical-align:middle;">#${u.id}</td>
+        <td style="text-align:center; vertical-align:middle;">${u.username || '<span class="text-secondary">Not set</span>'}</td>
+        <td style="text-align:center; vertical-align:middle;">${u.email} ${u.email_verified ? '<span style="color:var(--success);font-size:12px;">(Verified)</span>' : ''}</td>
+        <td style="text-align:center; vertical-align:middle;"><span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-neutral'}">${capitalize(u.role)}</span></td>
+        <td style="text-align:center; vertical-align:middle;">${fmtDate(u.created_at.split("T")[0])}</td>
+        <td style="text-align:center; vertical-align:middle;">
           <button class="btn btn-secondary btn-sm" onclick="promoteUser(${u.id}, '${u.username || u.email}')" ${u.role === 'admin' ? 'disabled' : ''}>Make Admin</button>
           <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${u.username || u.email}')" style="margin-left:4px;">Delete</button>
         </td>
