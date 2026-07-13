@@ -227,7 +227,23 @@ const Api = {
   logWeight(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
   listWeight(params = {}) { return apiRequest(`/weight${qs(params)}`); },
   deleteWeight(id) { return apiRequest(`/weight/${id}`, { method: "DELETE" }); },
+  weightGet(start, end) {
+    let url = "/weight";
+    if (start && end) url += `?start=${start}&end=${end}`;
+    return apiRequest(url);
+  },
   weightSummary() { return apiRequest("/weight/summary"); },
+  weightAdd(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
+  weightDelete(id) { return apiRequest(`/weight/${id}`, { method: "DELETE" }); },
+
+  // --- measurements ---
+  measurementsGet(start, end) {
+    let url = "/measurements";
+    if (start && end) url += `?start=${start}&end=${end}`;
+    return apiRequest(url);
+  },
+  measurementsAdd(payload) { return apiRequest("/measurements", { method: "POST", body: payload }); },
+  measurementsDelete(id) { return apiRequest(`/measurements/${id}`, { method: "DELETE" }); },
 
   // --- exercises ---
   listExercises() { return apiRequest("/exercises"); },

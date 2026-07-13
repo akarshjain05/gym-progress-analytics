@@ -148,6 +148,29 @@ class ExerciseOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+# ---------- Body Measurements ----------
+
+class BodyMeasurementBase(BaseModel):
+    date: date
+    chest: Optional[float] = Field(default=None, ge=0)
+    waist: Optional[float] = Field(default=None, ge=0)
+    neck: Optional[float] = Field(default=None, ge=0)
+    hip: Optional[float] = Field(default=None, ge=0)
+    arm: Optional[float] = Field(default=None, ge=0)
+    forearm: Optional[float] = Field(default=None, ge=0)
+    thigh: Optional[float] = Field(default=None, ge=0)
+    calf: Optional[float] = Field(default=None, ge=0)
+    shoulders: Optional[float] = Field(default=None, ge=0)
+    notes: Optional[str] = None
+
+class BodyMeasurementCreate(BodyMeasurementBase):
+    pass
+
+class BodyMeasurementOut(BodyMeasurementBase):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 # ---------- Calculators ----------
 

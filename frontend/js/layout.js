@@ -14,6 +14,11 @@ const NAV_ITEMS = [
       <path d="M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
       <path d="M9 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
+  { id: "measurements", href: "measurements.html", label: "Measurements",
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M6 12v-3M10 12v-2M14 12v-3M18 12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>` },
   { id: "lifts", href: "lifts.html", label: "Lifts",
     icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <path d="M6 5v14M18 5v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>

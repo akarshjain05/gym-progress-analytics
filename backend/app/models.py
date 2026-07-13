@@ -46,6 +46,7 @@ class User(Base):
     goals = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     workout_templates = relationship("WorkoutTemplate", back_populates="user", cascade="all, delete-orphan")
     workout_sessions = relationship("WorkoutSession", back_populates="user", cascade="all, delete-orphan")
+    measurements = relationship("BodyMeasurement", back_populates="user", cascade="all, delete-orphan")
 
     @property
     def has_google_login(self) -> bool:
@@ -82,6 +83,28 @@ class BodyWeightLog(Base):
     user = relationship("User", back_populates="weight_logs")
 
     __table_args__ = (UniqueConstraint("user_id", "date", name="uq_weight_per_user_per_day"),)
+
+
+class BodyMeasurement(Base):
+    __tablename__ = "body_measurements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    date = Column(Date, nullable=False, default=date.today)
+    chest = Column(Float, nullable=True)
+    waist = Column(Float, nullable=True)
+    neck = Column(Float, nullable=True)
+    hip = Column(Float, nullable=True)
+    arm = Column(Float, nullable=True)
+    forearm = Column(Float, nullable=True)
+    thigh = Column(Float, nullable=True)
+    calf = Column(Float, nullable=True)
+    shoulders = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
+
+    user = relationship("User", back_populates="measurements")
+
+    __table_args__ = (UniqueConstraint("user_id", "date", name="uq_measurements_per_user_per_day"),)
 
 
 class LiftLog(Base):
