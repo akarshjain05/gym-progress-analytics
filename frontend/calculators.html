@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculators | IronLog</title>
+  
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .calculators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .calc-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .calc-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    
+    .calc-header svg {
+      width: 24px;
+      height: 24px;
+      color: var(--accent);
+    }
+    
+    .calc-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .calc-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .calc-row {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .calc-row > * {
+      flex: 1;
+    }
+
+    .calc-result {
+      background: var(--bg-body);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .result-value {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    /* Plate Calculator specific */
+    .plate-display {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem 0;
+      min-height: 80px;
+    }
+    
+    .plate {
+      width: 12px;
+      border-radius: 2px;
+      background: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg-surface);
+      font-weight: 800;
+      font-size: 0.65rem;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    .plate-25 { height: 60px; background: #e74c3c; }
+    .plate-20 { height: 60px; background: #3498db; }
+    .plate-15 { height: 50px; background: #f1c40f; }
+    .plate-10 { height: 40px; background: #2ecc71; }
+    .plate-5 { height: 30px; background: #ecf0f1; color: #333; }
+    .plate-2-5 { height: 25px; background: #95a5a6; }
+    .plate-1-25 { height: 20px; background: #7f8c8d; }
+    .bar-end {
+      width: 20px;
+      height: 12px;
+      background: #7f8c8d;
+      border-radius: 2px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Layout Shell -->
+  <div id="app-layout">
+    <!-- Sidebar/drawer injected by layout.js -->
+    
+    <main class="main-content">
+      <div class="page-header">
+        <div class="header-titles">
+          <h1>Calculators</h1>
+          <p class="subtitle">Quick math for lifting and nutrition</p>
+        </div>
+      </div>
+
+      <div class="calculators-grid">
+
+        <!-- Plate Calculator (Frontend only) -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h12v2H6V4zm0 14h12v2H6v-2zM4 6h16v12H4V6z"/></svg>
+            <h2>Plate Calculator</h2>
+          </div>
+          <div class="calc-body">
+            <div class="calc-row">
+              <div class="form-group">
+                <label>Target Weight (kg)</label>
+                <input type="number" id="plateTarget" class="form-control" placeholder="e.g. 100" value="100">
+              </div>
+              <div class="form-group">
+                <label>Bar Weight (kg)</label>
+                <input type="number" id="plateBar" class="form-control" value="20">
+              </div>
+            </div>
+            <div class="calc-result" id="plateResultBox">
+              <div class="result-item"><span>Per Side:</span> <span class="result-value" id="platePerSide">40 kg</span></div>
+              <div class="plate-display" id="plateVisual">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1RM Calculator (Frontend only using epley/brzycki logic) -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <h2>One-Rep Max</h2>
+          </div>
+          <div class="calc-body">
+            <div class="calc-row">
+              <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" id="ormWeight" class="form-control" placeholder="100">
+              </div>
+              <div class="form-group">
+                <label>Reps</label>
+                <input type="number" id="ormReps" class="form-control" placeholder="5">
+              </div>
+            </div>
+            <div class="calc-result">
+              <div class="result-item"><span>Estimated 1RM:</span> <span class="result-value" id="ormResult">-</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body Metrics -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21a9 9 0 100-18 9 9 0 000 18z"/><path d="M12 7v5l3 3"/></svg>
+            <h2>Body Metrics</h2>
+          </div>
+          <div class="calc-body">
+            <form id="bodyMetricsForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcBodyMetrics();">
+              <div class="calc-row">
+                <div class="form-group">
+                  <label>Weight (kg)</label>
+                  <input type="number" step="0.1" id="bmWeight" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Height (cm)</label>
+                  <input type="number" step="0.1" id="bmHeight" class="form-control" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="bmGender" class="form-control">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Calculate</button>
+            </form>
+            <div class="calc-result" id="bmResult" style="display: none;">
+              <div class="result-item"><span>BMI:</span> <span class="result-value" id="resBmi"></span></div>
+              <div class="result-item"><span>Lean Body Mass:</span> <span class="result-value" id="resLbm"></span></div>
+              <div class="result-item"><span>Ideal Weight:</span> <span class="result-value" id="resIbw"></span></div>
+              <div class="result-item"><span>FFMI:</span> <span class="result-value" id="resFfmi"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Powerlifting Scores -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <h2>Powerlifting Scores</h2>
+          </div>
+          <div class="calc-body">
+            <form id="powerForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcPowerlifting();">
+              <div class="calc-row">
+                <div class="form-group">
+                  <label>Body Weight (kg)</label>
+                  <input type="number" step="0.1" id="pwWeight" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Total Lifted (kg)</label>
+                  <input type="number" step="0.5" id="pwTotal" class="form-control" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="pwGender" class="form-control">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Calculate</button>
+            </form>
+            <div class="calc-result" id="pwResult" style="display: none;">
+              <div class="result-item"><span>Wilks (2020):</span> <span class="result-value" id="resWilks"></span></div>
+              <div class="result-item"><span>DOTS:</span> <span class="result-value" id="resDots"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro Calculator -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.5c-3 0-5.5-2.5-5.5-5.5V5h11v11c0 3-2.5 5.5-5.5 5.5z"/></svg>
+            <h2>Macro Split</h2>
+          </div>
+          <div class="calc-body">
+            <form id="macroForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcMacros();">
+              <div class="form-group">
+                <label>Daily Calories</label>
+                <input type="number" id="macCals" class="form-control" required placeholder="e.g. 2500">
+              </div>
+              <div class="form-group">
+                <label>Goal</label>
+                <select id="macGoal" class="form-control">
+                  <option value="maintain">Maintain (30P/40C/30F)</option>
+                  <option value="cut">Cut (40P/30C/30F)</option>
+                  <option value="bulk">Bulk (25P/50C/25F)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Calculate</button>
+            </form>
+            <div class="calc-result" id="macResult" style="display: none;">
+              <div class="result-item"><span>Protein:</span> <span class="result-value" id="resPro"></span></div>
+              <div class="result-item"><span>Carbs:</span> <span class="result-value" id="resCarb"></span></div>
+              <div class="result-item"><span>Fat:</span> <span class="result-value" id="resFat"></span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/calculators.js"></script>
+</body>
+</html>

@@ -44,6 +44,12 @@ const NAV_ITEMS = [
       <rect x="10" y="7" width="4" height="13" rx="1" fill="currentColor" />
       <rect x="16" y="3" width="4" height="17" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
     </svg>` },
+  { id: "calculators", href: "calculators.html", label: "Calculators",
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M8 8h8v2H8V8z" fill="currentColor"/>
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>` },
   { id: "coach", href: "coach.html", label: "AI Coach",
     icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="8" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>

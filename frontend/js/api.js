@@ -285,6 +285,12 @@ const Api = {
   adminGetStats() { return apiRequest("/admin/stats"); },
   adminGetLogs() { return apiRequest("/admin/logs"); },
   adminDeleteLog(type, id) { return apiRequest(`/admin/logs/${type}/${id}`, { method: "DELETE" }); },
+
+  Calculators: {
+    getBodyMetrics(payload) { return apiRequest("/calculators/body-metrics", { method: "POST", body: payload }); },
+    getPowerlifting(payload) { return apiRequest("/calculators/powerlifting", { method: "POST", body: payload }); },
+    getMacros(payload) { return apiRequest("/calculators/macros", { method: "POST", body: payload }); }
+  }
 };
 
 function qs(params) {

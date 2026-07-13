@@ -149,6 +149,39 @@ class ExerciseOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ---------- Calculators ----------
+
+class BodyMetricsIn(BaseModel):
+    weight_kg: float = Field(gt=0)
+    height_cm: float = Field(gt=0)
+    gender: str  # 'male' or 'female'
+
+class BodyMetricsOut(BaseModel):
+    bmi: dict
+    ibw_kg: Optional[float]
+    lbm_kg: Optional[float]
+    ffmi: dict
+
+class PowerliftingIn(BaseModel):
+    weight_kg: float = Field(gt=0)
+    total_kg: float = Field(gt=0)
+    gender: str
+
+class PowerliftingOut(BaseModel):
+    wilks_score: float
+    dots_score: float
+
+class MacrosIn(BaseModel):
+    calories: float = Field(gt=0)
+    goal: str  # 'cut', 'maintain', 'bulk'
+
+class MacrosOut(BaseModel):
+    protein_g: int
+    carbs_g: int
+    fat_g: int
+
+
+
 # ---------- Lift logs ----------
 
 class LiftLogIn(BaseModel):

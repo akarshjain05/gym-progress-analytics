@@ -798,3 +798,170 @@ def get_strength_standard_info(
         tier: round(ratio * bodyweight_kg, 1)
         for tier, ratio in table.items()
     }
+
+
+# ---------------------------------------------------------------------------
+# BMI & Body Composition
+# ---------------------------------------------------------------------------
+
+def calculate_bmi(weight_kg: float, height_cm: float) -> dict:
+    if height_cm <= 0 or weight_kg <= 0:
+        return {"value": 0.0, "category": "Invalid"}
+    
+    height_m = height_cm / 100
+    bmi = round(weight_kg / (height_m ** 2), 1)
+    
+    if bmi < 18.5:
+        category = "Underweight"
+    elif bmi < 25:
+        category = "Normal"
+    elif bmi < 30:
+        category = "Overweight"
+    else:
+        category = "Obese"
+        
+    return {"value": bmi, "category": category}
+
+def calculate_ideal_body_weight(height_cm: float, gender: str) -> Optional[float]:
+    """Devine formula"""
+    if height_cm < 152.4:  # Formula applies to heights > 5 feet
+        return None
+    inches_over_5_ft = (height_cm - 152.4) / 2.54
+    if gender == "male":
+        return round(50.0 + 2.3 * inches_over_5_ft, 1)
+    elif gender == "female":
+        return round(45.5 + 2.3 * inches_over_5_ft, 1)
+    return None
+
+def calculate_lean_body_mass(weight_kg: float, height_cm: float, gender: str) -> Optional[float]:
+    """Boer formula"""
+    if gender == "male":
+        return round((0.407 * weight_kg) + (0.267 * height_cm) - 19.2, 1)
+    elif gender == "female":
+        return round((0.252 * weight_kg) + (0.473 * height_cm) - 48.3, 1)
+    return None
+
+def calculate_ffmi(lbm_kg: float, height_cm: float) -> dict:
+    if height_cm <= 0 or lbm_kg <= 0:
+        return {"value": 0.0, "normalized": 0.0, "category": "Invalid"}
+    
+    height_m = height_cm / 100
+    ffmi = lbm_kg / (height_m ** 2)
+    normalized_ffmi = ffmi + 6.1 * (1.8 - height_m)
+    
+    val = round(ffmi, 1)
+    norm_val = round(normalized_ffmi, 1)
+    
+    if norm_val < 18:
+        cat = "Below Average"
+    elif norm_val < 20:
+        cat = "Average"
+    elif norm_val < 22:
+        cat = "Above Average"
+    elif norm_val < 23:
+        cat = "Excellent"
+    elif norm_val < 25:
+        cat = "Superior"
+    else:
+        cat = "Suspicious (Natty Limit ~25)"
+        
+    return {"value": val, "normalized": norm_val, "category": cat}
+
+
+# ---------------------------------------------------------------------------
+# Powerlifting Scores (Wilks 2020 & DOTS)
+# ---------------------------------------------------------------------------
+
+def calculate_wilks(weight_kg: float, total_kg: float, gender: str) -> float:
+    """Wilks 2020 formula"""
+    if weight_kg <= 0 or total_kg <= 0:
+        return 0.0
+        
+    if gender == "male":
+        a = 47.46178854
+        b = 8.472061379
+        c = 0.07369410346
+        d = -1.395833811e-3
+        e = 7.076659730e-6
+        f = -1.208043364e-8
+    elif gender == "female":
+        a = -125.4255398
+        b = 13.71219419
+        c = -0.03307250631
+        d = -1.050400051e-3
+        e = 9.387738815e-6
+        f = -2.333461388e-8
+    else:
+        return 0.0
+
+    w = weight_kg
+    denominator = a + (b * w) + (c * w**2) + (d * w**3) + (e * w**4) + (f * w**5)
+    if denominator == 0:
+        return 0.0
+    return round((600 / denominator) * total_kg, 2)
+
+
+def calculate_dots(weight_kg: float, total_kg: float, gender: str) -> float:
+    """DOTS formula"""
+    if weight_kg <= 0 or total_kg <= 0:
+        return 0.0
+        
+    w = weight_kg
+    if gender == "male":
+        a = -307.75076
+        b = 24.0900756
+        c = -0.1918759221
+        d = 0.0007391293
+        e = -0.000001093
+    elif gender == "female":
+        a = -57.96288
+        b = 13.6175032
+        c = -0.1126655495
+        d = 0.0005158568
+        e = -0.000001070
+    else:
+        return 0.0
+
+    denominator = a + (b * w) + (c * w**2) + (d * w**3) + (e * w**4)
+    if denominator == 0:
+        return 0.0
+    return round((500 / denominator) * total_kg, 2)
+
+
+# ---------------------------------------------------------------------------
+# Macro Calculator
+# ---------------------------------------------------------------------------
+
+def calculate_macros(calories: float, goal: str) -> dict:
+    """
+    Standard splits based on goal.
+    cut: High protein to preserve muscle (40P / 30C / 30F)
+    maintain: Balanced (30P / 40C / 30F)
+    bulk: High carb for energy/growth (25P / 50C / 25F)
+    """
+    if calories <= 0:
+        return {"protein_g": 0, "carbs_g": 0, "fat_g": 0}
+        
+    if goal == "cut":
+        p_ratio = 0.40
+        c_ratio = 0.30
+        f_ratio = 0.30
+    elif goal == "bulk":
+        p_ratio = 0.25
+        c_ratio = 0.50
+        f_ratio = 0.25
+    else: # maintain
+        p_ratio = 0.30
+        c_ratio = 0.40
+        f_ratio = 0.30
+        
+    # 4 kcal/g for Protein and Carbs, 9 kcal/g for Fat
+    p_kcal = calories * p_ratio
+    c_kcal = calories * c_ratio
+    f_kcal = calories * f_ratio
+    
+    return {
+        "protein_g": round(p_kcal / 4),
+        "carbs_g": round(c_kcal / 4),
+        "fat_g": round(f_kcal / 9),
+    }
