@@ -14,15 +14,21 @@ function chartColors() {
 }
 
 document.getElementById("pageHeaderActions").innerHTML = `
-  <button class="btn btn-primary btn-sm" id="openLogBtn">
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-    Log measurements
-  </button>
+  <div style="display:flex; align-items:center; gap: 12px;">
+    <div style="display:flex; background:var(--surface-50); border-radius:6px; padding:2px; font-size:13px; font-weight:600;">
+      <button id="unitBtnCm" class="btn btn-sm" style="background:var(--surface-0); border-radius:4px; border:1px solid var(--border-color); padding:4px 12px; cursor:pointer; color:var(--text-primary);">cm</button>
+      <button id="unitBtnIn" class="btn btn-sm" style="background:transparent; border:none; padding:4px 12px; cursor:pointer; color:var(--text-tertiary);">in</button>
+    </div>
+    <button class="btn btn-primary btn-sm" id="openLogBtn">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Log measurements
+    </button>
+  </div>
 `;
 
 document.getElementById("pageContent").innerHTML = `
   <div id="formCard" class="card mb-16" style="display:none;">
-    <div class="card-title">Log measurements (cm)</div>
+    <div class="card-title">Log measurements (<span id="formUnitLabel">cm</span>)</div>
     <form id="measurementForm">
       <div class="form-row">
         <div class="field">
@@ -125,6 +131,28 @@ document.getElementById("pageContent").innerHTML = `
 `;
 
 let currentLogs = [];
+let displayUnit = localStorage.getItem("ironlog_measurements_unit") || "cm";
+
+function getVal(log, metric) {
+  if (log[metric] === null || log[metric] === undefined) return null;
+  let val = log[metric];
+  // Convert based on log.unit vs displayUnit
+  const logUnit = log.unit || "cm";
+  if (logUnit === "cm" && displayUnit === "in") val = val / 2.54;
+  if (logUnit === "in" && displayUnit === "cm") val = val * 2.54;
+  return Number(val.toFixed(1));
+}
+
+function updateUnitUI() {
+  document.getElementById("formUnitLabel").textContent = displayUnit;
+  document.getElementById("unitBtnCm").style.background = displayUnit === "cm" ? "var(--surface-0)" : "transparent";
+  document.getElementById("unitBtnCm").style.color = displayUnit === "cm" ? "var(--text-primary)" : "var(--text-tertiary)";
+  document.getElementById("unitBtnCm").style.border = displayUnit === "cm" ? "1px solid var(--border-color)" : "none";
+  
+  document.getElementById("unitBtnIn").style.background = displayUnit === "in" ? "var(--surface-0)" : "transparent";
+  document.getElementById("unitBtnIn").style.color = displayUnit === "in" ? "var(--text-primary)" : "var(--text-tertiary)";
+  document.getElementById("unitBtnIn").style.border = displayUnit === "in" ? "1px solid var(--border-color)" : "none";
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const openBtn = document.getElementById("openLogBtn");
@@ -132,6 +160,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const formCard = document.getElementById("formCard");
   const form = document.getElementById("measurementForm");
   const metricSelect = document.getElementById("chartMetric");
+  
+  const btnCm = document.getElementById("unitBtnCm");
+  const btnIn = document.getElementById("unitBtnIn");
+  
+  updateUnitUI();
+
+  btnCm.addEventListener("click", () => {
+    if (displayUnit === "cm") return;
+    displayUnit = "cm";
+    localStorage.setItem("ironlog_measurements_unit", "cm");
+    updateUnitUI();
+    renderTable(currentLogs);
+    renderChart(currentLogs);
+  });
+
+  btnIn.addEventListener("click", () => {
+    if (displayUnit === "in") return;
+    displayUnit = "in";
+    localStorage.setItem("ironlog_measurements_unit", "in");
+    updateUnitUI();
+    renderTable(currentLogs);
+    renderChart(currentLogs);
+  });
 
   document.getElementById("mDate").value = new Date().toISOString().split("T")[0];
 
@@ -164,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       calf: parseFloat(document.getElementById("mCalf").value) || null,
       shoulders: parseFloat(document.getElementById("mShoulders").value) || null,
       notes: document.getElementById("mNotes").value || null,
+      unit: displayUnit,
     };
 
     try {
@@ -214,10 +266,10 @@ function renderTable(logs) {
     html += `
       <tr>
         <td><strong>${fmtDate(log.date)}</strong></td>
-        <td>${log.chest ? log.chest + ' cm' : '-'}</td>
-        <td>${log.waist ? log.waist + ' cm' : '-'}</td>
-        <td>${log.arm ? log.arm + ' cm' : '-'}</td>
-        <td>${log.thigh ? log.thigh + ' cm' : '-'}</td>
+        <td>${getVal(log, 'chest') ? getVal(log, 'chest') + ' ' + displayUnit : '-'}</td>
+        <td>${getVal(log, 'waist') ? getVal(log, 'waist') + ' ' + displayUnit : '-'}</td>
+        <td>${getVal(log, 'arm') ? getVal(log, 'arm') + ' ' + displayUnit : '-'}</td>
+        <td>${getVal(log, 'thigh') ? getVal(log, 'thigh') + ' ' + displayUnit : '-'}</td>
         <td class="text-tertiary" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           ${log.notes || ''}
         </td>
@@ -260,7 +312,8 @@ function renderChart(logs) {
     const d = new Date(l.date);
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   });
-  const data = validLogs.map(l => l[metric]);
+  // use getVal so it matches displayUnit
+  const data = validLogs.map(l => getVal(l, metric));
   
   const ctx = document.getElementById('measurementCanvas').getContext('2d');
   const colors = chartColors();
@@ -274,7 +327,7 @@ function renderChart(logs) {
     data: {
       labels: labels,
       datasets: [{
-        label: capitalize(metric) + ' (cm)',
+        label: capitalize(metric) + ' (' + displayUnit + ')',
         data: data,
         borderColor: '#c0392b',
         backgroundColor: gradient,
@@ -300,7 +353,7 @@ function renderChart(logs) {
           padding: 10,
           displayColors: false,
           callbacks: {
-            label: function(ctx) { return ctx.parsed.y + ' cm'; }
+            label: function(ctx) { return ctx.parsed.y + ' ' + displayUnit; }
           }
         }
       },

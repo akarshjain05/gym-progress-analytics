@@ -101,6 +101,7 @@ class BodyMeasurement(Base):
     calf = Column(Float, nullable=True)
     shoulders = Column(Float, nullable=True)
     notes = Column(Text, nullable=True)
+    unit = Column(String, default="cm", nullable=False, server_default="cm")
 
     user = relationship("User", back_populates="measurements")
 

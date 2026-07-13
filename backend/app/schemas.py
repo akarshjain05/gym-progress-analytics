@@ -152,6 +152,7 @@ class ExerciseOut(BaseModel):
 
 class BodyMeasurementBase(BaseModel):
     date: date
+    unit: str = Field(default="cm")
     chest: Optional[float] = Field(default=None, ge=0)
     waist: Optional[float] = Field(default=None, ge=0)
     neck: Optional[float] = Field(default=None, ge=0)
