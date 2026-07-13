@@ -12,7 +12,7 @@ from .config import settings
 from .rate_limiter import limiter
 from .routers import (
     auth, profile, weight, exercises, lifts,
-    nutrition, goals, analytics, coach, workout_templates,
+    nutrition, goals, analytics, coach, workout_templates, admin
 )
 from .push_notifications import router as push_router, PushSubscription
 from .export import router as export_router
@@ -72,6 +72,22 @@ async def lifespan(app: FastAPI):
         except Exception:
             db.rollback()
 
+        try:
+            db.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR DEFAULT 'user' NOT NULL"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        if settings.initial_admin_username:
+            try:
+                db.execute(
+                    text("UPDATE users SET role = 'admin' WHERE username = :u AND role != 'admin'"),
+                    {"u": settings.initial_admin_username}
+                )
+                db.commit()
+            except Exception:
+                db.rollback()
+
         seed_exercises(db)
     finally:
         db.close()
@@ -104,6 +120,7 @@ app.include_router(coach.router)
 app.include_router(workout_templates.router)
 app.include_router(push_router)
 app.include_router(export_router)
+app.include_router(admin.router)
 
 
 @app.get("/")

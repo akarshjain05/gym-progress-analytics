@@ -85,6 +85,15 @@ class UserOut(BaseModel):
     sidebar_collapsed: bool = False
     has_google_login: bool = False
     has_password: bool = False
+    role: str = "user"
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminUserOut(UserOut):
+    created_at: datetime
+    failed_login_attempts: int
+    locked_until: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

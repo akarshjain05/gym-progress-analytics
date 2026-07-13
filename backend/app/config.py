@@ -36,8 +36,10 @@ class Settings(BaseSettings):
 
     # Used to build the password reset link (e.g. https://x.onrender.com/reset-password.html)
     frontend_url: str = "http://127.0.0.1:8080"
+    
+    initial_admin_username: str | None = None
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property
     def cors_origins_list(self) -> list[str]:

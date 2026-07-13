@@ -221,14 +221,25 @@ function renderShell(activeId, pageTitle, subtitle) {
     throw new Error("IRONLOG: not authenticated, redirecting to home.");
   }
 
-  const navHtml = NAV_ITEMS.map(item => `
+  const user = Auth.getUser() || {};
+  const isCollapsed = user.sidebar_collapsed ? "sidebar-collapsed" : "";
+
+  let navHtml = NAV_ITEMS.map(item => `
     <a class="nav-link ${item.id === activeId ? "active" : ""}" href="${item.href}">
       ${item.icon}<span>${item.label}</span>
     </a>
   `).join("");
 
-  const user = Auth.getUser() || {};
-  const isCollapsed = user.sidebar_collapsed ? "sidebar-collapsed" : "";
+  if (user.role === 'admin') {
+    navHtml += `
+      <a class="nav-link ${activeId === 'admin' ? "active" : ""}" href="admin.html">
+        <svg ${ICON_STYLE} viewBox="0 0 24 24">
+          <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg><span>Admin Panel</span>
+      </a>
+    `;
+  }
 
   document.body.innerHTML = `
     ${buildLoadingOverlay()}

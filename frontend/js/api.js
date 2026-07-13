@@ -276,6 +276,11 @@ const Api = {
   // --- coach ---
   getCoachAnalysis() { return apiRequest("/coach/analysis"); },
   getCoachAdvice() { return apiRequest("/coach/advice"); },
+
+  // --- admin ---
+  adminGetUsers() { return apiRequest("/admin/users"); },
+  adminDeleteUser(id) { return apiRequest(`/admin/users/${id}`, { method: "DELETE" }); },
+  adminPromoteUser(id) { return apiRequest(`/admin/promote/${id}`, { method: "POST" }); },
 };
 
 function qs(params) {
