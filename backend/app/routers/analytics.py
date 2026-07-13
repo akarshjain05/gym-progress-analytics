@@ -121,8 +121,6 @@ def insights(
     current_user: models.User = Depends(get_current_user),
 ):
     """
-    Dispatches the massive analytics calculation to Celery to prevent blocking.
-    Returns the task ID so the client can poll for results if desired.
+    Generate insights synchronously since it's extremely fast.
     """
-    task = generate_insights.delay(current_user.id)
-    return {"message": "Insights generation started", "task_id": task.id}
+    return generate_insights(current_user.id)
