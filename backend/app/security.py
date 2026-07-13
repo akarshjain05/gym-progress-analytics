@@ -128,3 +128,17 @@ def generate_reset_token() -> tuple[str, str]:
 
 def hash_reset_token(raw_token: str) -> str:
     return hashlib.sha256(raw_token.encode()).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Email Verification
+# ---------------------------------------------------------------------------
+
+def generate_verification_token() -> tuple[str, str]:
+    raw = secrets.token_urlsafe(32)
+    hashed = hashlib.sha256(raw.encode()).hexdigest()
+    return raw, hashed
+
+
+def hash_verification_token(raw_token: str) -> str:
+    return hashlib.sha256(raw_token.encode()).hexdigest()

@@ -139,7 +139,20 @@ loginForm.addEventListener("submit", async (e) => {
     const urlParams = new URLSearchParams(window.location.search);
     window.location.href = urlParams.get("next") || "dashboard.html";
   } catch (err) {
-    setAlert(err.message || "Login failed.");
+    if (err.message && err.message.toLowerCase().includes("verify your email")) {
+      alertSlot.innerHTML = `<div class="alert alert-error">${err.message} <br><a href="#" id="resendVerificationLink" style="font-weight:600;margin-top:8px;display:inline-block;">Resend verification email</a></div>`;
+      document.getElementById("resendVerificationLink").addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        try {
+          const res = await Api.resendVerification(loginForm.username.value.trim());
+          setAlert(res.message || "Verification email sent.", "success");
+        } catch (rErr) {
+          setAlert(rErr.message || "Failed to resend email.");
+        }
+      });
+    } else {
+      setAlert(err.message || "Login failed.");
+    }
     btn.disabled = false; btn.textContent = "Log in";
   }
 });
@@ -151,9 +164,9 @@ registerForm.addEventListener("submit", async (e) => {
   btn.disabled = true; btn.textContent = "Creating account…";
   try {
     await Api.register(registerForm.username.value.trim(), registerForm.email.value.trim(), registerForm.password.value);
-    await Api.login(registerForm.username.value.trim(), registerForm.password.value);
-    const urlParams = new URLSearchParams(window.location.search);
-    window.location.href = urlParams.get("next") || "dashboard.html";
+    setAlert("Account created! Please check your email to verify your account before logging in.", "success");
+    registerForm.reset();
+    btn.disabled = false; btn.textContent = "Create account";
   } catch (err) {
     setAlert(err.message || "Couldn't create account.");
     btn.disabled = false; btn.textContent = "Create account";

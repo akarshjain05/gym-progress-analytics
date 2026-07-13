@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from .. import schemas, models
 from ..config import settings
 from ..database import get_db
-from ..email_utils import send_password_reset_email
+from ..email_utils import send_password_reset_email, send_verification_email
 from ..rate_limiter import limiter
 from ..security import (
     hash_password,
@@ -19,6 +19,8 @@ from ..security import (
     decode_setup_token,
     generate_reset_token,
     hash_reset_token,
+    generate_verification_token,
+    hash_verification_token,
 )
 from ..demo_templates import create_demo_templates
 
@@ -57,10 +59,19 @@ def register(request: Request, payload: schemas.UserCreate, db: Session = Depend
         username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
+        email_verified=False,
     )
+    
+    raw_token, hashed_token = generate_verification_token()
+    user.email_verification_token = hashed_token
+    user.email_verification_expires = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
+
     db.add(user)
     db.commit()
     db.refresh(user)
+    
+    verify_link = f"{settings.frontend_url}/verify-email.html?token={raw_token}"
+    send_verification_email(user.email, verify_link)
     
     create_demo_templates(db, user.id)
     
@@ -106,6 +117,12 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email address. Check your inbox.",
+        )
+
     if user.failed_login_attempts > 0 or user.locked_until is not None:
         user.failed_login_attempts = 0
         user.locked_until = None
@@ -134,10 +151,11 @@ def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session =
         user = db.query(models.User).filter(models.User.email == email).first()
         if user:
             user.google_id = google_id
+            user.email_verified = True
             db.commit()
             db.refresh(user)
         else:
-            user = models.User(email=email, google_id=google_id, username=None, password_hash=None)
+            user = models.User(email=email, google_id=google_id, username=None, password_hash=None, email_verified=True)
             db.add(user)
             db.commit()
             db.refresh(user)
@@ -166,6 +184,7 @@ def complete_google_signup(request: Request, response: Response, payload: schema
 
     user.username = payload.username
     user.password_hash = hash_password(payload.password)
+    user.email_verified = True
     db.commit()
 
     create_demo_templates(db, user.id)
@@ -203,6 +222,46 @@ def forgot_password(request: Request, payload: schemas.ForgotPasswordIn, db: Ses
         response_data["reset_link"] = reset_link
 
     return response_data
+
+
+@router.post("/verify-email")
+@limiter.limit("5/minute")
+def verify_email(request: Request, payload: schemas.VerifyEmailIn, db: Session = Depends(get_db)):
+    hashed = hash_verification_token(payload.token)
+    user = db.query(models.User).filter(models.User.email_verification_token == hashed).first()
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    if not user or not user.email_verification_expires or user.email_verification_expires < now:
+        raise HTTPException(status_code=400, detail="This verification link is invalid or has expired. Please request a new one.")
+
+    user.email_verified = True
+    user.email_verification_token = None
+    user.email_verification_expires = None
+    db.commit()
+
+    return {"message": "Email successfully verified. You can now log in."}
+
+
+@router.post("/resend-verification")
+@limiter.limit("3/minute")
+def resend_verification(request: Request, payload: schemas.ResendVerificationIn, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(
+        or_(
+            models.User.email == payload.email,
+            models.User.username == payload.email
+        )
+    ).first()
+    
+    if user and not user.email_verified:
+        raw_token, hashed_token = generate_verification_token()
+        user.email_verification_token = hashed_token
+        user.email_verification_expires = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
+        db.commit()
+        
+        verify_link = f"{settings.frontend_url}/verify-email.html?token={raw_token}"
+        send_verification_email(user.email, verify_link)
+        
+    return {"message": "If that email is registered and not verified, a new verification link has been sent."}
 
 
 @router.post("/reset-password")

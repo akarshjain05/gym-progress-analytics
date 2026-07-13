@@ -216,6 +216,12 @@ const Api = {
   resetPassword(token, newPassword) {
     return apiRequest("/auth/reset-password", { method: "POST", auth: false, body: { token, new_password: newPassword } });
   },
+  resendVerification(email) {
+    return apiRequest("/auth/resend-verification", { method: "POST", auth: false, body: { email } });
+  },
+  verifyEmail(token) {
+    return apiRequest("/auth/verify-email", { method: "POST", auth: false, body: { token } });
+  },
 
   // --- weight ---
   logWeight(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },

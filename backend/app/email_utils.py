@@ -64,3 +64,50 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
         resp.raise_for_status()
     except requests.RequestException as e:
         print(f"[ERROR] Failed to send password reset email via Brevo: {e}")
+
+
+def send_verification_email(to_email: str, verify_link: str) -> None:
+    """
+    Sends an email verification link via Brevo's transactional email HTTP API.
+    """
+    if not settings.brevo_api_key:
+        print(f"[DEV - no BREVO_API_KEY configured] Email verification link for {to_email}: {verify_link}")
+        return
+
+    text_body = (
+        "Welcome to IRONLOG! Please verify your email address using the link below. It's valid for 24 hours.\n\n"
+        f"{verify_link}\n\n"
+        "If you didn't create this account, you can safely ignore this email."
+    )
+    html_body = f"""
+    <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; color: #222;">
+      <h2 style="color:#2196F3;">Verify your email address</h2>
+      <p>Click the button below to verify your email and activate your IRONLOG account. This link is valid for <strong>24 hours</strong>.</p>
+      <p style="margin: 24px 0;">
+        <a href="{verify_link}" style="display:inline-block;background:#2196F3;color:#ffffff;
+           padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:600;">
+          Verify Email
+        </a>
+      </p>
+      <p style="color:#888;font-size:13px;">If you didn't create this account, you can safely ignore this email.</p>
+    </div>
+    """
+
+    payload = {
+        "sender": {"email": settings.brevo_sender_email, "name": "IRONLOG"},
+        "to": [{"email": to_email}],
+        "subject": "Verify your IRONLOG email address",
+        "htmlContent": html_body,
+        "textContent": text_body,
+    }
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.brevo_api_key,
+        "content-type": "application/json",
+    }
+
+    try:
+        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f"[ERROR] Failed to send verification email via Brevo: {e}")

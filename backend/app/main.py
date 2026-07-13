@@ -54,6 +54,24 @@ async def lifespan(app: FastAPI):
         except Exception:
             db.rollback()
 
+        try:
+            db.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT TRUE NOT NULL"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
+            db.execute(text("ALTER TABLE users ADD COLUMN email_verification_token VARCHAR"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
+            db.execute(text("ALTER TABLE users ADD COLUMN email_verification_expires TIMESTAMP"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         seed_exercises(db)
     finally:
         db.close()

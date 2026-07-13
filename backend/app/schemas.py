@@ -53,6 +53,14 @@ class ResetPasswordIn(BaseModel):
     new_password: str = Field(min_length=6)
 
 
+class VerifyEmailIn(BaseModel):
+    token: str
+
+
+class ResendVerificationIn(BaseModel):
+    email: str
+
+
 # ---------- Profile ----------
 
 class ProfileUpdate(BaseModel):

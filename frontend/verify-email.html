@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#c0392b">
+<title>Verify Email — IRONLOG</title>
+<link rel="stylesheet" href="css/style.css?v=11">
+<link rel="stylesheet" href="css/mobile.css?v=11">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card" style="text-align: center;">
+    <div class="auth-brand">
+      <div class="brand-mark">IL</div>
+      <h1>IRONLOG</h1>
+    </div>
+
+    <h2 style="margin-bottom: 16px;">Email Verification</h2>
+    
+    <div id="alertSlot">
+      <div class="alert alert-info">Verifying your email address... Please wait.</div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <a href="login.html" class="btn btn-primary" style="display:inline-block;">Go to Login</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js?v=11"></script>
+<script src="js/api.js?v=12"></script>
+<script>
+async function verifyEmail() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get("token");
+  const alertSlot = document.getElementById("alertSlot");
+
+  if (!token) {
+    alertSlot.innerHTML = `<div class="alert alert-error">No verification token found in the URL.</div>`;
+    return;
+  }
+
+  try {
+    const res = await Api.verifyEmail(token);
+    alertSlot.innerHTML = `<div class="alert alert-success">${res.message || "Email successfully verified!"}</div>`;
+  } catch (err) {
+    alertSlot.innerHTML = `<div class="alert alert-error">${err.message || "Verification failed. The link might be invalid or expired."}</div>`;
+  }
+}
+
+window.addEventListener("load", verifyEmail);
+</script>
+</body>
+</html>

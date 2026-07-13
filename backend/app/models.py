@@ -22,6 +22,10 @@ class User(Base):
 
     google_id = Column(String, unique=True, index=True, nullable=True)
 
+    email_verified = Column(Boolean, default=False, nullable=False, server_default='false')
+    email_verification_token = Column(String, nullable=True)
+    email_verification_expires = Column(DateTime, nullable=True)
+
     reset_token_hash = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
 
