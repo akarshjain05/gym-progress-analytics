@@ -37,6 +37,18 @@ async def lifespan(app: FastAPI):
             db.rollback()
 
         try:
+            db.execute(text("ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0 NOT NULL"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
+            db.execute(text("ALTER TABLE users ADD COLUMN locked_until TIMESTAMP"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
             db.execute(text("ALTER TABLE workout_templates ADD COLUMN share_id VARCHAR UNIQUE"))
             db.commit()
         except Exception:

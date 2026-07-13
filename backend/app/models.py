@@ -9,15 +9,6 @@ from sqlalchemy.orm import relationship
 from .database import Base
 
 
-class BlacklistedToken(Base):
-    """
-    Stores revoked refresh tokens.
-    """
-    __tablename__ = "blacklisted_tokens"
-
-    id = Column(Integer, primary_key=True, index=True)
-    token = Column(String, unique=True, index=True, nullable=False)
-    blacklisted_on = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 class User(Base):
     __tablename__ = "users"
 

@@ -678,12 +678,9 @@
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
           <span class="set-note">${set.notes || ""}</span>
-          <div style="position:relative;" class="set-menu-container">
-            <button class="set-menu-btn" title="Options" style="font-size: 18px; opacity: 0.6; padding: 4px; background: none; border: none; color: inherit; cursor: pointer;" onclick="event.stopPropagation(); const d = this.nextElementSibling; const isVis = d.style.display === 'block'; document.querySelectorAll('.set-dropdown').forEach(x => x.style.display='none'); if(!isVis) d.style.display='block';">⋮</button>
-            <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:#2D3748; border-radius:6px; padding:4px 0; z-index:10; box-shadow:0 4px 6px rgba(0,0,0,0.3); min-width:100px;">
-              <div class="wk-dropdown-item set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="padding:8px 16px; cursor:pointer; font-size:14px; white-space:nowrap;">Edit set</div>
-              <div class="wk-dropdown-item set-delete-btn" data-logid="${set.id}" style="padding:8px 16px; cursor:pointer; font-size:14px; color:#FC8181; white-space:nowrap;">Delete set</div>
-            </div>
+          <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+            <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' title="Edit" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:14px; padding:4px;">✏️</button>
+            <button class="set-delete-btn" data-logid="${set.id}" title="Delete" style="background:none; border:none; color:#FC8181; cursor:pointer; font-size:14px; padding:4px;">🗑️</button>
           </div>
         </div>
       `).join("");

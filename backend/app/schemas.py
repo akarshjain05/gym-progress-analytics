@@ -23,11 +23,7 @@ class UserLogin(BaseModel):
 
 class Token(BaseModel):
     access_token: str
-    refresh_token: Optional[str] = None
     token_type: str = "bearer"
-
-class TokenRefreshIn(BaseModel):
-    refresh_token: str
 
 
 class GoogleLoginIn(BaseModel):
@@ -37,7 +33,6 @@ class GoogleLoginIn(BaseModel):
 class GoogleLoginOut(BaseModel):
     needs_setup: bool
     access_token: Optional[str] = None
-    refresh_token: Optional[str] = None
     token_type: str = "bearer"
     setup_token: Optional[str] = None  # present only when needs_setup is True
     email: Optional[str] = None

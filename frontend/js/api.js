@@ -10,17 +10,20 @@ const API_BASE_URL = (window.IRONLOG_API_BASE || "http://127.0.0.1:8000");
 const Auth = {
   getToken() { return localStorage.getItem("ironlog_token"); },
   setToken(token) { localStorage.setItem("ironlog_token", token); },
-  getRefreshToken() { return localStorage.getItem("ironlog_refresh_token"); },
-  setRefreshToken(token) { localStorage.setItem("ironlog_refresh_token", token); },
   clear() { 
     localStorage.removeItem("ironlog_token"); 
-    localStorage.removeItem("ironlog_refresh_token"); 
     localStorage.removeItem("ironlog_user"); 
   },
   isLoggedIn() { return !!this.getToken(); },
   getUser() {
-    const raw = localStorage.getItem("ironlog_user");
-    return raw ? JSON.parse(raw) : null;
+    const userJson = localStorage.getItem("ironlog_user");
+    if (!userJson) return null;
+    try {
+      return JSON.parse(userJson);
+    } catch (e) {
+      console.warn("Invalid user JSON in localStorage", e);
+      return null;
+    }
   },
   setUser(user) { localStorage.setItem("ironlog_user", JSON.stringify(user)); },
 };
@@ -101,13 +104,7 @@ window.addEventListener('online', () => {
 // Also try to flush on startup
 OfflineSync.flush().catch(console.error);
 
-let isRefreshing = false;
-let refreshSubscribers = [];
 
-function onRefreshed(token) {
-  refreshSubscribers.forEach(cb => cb(token));
-  refreshSubscribers = [];
-}
 
 async function apiRequest(path, { method = "GET", body, auth = true, form = false, _retry = false } = {}) {
   const headers = {};
@@ -138,64 +135,10 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
     throw new ApiError("Can't reach the server. Check your connection or try again shortly.", 0);
   }
 
-  if (resp.status === 401 && auth && !_retry) {
-    // Attempt to refresh
-    const refreshToken = Auth.getRefreshToken();
-    if (refreshToken) {
-      if (isRefreshing) {
-        // Wait until the ongoing refresh finishes
-        return new Promise((resolve, reject) => {
-          refreshSubscribers.push((newToken) => {
-            if (newToken) {
-              resolve(apiRequest(path, { method, body, auth, form, _retry: true }));
-            } else {
-              reject(new ApiError("Session expired", 401));
-            }
-          });
-        });
-      }
-
-      isRefreshing = true;
-      try {
-        const refreshResp = await fetch(`${API_BASE_URL}/auth/refresh`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh_token: refreshToken })
-        });
-
-        if (refreshResp.ok) {
-          const refreshData = await refreshResp.json();
-          Auth.setToken(refreshData.access_token);
-          Auth.setRefreshToken(refreshData.refresh_token);
-          isRefreshing = false;
-          onRefreshed(refreshData.access_token);
-          return await apiRequest(path, { method, body, auth, form, _retry: true });
-        } else {
-          // Refresh failed, token is invalid or expired
-          isRefreshing = false;
-          onRefreshed(null);
-          Auth.clear();
-          window.location.href = "index.html";
-          throw new ApiError("Session expired - please log in again.", 401);
-        }
-      } catch (err) {
-        isRefreshing = false;
-        onRefreshed(null);
-        Auth.clear();
-        window.location.href = "index.html";
-        throw new ApiError("Session expired - please log in again.", 401);
-      }
-    } else {
-      Auth.clear();
-      window.location.href = "index.html";
-      throw new ApiError("Session expired - please log in again.", 401);
-    }
-  }
-
-  if (resp.status === 401 && auth && _retry) {
-      Auth.clear();
-      window.location.href = "index.html";
-      throw new ApiError("Session expired - please log in again.", 401);
+  if (resp.status === 401 && auth) {
+    Auth.clear();
+    window.location.href = "index.html";
+    throw new ApiError("Session expired - please log in again.", 401);
   }
 
   if (resp.status === 204) return null;
@@ -230,20 +173,16 @@ const Api = {
     form.set("password", password);
     const data = await apiRequest("/auth/login", { method: "POST", auth: false, form: true, body: form });
     Auth.setToken(data.access_token);
-    if (data.refresh_token) Auth.setRefreshToken(data.refresh_token);
     const user = await apiRequest("/profile/me");
     Auth.setUser(user);
     return user;
   },
   
   async logout() {
-    const refreshToken = Auth.getRefreshToken();
-    if (refreshToken) {
-      try {
-        await apiRequest("/auth/logout", { method: "POST", auth: false, body: { refresh_token: refreshToken } });
-      } catch (e) {
-        console.warn("Logout request failed or token already invalid", e);
-      }
+    try {
+      await apiRequest("/auth/logout", { method: "POST", auth: false });
+    } catch (e) {
+      console.warn("Logout request failed", e);
     }
     Auth.clear();
     window.location.href = "index.html";
@@ -258,7 +197,6 @@ const Api = {
     const data = await apiRequest("/auth/google", { method: "POST", auth: false, body: { id_token: idToken } });
     if (!data.needs_setup && data.access_token) {
       Auth.setToken(data.access_token);
-      if (data.refresh_token) Auth.setRefreshToken(data.refresh_token);
     }
     return data;
   },
@@ -269,7 +207,6 @@ const Api = {
     });
     if (data.access_token) {
       Auth.setToken(data.access_token);
-      if (data.refresh_token) Auth.setRefreshToken(data.refresh_token);
     }
     return data;
   },
