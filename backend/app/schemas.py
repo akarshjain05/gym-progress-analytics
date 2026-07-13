@@ -98,6 +98,24 @@ class AdminUserOut(UserOut):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AdminStatsOut(BaseModel):
+    total_users: int
+    total_workouts: int
+    total_lift_logs: int
+    total_weight_logs: int
+    total_goals: int
+
+
+class AdminLogEntryOut(BaseModel):
+    log_id: int
+    log_type: str  # 'lift', 'weight', 'workout', 'goal', 'calorie'
+    user_id: int
+    username: Optional[str] = None
+    email: str
+    date: date
+    description: str
+
+
 # ---------- Body weight ----------
 
 class WeightLogIn(BaseModel):

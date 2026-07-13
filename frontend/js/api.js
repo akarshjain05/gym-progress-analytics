@@ -282,6 +282,9 @@ const Api = {
   adminGetUsers() { return apiRequest("/admin/users"); },
   adminDeleteUser(id) { return apiRequest(`/admin/users/${id}`, { method: "DELETE" }); },
   adminPromoteUser(id) { return apiRequest(`/admin/promote/${id}`, { method: "POST" }); },
+  adminGetStats() { return apiRequest("/admin/stats"); },
+  adminGetLogs() { return apiRequest("/admin/logs"); },
+  adminDeleteLog(type, id) { return apiRequest(`/admin/logs/${type}/${id}`, { method: "DELETE" }); },
 };
 
 function qs(params) {

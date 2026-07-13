@@ -18,6 +18,35 @@
 <link rel="stylesheet" href="css/style.css?v=11">
 <link rel="stylesheet" href="css/mobile.css?v=11">
 <link rel="stylesheet" href="css/polish.css?v=11">
+<style>
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+  }
+  .stat-number { font-size: 32px; font-weight: 800; margin-bottom: 8px; color: var(--primary); }
+  .stat-label { font-size: 13px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-info { display: flex; flex-direction: column; gap: 4px; }
+  .log-desc { font-weight: 500; font-size: 14px; }
+  .log-meta { font-size: 12px; color: var(--text-tertiary); display: flex; gap: 8px; align-items: center; }
+  
+  .badge-log { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .badge-log-lift { background: rgba(52,152,219,0.15); color: #3498db; }
+  .badge-log-weight { background: rgba(155,89,182,0.15); color: #9b59b6; }
+  .badge-log-workout { background: rgba(46,204,113,0.15); color: #2ecc71; }
+  .badge-log-goal { background: rgba(241,196,15,0.15); color: #f1c40f; }
+</style>
 </head>
 <body>
 <script src="js/config.js?v=11"></script>
