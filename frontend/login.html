@@ -31,7 +31,7 @@
 
     <!-- GOOGLE SIGN-IN -->
     <div id="googleAuthSection" style="display:none;">
-      <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
+      <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-bottom:18px;overflow:hidden;max-width:100%;border-radius:8px;"></div>
       <div class="bar-divider" style="margin:18px 0;">
         <div class="collar"></div><div class="rail"></div>
         <div class="label">or</div>
@@ -229,8 +229,10 @@ function initGoogleSignIn() {
     client_id: clientId,
     callback: handleGoogleCredentialResponse,
   });
-  google.accounts.id.renderButton(document.getElementById("googleSignInBtn"), {
-    theme: "outline", size: "large", width: 320, text: "continue_with",
+  var btnContainer = document.getElementById("googleSignInBtn");
+  var btnWidth = Math.min(btnContainer.offsetWidth || 300, 320);
+  google.accounts.id.renderButton(btnContainer, {
+    theme: "filled_black", size: "large", width: btnWidth, text: "continue_with",
   });
 }
 window.addEventListener("load", () => setTimeout(initGoogleSignIn, 300));

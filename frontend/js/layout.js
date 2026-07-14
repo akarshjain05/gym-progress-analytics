@@ -211,18 +211,10 @@ function buildMobileDrawer(activeId) {
 
 // ── Bottom nav (5 main items only, no profile — it's in drawer) ───────────────
 function buildBottomNav(activeId) {
-  const user = Auth.getUser() || {};
-  let bottomItems = NAV_ITEMS.filter(i => i.id !== 'profile');
+  const BOTTOM_NAV_IDS = ['dashboard', 'lifts', 'workout', 'analytics', 'profile'];
+  let bottomItems = NAV_ITEMS.filter(i => BOTTOM_NAV_IDS.includes(i.id));
   
-  if (user.role === 'admin') {
-    bottomItems.push({
-      id: 'admin', href: 'admin.html', label: 'Admin',
-      icon: `<svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`
-    });
-  }
+
 
   const links = bottomItems.map(item => `
     <a href="${item.href}" class="bottom-nav-link ${item.id === activeId ? 'active' : ''}" aria-label="${item.label}">

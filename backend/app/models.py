@@ -39,6 +39,7 @@ class User(Base):
 
     goal_weight_kg = Column(Float, nullable=True)
     sidebar_collapsed = Column(Boolean, default=False, nullable=False, server_default='false')
+    onboarding_completed = Column(Boolean, default=False, nullable=False, server_default='false')
 
     weight_logs = relationship("BodyWeightLog", back_populates="user", cascade="all, delete-orphan")
     lift_logs = relationship("LiftLog", back_populates="user", cascade="all, delete-orphan")

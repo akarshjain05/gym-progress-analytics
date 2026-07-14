@@ -38,8 +38,19 @@
     if (!Auth.isLoggedIn()) return;
     if (window.IronlogOnboarding.isComplete()) return;
 
-    // Small delay so the dashboard renders first (better UX)
-    setTimeout(showOnboarding, 800);
+    // Check server-side: if user already has profile data, they completed
+    // onboarding on another device — skip it and mark as complete locally.
+    Api.getProfile().then(function(user) {
+      if (user && user.onboarding_completed) {
+        localStorage.setItem(STORAGE_KEY, STORAGE_VERSION);
+        return; // don't show onboarding
+      }
+      // Small delay so the dashboard renders first (better UX)
+      setTimeout(showOnboarding, 800);
+    }).catch(function() {
+      // If profile fetch fails, fall back to showing onboarding
+      setTimeout(showOnboarding, 800);
+    });
   }
 
   // ── Build and show modal ──────────────────────────────────────────────────
@@ -432,6 +443,8 @@
 
   function complete() {
     localStorage.setItem(STORAGE_KEY, STORAGE_VERSION);
+    // Tell the server so other devices know onboarding is done
+    Api.updateProfile({ onboarding_completed: true }).catch(function() {});
     goToDone();
   }
 
