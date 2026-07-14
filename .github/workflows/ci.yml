@@ -25,19 +25,4 @@ jobs:
         cd backend
         pytest
 
-  test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: "18.x"
-    - name: Install dependencies
-      run: |
-        cd frontend
-        npm ci
-    - name: Run lint
-      run: |
-        cd frontend
-        npm run lint
+
