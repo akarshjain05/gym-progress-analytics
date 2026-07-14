@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     # SQLAlchemy's psycopg2 driver needs as "postgresql://" - we normalize that.
     database_url: str = "sqlite:///./gym.db"
 
-    secret_key: str = "dev-secret-change-me-in-production"
+    secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 10080  # 7 days
 

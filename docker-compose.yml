@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: gym_user
-      POSTGRES_PASSWORD: gym_password
-      POSTGRES_DB: gym_analytics
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -41,7 +41,7 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/1
@@ -49,8 +49,8 @@ services:
       - FRONTEND_URL=http://98.86.178.101.nip.io
       - BREVO_API_KEY=${BREVO_API_KEY}
       - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
-      - SECRET_KEY=dev-secret-change-me-in-production-12345
-      - GOOGLE_CLIENT_ID=614450704706-8n5dla8lbbji9edv96hpa3qdosq6us9k.apps.googleusercontent.com
+      - SECRET_KEY=${SECRET_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       db:
         condition: service_healthy
@@ -66,7 +66,7 @@ services:
       - ./backend:/app
     env_file: .env
     environment:
-      - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/1
@@ -87,7 +87,7 @@ services:
       - ./backend:/app
     env_file: .env
     environment:
-      - DATABASE_URL=postgresql://gym_user:gym_password@db:5432/gym_analytics
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/1
