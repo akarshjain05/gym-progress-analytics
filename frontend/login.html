@@ -232,7 +232,12 @@ function initGoogleSignIn() {
   var btnContainer = document.getElementById("googleSignInBtn");
   var btnWidth = Math.min(btnContainer.offsetWidth || 300, 320);
   google.accounts.id.renderButton(btnContainer, {
-    theme: "filled_black", size: "large", width: btnWidth, text: "continue_with",
+    theme: "filled_black", 
+    size: "large", 
+    width: btnWidth, 
+    text: "signin_with", 
+    shape: "rectangular",
+    logo_alignment: "center"
   });
 }
 window.addEventListener("load", () => setTimeout(initGoogleSignIn, 300));
