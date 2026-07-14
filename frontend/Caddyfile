@@ -1,4 +1,4 @@
-98.86.178.101.nip.io {
+ironlog.in, www.ironlog.in {
     root * /usr/share/caddy/html
     file_server
 

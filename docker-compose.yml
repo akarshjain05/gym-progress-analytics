@@ -45,8 +45,8 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/1
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:8080,http://98.86.178.101,http://98.86.178.101.nip.io
-      - FRONTEND_URL=http://98.86.178.101.nip.io
+      - CORS_ORIGINS=https://ironlog.in,https://www.ironlog.in
+      - FRONTEND_URL=https://ironlog.in
       - BREVO_API_KEY=${BREVO_API_KEY}
       - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
       - SECRET_KEY=${SECRET_KEY}
