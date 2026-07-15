@@ -68,6 +68,12 @@ const NAV_ITEMS = [
       <circle cx="12" cy="8" r="4" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M5 20c0-2.5 2-5 7-5s7 2.5 7 5" fill="currentColor" />
     </svg>` },
+  { id: "library", href: "library.html", label: "Exercise Library",
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M8 4v16M16 4v16" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M4 12h4M16 12h4" stroke="currentColor" stroke-width="1.5"/>
+    </svg>` },
 ];
 
 const BARBELL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -370,6 +376,7 @@ function renderShell(activeId, pageTitle, subtitle) {
     const skeletonMap = {
       dashboard: "dashboard", weight: "weight", lifts: "lifts",
       nutrition: "nutrition", analytics: "analytics", workout: null,
+      library: "lifts", // use lifts skeleton for library
     };
     const skPage = skeletonMap[activeId];
     if (skPage) {
@@ -378,3 +385,57 @@ function renderShell(activeId, pageTitle, subtitle) {
   }
   setupLoadingAutoHide();
 }
+
+window.showExerciseInfo = async function(exerciseId) {
+  try {
+    const exercises = await Api.listExercises();
+    const ex = exercises.find(e => e.id === exerciseId);
+    if (!ex) return;
+    
+    let modal = document.getElementById('exerciseInfoModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'exerciseInfoModal';
+      modal.className = 'wk-modal-overlay';
+      modal.style.zIndex = '9999';
+      document.body.appendChild(modal);
+    }
+    
+    const difficultyBadge = ex.difficulty 
+      ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:var(--bg-tertiary); font-size:12px; margin-left:8px;">${ex.difficulty}</span>` 
+      : '';
+      
+    modal.innerHTML = `
+      <div class="wk-modal" style="max-width:500px;">
+        <div class="wk-modal-header">
+          <div class="wk-modal-title" style="display:flex; align-items:center;">
+            ${ex.name} ${difficultyBadge}
+          </div>
+          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${CLOSE_ICON}</button>
+        </div>
+        <div class="wk-modal-body" style="line-height:1.5;">
+          <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
+              <strong style="color:var(--text-secondary);">Category:</strong><br>${ex.category || '—'}
+            </div>
+            <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
+              <strong style="color:var(--text-secondary);">Primary Muscle:</strong><br>${ex.muscle_group || '—'}
+            </div>
+            <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
+              <strong style="color:var(--text-secondary);">Secondary Muscle:</strong><br>${ex.secondary_muscle || '—'}
+            </div>
+            <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
+              <strong style="color:var(--text-secondary);">Equipment:</strong><br>${ex.equipment || '—'}
+            </div>
+          </div>
+          
+          <h4 style="margin:0 0 8px 0; color:var(--text-primary);">Instructions</h4>
+          <div style="color:var(--text-secondary); font-size:14px; white-space:pre-wrap;">${ex.instructions || 'No instructions available.'}</div>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  } catch (err) {
+    console.error("Failed to load exercise info", err);
+  }
+};

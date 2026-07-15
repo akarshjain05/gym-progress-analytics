@@ -208,6 +208,27 @@
               <option value="core">Core</option>
             </select>
           </div>
+          <div class="field">
+            <label class="field-label">Secondary Muscle (optional)</label>
+            <input type="text" id="customSecondaryMuscle" class="text-input" placeholder="e.g. Triceps, Front Delt">
+          </div>
+          <div class="field">
+            <label class="field-label">Equipment (optional)</label>
+            <input type="text" id="customEquipment" class="text-input" placeholder="e.g. Dumbbell, Machine">
+          </div>
+          <div class="field">
+            <label class="field-label">Difficulty (optional)</label>
+            <select id="customDifficulty" class="select-input">
+              <option value="">Select…</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Instructions (optional)</label>
+            <textarea id="customInstructions" class="text-input" placeholder="How to perform..." rows="2"></textarea>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" id="cancelCustom">Cancel</button>
@@ -796,7 +817,10 @@
 
           return `
             <div class="pr-row" data-exid="${pr.exercise_id}" style="cursor:pointer;">
-              <div class="pr-exercise">${pr.exercise}</div>
+              <div class="pr-exercise" style="display:flex; align-items:center; gap:6px;">
+                ${pr.exercise}
+                <button type="button" class="btn btn-secondary" style="padding:0 6px; font-size:10px; min-width:24px; min-height:24px; line-height:1;" onclick="event.stopPropagation(); window.showExerciseInfo(${pr.exercise_id})">ℹ️</button>
+              </div>
               <div class="pr-1rm">${prMetric}</div>
               <div class="pr-achieved">${prAchieved}</div>
               <div class="pr-date">${fmtDate(pr.date)}</div>
@@ -946,12 +970,16 @@
     const name = document.getElementById("customName").value.trim();
     const muscle_group = document.getElementById("customMuscle").value || null;
     const category = document.getElementById("customCategory").value || null;
+    const secondary_muscle = document.getElementById("customSecondaryMuscle").value.trim() || null;
+    const equipment = document.getElementById("customEquipment").value.trim() || null;
+    const difficulty = document.getElementById("customDifficulty").value || null;
+    const instructions = document.getElementById("customInstructions").value.trim() || null;
     if (!name) { showToast("Please enter an exercise name.", "error"); return; }
 
     const btn = document.getElementById("submitCustom");
     btn.disabled = true;
     try {
-      const ex = await apiRequest("/exercises", { method: "POST", body: { name, muscle_group, category } });
+      const ex = await apiRequest("/exercises", { method: "POST", body: { name, muscle_group, category, secondary_muscle, equipment, difficulty, instructions } });
       exercises.push(ex);
       populateMuscleGroupPills();
       populateExerciseSelects();

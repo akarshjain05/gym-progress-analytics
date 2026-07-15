@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#c0392b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IRONLOG">
+  
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="shortcut icon" href="/icons/icon-96.png">
+  
+  <link rel="stylesheet" href="css/theme.css?v=11">
+  <link rel="stylesheet" href="css/style.css?v=11">
+  <link rel="stylesheet" href="css/mobile.css?v=11">
+  <link rel="stylesheet" href="css/polish.css?v=11">
+  <style>
+    .lib-search {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .lib-search:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .lib-group {
+      margin-bottom: 24px;
+    }
+    .lib-group-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .lib-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lib-item:hover {
+      background: var(--bg-tertiary);
+    }
+    .lib-item-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .lib-item-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+  </style>
+  <title>Exercise Library — IRONLOG</title>
+</head>
+<body>
+  <script src="js/vendor/chart.umd.js?v=11"></script>
+  <script src="js/config.js?v=11"></script>
+  <script src="js/api.js?v=12"></script>
+  <script src="js/features.js?v=11"></script>
+  <script src="js/layout.js?v=11"></script>
+  <script src="js/skeleton.js?v=11"></script>
+  <script src="js/library.js?v=11"></script>
+  <script src="js/pwa.js?v=11"></script>
+</body>
+</html>

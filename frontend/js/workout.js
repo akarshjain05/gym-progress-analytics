@@ -700,8 +700,21 @@
     overlay.innerHTML = `
       <div class="wk-quick-pick-box">
         <div class="wk-quick-pick-title">Add Exercise</div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;" id="qpSelectWrapper"></div>
       </div>`;
-    overlay.querySelector('.wk-quick-pick-box').appendChild(sel);
+      
+    const wrapper = overlay.querySelector('#qpSelectWrapper');
+    sel.style.flex = '1';
+    wrapper.appendChild(sel);
+    
+    const infoBtn = document.createElement('button');
+    infoBtn.className = 'btn btn-secondary';
+    infoBtn.style.padding = '0 12px';
+    infoBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>';
+    infoBtn.onclick = () => {
+      window.showExerciseInfo(parseInt(sel.value));
+    };
+    wrapper.appendChild(infoBtn);
 
     const btnRow = document.createElement('div');
     btnRow.className = 'wk-modal-footer';
