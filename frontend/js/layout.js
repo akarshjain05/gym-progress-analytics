@@ -263,7 +263,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   const user = Auth.getUser() || {};
   const isCollapsed = user.sidebar_collapsed ? "sidebar-collapsed" : "";
 
-  let navHtml = NAV_ITEMS.map(item => `
+  let navHtml = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
     <a class="nav-link ${item.id === activeId ? "active" : ""}" href="${item.href}">
       ${item.icon}<span>${item.label}</span>
     </a>
@@ -297,11 +297,15 @@ function renderShell(activeId, pageTitle, subtitle) {
         </button>
         <ul class="nav-list" id="navList">
           ${navHtml}
-          <a class="nav-link nav-link-logout" id="logoutBtn">
-            ${LOGOUT_ICON}
-            <span>Log out</span>
-          </a>
         </ul>
+        <div class="sidebar-footer">
+          <a href="profile.html" class="sidebar-profile-link" title="Profile">
+            <div class="sidebar-avatar">${user.username ? user.username.charAt(0).toUpperCase() : 'U'}</div>
+          </a>
+          <button class="sidebar-logout-btn" id="logoutBtn" title="Log out">
+            ${LOGOUT_ICON}
+          </button>
+        </div>
       </aside>
 
       <main class="main-content">
