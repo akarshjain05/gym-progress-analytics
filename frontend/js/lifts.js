@@ -73,7 +73,12 @@
         </div>
         <div class="lifts-selector-field" id="exerciseStep" style="display:none;">
           <label class="field-label" for="exerciseSelect">Exercise</label>
-          <select id="exerciseSelect" class="select-input lifts-select"></select>
+          <div style="display:flex; gap:8px;">
+            <select id="exerciseSelect" class="select-input lifts-select" style="flex:1;"></select>
+            <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtn" style="padding: 0 12px; margin-top:0;" title="Exercise Info">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            </button>
+          </div>
         </div>
         <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
       </div>
@@ -958,6 +963,13 @@
   });
 
   // ── Custom Exercise Modal ─────────────────────────────────────────────────
+  document.getElementById("exerciseInfoBtn").addEventListener("click", () => {
+    const exId = parseInt(document.getElementById("exerciseSelect").value, 10);
+    if (!isNaN(exId) && window.showExerciseInfo) {
+      window.showExerciseInfo(exId);
+    }
+  });
+
   document.getElementById("addCustomBtn").addEventListener("click", () => {
     document.getElementById("customName").value = "";
     document.getElementById("customModal").style.display = "flex";
