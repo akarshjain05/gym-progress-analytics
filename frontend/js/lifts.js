@@ -78,7 +78,7 @@
             <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtnDesktop" style="margin-top:0;" title="Exercise Info">Info</button>
           </div>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <div id="customBtnWrapper" style="display:flex; justify-content:space-between; align-items:center;">
           <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
           <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtnMobile" style="display:none;" title="Exercise Info">Info</button>
         </div>
@@ -328,6 +328,7 @@
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
       const isMobile = window.innerWidth <= 768;
+      document.getElementById("customBtnWrapper").style.width = isMobile ? "100%" : "auto";
       document.getElementById("exerciseInfoBtnDesktop").style.display = isMobile ? "none" : "";
       document.getElementById("exerciseInfoBtnMobile").style.display = isMobile ? "" : "none";
     });
@@ -339,6 +340,7 @@
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
       const isMobile = window.innerWidth <= 768;
+      document.getElementById("customBtnWrapper").style.width = isMobile ? "100%" : "auto";
       document.getElementById("exerciseInfoBtnDesktop").style.display = isMobile ? "none" : "";
       document.getElementById("exerciseInfoBtnMobile").style.display = isMobile ? "" : "none";
     }
