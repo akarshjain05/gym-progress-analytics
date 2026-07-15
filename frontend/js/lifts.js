@@ -73,12 +73,12 @@
         </div>
         <div class="lifts-selector-field" id="exerciseStep" style="display:none;">
           <label class="field-label" for="exerciseSelect">Exercise</label>
-          <div style="display:flex; gap:8px;">
-            <select id="exerciseSelect" class="select-input lifts-select" style="flex:1;"></select>
-            <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtn" style="margin-top:0;" title="Exercise Info">Info</button>
-          </div>
+          <select id="exerciseSelect" class="select-input lifts-select"></select>
         </div>
-        <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
+          <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtn" style="display:none;" title="Exercise Info">Info</button>
+        </div>
       </div>
 
       <!-- Progress section -->
@@ -324,6 +324,7 @@
       selectedMuscleGroup = select.value;
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
+      document.getElementById("exerciseInfoBtn").style.display = "";
     });
 
     // Auto-select first group
@@ -332,6 +333,7 @@
       select.value = allGroups[0];
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
+      document.getElementById("exerciseInfoBtn").style.display = "";
     }
   }
 
