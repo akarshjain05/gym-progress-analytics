@@ -443,3 +443,132 @@ window.showExerciseInfo = async function(exerciseId) {
     console.error("Failed to load exercise info", err);
   }
 };
+
+window.showCustomExerciseModal = function(onSuccess) {
+  let modal = document.getElementById('globalCustomExerciseModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'globalCustomExerciseModal';
+    modal.className = 'wk-modal-overlay';
+    modal.style.zIndex = '10000';
+    modal.innerHTML = `
+      <div class="wk-modal" style="max-width:500px;">
+        <div class="wk-modal-header">
+          <span class="wk-modal-title">Add custom exercise</span>
+          <button class="wk-modal-close" id="closeGlobalCustomModal">✕</button>
+        </div>
+        <div class="wk-modal-body" style="padding-right: 8px;">
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Exercise name</label>
+            <input type="text" id="gCustomName" class="wk-input" placeholder="e.g. Cable Lateral Raise" maxlength="80">
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Muscle group (optional)</label>
+            <select id="gCustomMuscle" class="wk-select">
+              <option value="">Select…</option>
+              <option value="chest">Chest</option>
+              <option value="back">Back</option>
+              <option value="shoulders">Shoulders</option>
+              <option value="biceps">Biceps</option>
+              <option value="triceps">Triceps</option>
+              <option value="legs">Legs</option>
+              <option value="quads">Quads</option>
+              <option value="hamstrings">Hamstrings</option>
+              <option value="glutes">Glutes</option>
+              <option value="core">Core</option>
+              <option value="calves">Calves</option>
+            </select>
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Category (optional)</label>
+            <select id="gCustomCategory" class="wk-select">
+              <option value="">Select…</option>
+              <option value="compound">Compound</option>
+              <option value="isolation">Isolation</option>
+              <option value="core">Core</option>
+            </select>
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Secondary Muscle (optional)</label>
+            <input type="text" id="gCustomSecondaryMuscle" class="wk-input" placeholder="e.g. Triceps, Front Delt">
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Equipment (optional)</label>
+            <input type="text" id="gCustomEquipment" class="wk-input" placeholder="e.g. Dumbbell, Machine">
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Difficulty (optional)</label>
+            <select id="gCustomDifficulty" class="wk-select">
+              <option value="">Select…</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="wk-field" style="margin-bottom:12px;">
+            <label class="wk-label">Instructions (optional)</label>
+            <textarea id="gCustomInstructions" class="wk-input" placeholder="How to perform..." rows="2"></textarea>
+          </div>
+        </div>
+        <div class="wk-modal-footer">
+          <button class="btn btn-secondary" id="cancelGlobalCustom">Cancel</button>
+          <button class="btn btn-primary" id="submitGlobalCustom">Add exercise</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('closeGlobalCustomModal').addEventListener('click', () => modal.style.display = 'none');
+    document.getElementById('cancelGlobalCustom').addEventListener('click', () => modal.style.display = 'none');
+  }
+  
+  // reset fields
+  document.getElementById('gCustomName').value = '';
+  document.getElementById('gCustomMuscle').value = '';
+  document.getElementById('gCustomCategory').value = '';
+  document.getElementById('gCustomSecondaryMuscle').value = '';
+  document.getElementById('gCustomEquipment').value = '';
+  document.getElementById('gCustomDifficulty').value = '';
+  document.getElementById('gCustomInstructions').value = '';
+  
+  const submitBtn = document.getElementById('submitGlobalCustom');
+  const newSubmitBtn = submitBtn.cloneNode(true);
+  submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+  
+  newSubmitBtn.addEventListener('click', async () => {
+      const name = document.getElementById('gCustomName').value.trim();
+      const muscle_group = document.getElementById('gCustomMuscle').value || null;
+      const category = document.getElementById('gCustomCategory').value || null;
+      const secondary_muscle = document.getElementById('gCustomSecondaryMuscle').value.trim() || null;
+      const equipment = document.getElementById('gCustomEquipment').value.trim() || null;
+      const difficulty = document.getElementById('gCustomDifficulty').value || null;
+      const instructions = document.getElementById('gCustomInstructions').value.trim() || null;
+      
+      if (!name) {
+        window.showToast?.('Exercise name is required.', 'error');
+        return;
+      }
+      
+      const payload = {
+        name, muscle_group, category, secondary_muscle, equipment, difficulty, instructions,
+        is_bodyweight: false
+      };
+      
+      newSubmitBtn.disabled = true;
+      newSubmitBtn.textContent = 'Saving...';
+      
+      try {
+        const result = await window.apiRequest('/exercises/custom', { method: 'POST', body: payload });
+        if(window.showToast) window.showToast('Custom exercise created!');
+        modal.style.display = 'none';
+        if (typeof onSuccess === 'function') onSuccess(result);
+      } catch (err) {
+        if(window.handleApiError) window.handleApiError(err);
+      } finally {
+        newSubmitBtn.disabled = false;
+        newSubmitBtn.textContent = 'Add exercise';
+      }
+  });
+
+  modal.style.display = 'flex';
+};

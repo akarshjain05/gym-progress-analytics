@@ -80,6 +80,7 @@
             <select id="tmplAddMuscleSelect" class="wk-select" style="flex:1; min-width: 100px;"></select>
             <select id="tmplAddExerciseSelect" class="wk-select" style="flex:2; min-width: 150px;"></select>
             <button class="btn btn-secondary" id="tmplAddExBtn">+ Add</button>
+            <button class="btn btn-secondary" id="tmplCustomExBtn">+ Custom</button>
           </div>
         </div>
         <div class="wk-modal-footer">
@@ -744,6 +745,26 @@
       if(exSel.value) window.showExerciseInfo(parseInt(exSel.value));
     };
     wrapper.appendChild(infoBtn);
+    
+    const customBtn = document.createElement('button');
+    customBtn.className = 'btn btn-secondary';
+    customBtn.style.padding = '0 12px';
+    customBtn.innerHTML = '+ Custom';
+    customBtn.onclick = () => {
+      if(window.showCustomExerciseModal) {
+        window.showCustomExerciseModal(async (newEx) => {
+          try {
+            allExercises = await window.Api.listExercises();
+            document.getElementById('qpMuscleSel').dispatchEvent(new Event('change'));
+            setTimeout(() => {
+              const exSel = document.getElementById('qpExSel');
+              if (exSel) exSel.value = newEx.id;
+            }, 100);
+          } catch(e) { console.error(e); }
+        });
+      }
+    };
+    wrapper.appendChild(customBtn);
 
     const btnRow = document.createElement('div');
     btnRow.className = 'wk-modal-footer';
@@ -825,9 +846,7 @@
       <div class="wk-panel-header">
         <div class="wk-panel-title" style="display:flex; align-items:center; justify-content:space-between;">
           <span>${escHtml(ex.exercise_name)}</span>
-          <button class="wk-icon-btn aw-info-btn" title="Exercise Info" data-id="${ex.exercise_id}">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          </button>
+          <button class="btn btn-secondary btn-sm aw-info-btn" title="Exercise Info" data-id="${ex.exercise_id}">Info</button>
         </div>
         <div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>
         <div class="wk-panel-progress">
