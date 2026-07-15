@@ -147,7 +147,7 @@ function setupLoadingAutoHide() {
 // ── Mobile drawer nav ─────────────────────────────────────────────────────────
 function buildMobileDrawer(activeId) {
   const user = Auth.getUser() || {};
-  let navLinks = NAV_ITEMS.map(item => `
+  let navLinks = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
     <a class="drawer-link ${item.id === activeId ? 'active' : ''}" href="${item.href}">
       ${item.icon}
       <span>${item.label}</span>
@@ -189,15 +189,14 @@ function buildMobileDrawer(activeId) {
         ${navLinks}
       </nav>
 
-      <div class="drawer-footer">
-        <a class="drawer-link drawer-link-profile ${activeId === 'profile' ? 'active' : ''}" href="profile.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6" stroke-linecap="round"/></svg>
-          <span>Profile</span>
+      <div class="drawer-footer sidebar-footer" style="padding: 16px 20px; padding-bottom: calc(16px + var(--safe-bottom)); border-top: 1px solid rgba(255,255,255,0.07); margin-top: 0;">
+        <a href="profile.html" class="sidebar-profile-link" title="Profile">
+          <div class="sidebar-avatar">${user.username ? user.username.charAt(0).toUpperCase() : 'U'}</div>
         </a>
-        <a class="drawer-link drawer-link-logout" id="drawerLogoutBtn">
+        <button class="sidebar-logout-btn" id="drawerLogoutBtn" title="Log out">
           ${LOGOUT_ICON}
           <span>Log out</span>
-        </a>
+        </button>
       </div>
     </div>
 
