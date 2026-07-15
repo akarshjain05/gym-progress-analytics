@@ -76,8 +76,9 @@
           <div class="wk-section-label" style="margin-top:20px;">EXERCISES</div>
           <div id="tmplExerciseList"></div>
 
-          <div class="wk-add-exercise-row">
-            <select id="tmplAddExerciseSelect" class="wk-select"></select>
+          <div class="wk-add-exercise-row" style="flex-wrap: wrap; gap: 8px;">
+            <select id="tmplAddMuscleSelect" class="wk-select" style="flex:1; min-width: 100px;"></select>
+            <select id="tmplAddExerciseSelect" class="wk-select" style="flex:2; min-width: 150px;"></select>
             <button class="btn btn-secondary" id="tmplAddExBtn">+ Add</button>
           </div>
         </div>
@@ -179,7 +180,7 @@
         apiRequest('/exercises'),
         apiRequest('/templates'),
       ]);
-      populateExerciseSelect('tmplAddExerciseSelect');
+      setupTwoStepSelector('tmplAddMuscleSelect', 'tmplAddExerciseSelect');
       renderTemplates();
       loadHistory();
       window.hideLoading && window.hideLoading();
@@ -200,10 +201,38 @@
     }
   }
 
-  function populateExerciseSelect(selectId) {
-    const sel = document.getElementById(selectId);
-    if (!sel) return;
-    sel.innerHTML = buildGroupedExerciseOptions(exercises);
+  function setupTwoStepSelector(muscleSelId, exSelId) {
+    const muscleSel = document.getElementById(muscleSelId);
+    const exSel = document.getElementById(exSelId);
+    if (!muscleSel || !exSel) return;
+    
+    const MUSCLE_ORDER = ["chest", "back", "shoulders", "biceps", "triceps", "legs", "quads", "hamstrings", "glutes", "calves", "core"];
+    
+    const muscles = [...new Set(exercises.map(e => (e.muscle_group || 'other').toLowerCase()))];
+    muscles.sort((a,b) => {
+       const idxA = MUSCLE_ORDER.indexOf(a);
+       const idxB = MUSCLE_ORDER.indexOf(b);
+       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+       if (idxA !== -1) return -1;
+       if (idxB !== -1) return 1;
+       return a.localeCompare(b);
+    });
+    
+    muscleSel.innerHTML = `<option value="">All Muscles</option>` + muscles.map(m => 
+      `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`
+    ).join('');
+    
+    exSel.innerHTML = buildGroupedExerciseOptions(exercises);
+    
+    muscleSel.addEventListener('change', () => {
+       const val = muscleSel.value;
+       if (!val) {
+         exSel.innerHTML = buildGroupedExerciseOptions(exercises);
+       } else {
+         const filtered = exercises.filter(e => (e.muscle_group || 'other').toLowerCase() === val);
+         exSel.innerHTML = filtered.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+       }
+    });
   }
 
   // ── Render templates grid ─────────────────────────────────────────────────
@@ -691,28 +720,28 @@
   }
 
   function addExerciseToWorkout() {
-    const sel = document.createElement('select');
-    sel.className = 'wk-select';
-    sel.innerHTML = buildGroupedExerciseOptions(exercises);
-
     const overlay = document.createElement('div');
     overlay.className = 'wk-quick-pick';
     overlay.innerHTML = `
       <div class="wk-quick-pick-box">
         <div class="wk-quick-pick-title">Add Exercise</div>
-        <div style="display:flex; gap:8px; margin-bottom:16px;" id="qpSelectWrapper"></div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <select id="qpMuscleSel" class="wk-select" style="flex:1;"></select>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;" id="qpSelectWrapper">
+          <select id="qpExSel" class="wk-select" style="flex:1;"></select>
+        </div>
       </div>`;
       
     const wrapper = overlay.querySelector('#qpSelectWrapper');
-    sel.style.flex = '1';
-    wrapper.appendChild(sel);
     
     const infoBtn = document.createElement('button');
     infoBtn.className = 'btn btn-secondary';
     infoBtn.style.padding = '0 12px';
     infoBtn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>';
     infoBtn.onclick = () => {
-      window.showExerciseInfo(parseInt(sel.value));
+      const exSel = document.getElementById('qpExSel');
+      if(exSel.value) window.showExerciseInfo(parseInt(exSel.value));
     };
     wrapper.appendChild(infoBtn);
 
@@ -723,10 +752,14 @@
     overlay.querySelector('.wk-quick-pick-box').appendChild(btnRow);
     document.body.appendChild(overlay);
 
+    setupTwoStepSelector('qpMuscleSel', 'qpExSel');
+
     document.getElementById('qpCancel').onclick = () => overlay.remove();
     document.getElementById('qpAdd').onclick = () => {
-      const id = parseInt(sel.value);
-      const name = sel.options[sel.selectedIndex]?.text || '';
+      const exSel = document.getElementById('qpExSel');
+      if (!exSel.value) return;
+      const id = parseInt(exSel.value);
+      const name = exSel.options[exSel.selectedIndex]?.text || '';
       awExercises.push({
         exercise_id: id, exercise_name: name,
         target_sets: 3, target_reps: 10, target_weight_kg: null,
