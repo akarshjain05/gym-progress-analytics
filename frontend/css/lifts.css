@@ -386,3 +386,9 @@
   padding: 20px; text-align: center;
   color: var(--text-secondary, #a09880); font-size: 13px;
 }
+
+.hide-desktop { display: none !important; }
+@media (max-width: 768px) {
+  .hide-desktop { display: inline-flex !important; }
+  .hide-mobile { display: none !important; }
+}
