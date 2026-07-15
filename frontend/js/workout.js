@@ -823,7 +823,12 @@
 
     panel.innerHTML = `
       <div class="wk-panel-header">
-        <div class="wk-panel-title">${escHtml(ex.exercise_name)}</div>
+        <div class="wk-panel-title" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>${escHtml(ex.exercise_name)}</span>
+          <button class="wk-icon-btn aw-info-btn" title="Exercise Info" data-id="${ex.exercise_id}">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </button>
+        </div>
         <div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>
         <div class="wk-panel-progress">
           <div class="wk-panel-progress-bar" style="width:${Math.min(100,(ex.loggedSets.filter(Boolean).length/ex.target_sets)*100)}%"></div>
@@ -841,6 +846,13 @@
         }
       </div>
     `;
+
+    panel.querySelector('.aw-info-btn')?.addEventListener('click', (e) => {
+      const exId = parseInt(e.currentTarget.dataset.id);
+      if (exId && window.showExerciseInfo) {
+        window.showExerciseInfo(exId);
+      }
+    });
 
     // Log set buttons — validate, auto-fill, no full re-render
     panel.querySelectorAll('.wk-log-set-btn').forEach(btn => {
