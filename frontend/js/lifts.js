@@ -75,9 +75,7 @@
           <label class="field-label" for="exerciseSelect">Exercise</label>
           <div style="display:flex; gap:8px;">
             <select id="exerciseSelect" class="select-input lifts-select" style="flex:1;"></select>
-            <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtn" style="padding: 0 12px; margin-top:0;" title="Exercise Info">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-            </button>
+            <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtn" style="margin-top:0;" title="Exercise Info">Info</button>
           </div>
         </div>
         <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
@@ -825,9 +823,8 @@
 
           return `
             <div class="pr-row" data-exid="${pr.exercise_id}" style="cursor:pointer;">
-              <div class="pr-exercise" style="display:flex; align-items:center; gap:6px;">
+              <div class="pr-exercise">
                 ${pr.exercise}
-                <button type="button" class="btn btn-secondary" style="padding:0 6px; font-size:10px; min-width:24px; min-height:24px; line-height:1;" onclick="event.stopPropagation(); window.showExerciseInfo(${pr.exercise_id})">ℹ️</button>
               </div>
               <div class="pr-1rm">${prMetric}</div>
               <div class="pr-achieved">${prAchieved}</div>
