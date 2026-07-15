@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import sentry_sdk
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -53,6 +54,13 @@ async def lifespan(app: FastAPI):
         db.close()
     yield
 
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 app = FastAPI(title="Gym Progress Analytics API", version="1.0.0", lifespan=lifespan)
 

@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     frontend_url: str = "http://127.0.0.1:8080"
     
     initial_admin_username: str | None = None
+    
+    sentry_dsn: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -19,3 +19,4 @@ py_vapid==1.9.4
 celery==5.4.0
 redis==5.0.4
 alembic==1.13.1
+sentry-sdk[fastapi]==2.10.0
