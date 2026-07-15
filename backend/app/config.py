@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # DATABASE_URL: postgres in production (Render), sqlite for local dev/tests.
-    # Render's managed Postgres gives a URL starting with "postgres://" which
+    # DATABASE_URL: postgres in production (AWS), sqlite for local dev/tests.
+    # Managed Postgres might give a URL starting with "postgres://" which
     # SQLAlchemy's psycopg2 driver needs as "postgresql://" - we normalize that.
     database_url: str = "sqlite:///./gym.db"
 
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # Comma-separated string, NOT list[str]. pydantic-settings parses env vars
     # for list/dict-typed fields as JSON by default (e.g. ["a","b"]), so a
-    # plain comma-separated value like Render's CORS_ORIGINS env var would
+    # plain comma-separated value like an AWS CORS_ORIGINS env var would
     # crash on startup with a SettingsError. Splitting it ourselves in
     # cors_origins_list below avoids that entirely.
     cors_origins: str = "*"
@@ -25,16 +25,16 @@ class Settings(BaseSettings):
     google_client_id: str = ""
 
     # Brevo (formerly Sendinblue) transactional email API for password reset
-    # links. Uses HTTPS, not SMTP - deliberately, since Render (and many
-    # cloud platforms) block or silently hang outbound SMTP connections on
-    # their free tier as an anti-spam measure, which has no clean error and
+    # links. Uses HTTPS, not SMTP - deliberately, since many cloud platforms
+    # (like AWS EC2 out-of-the-box) block or silently hang outbound SMTP 
+    # connections on their free tier as an anti-spam measure, which has no clean error and
     # just looks like the request hanging forever. If brevo_api_key is left
     # blank, reset links are printed to the server logs instead of emailed -
     # so local dev and tests don't need a real API key.
     brevo_api_key: str = ""
     brevo_sender_email: str = ""
 
-    # Used to build the password reset link (e.g. https://x.onrender.com/reset-password.html)
+    # Used to build the password reset link (e.g. https://ironlog.in/reset-password.html)
     frontend_url: str = "http://127.0.0.1:8080"
     
     initial_admin_username: str | None = None
