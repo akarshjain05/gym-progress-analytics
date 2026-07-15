@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Re-use api.js groupExercisesByMuscle
   function groupExercisesByMuscle(exercises) {
-    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "biceps", "triceps", "legs", "quads", "hamstrings", "glutes", "calves", "core"];
+    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
     const groups = {};
     for (const e of exercises) {
       const key = e.muscle_group || "other";

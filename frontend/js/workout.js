@@ -206,7 +206,7 @@
     const exSel = document.getElementById(exSelId);
     if (!muscleSel || !exSel) return;
     
-    const MUSCLE_ORDER = ["chest", "back", "shoulders", "biceps", "triceps", "legs", "quads", "hamstrings", "glutes", "calves", "core"];
+    const MUSCLE_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
     
     const muscles = [...new Set(exercises.map(e => (e.muscle_group || 'other').toLowerCase()))];
     muscles.sort((a,b) => {

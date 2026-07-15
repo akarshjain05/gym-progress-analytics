@@ -4,9 +4,9 @@
 // IMPORTANT: bump this version number every time you deploy new JS/CSS.
 // This forces the browser to fetch fresh files instead of serving stale
 // cached versions — the root cause of "old code still running" bugs.
-const CACHE_NAME = 'ironlog-v29';
-const STATIC_CACHE = 'ironlog-static-v29';
-const API_CACHE = 'ironlog-api-v29';
+const CACHE_NAME = 'ironlog-v30';
+const STATIC_CACHE = 'ironlog-static-v30';
+const API_CACHE = 'ironlog-api-v30';
 
 // All frontend pages and assets to cache for offline use
 const STATIC_ASSETS = [

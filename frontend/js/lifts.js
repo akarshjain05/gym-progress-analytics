@@ -261,20 +261,23 @@
   const MUSCLE_ORDER = [
     "chest", "back", "shoulders", "quads", "hamstrings",
     "glutes", "adductors", "legs", "biceps", "triceps",
-    "core", "calves", "other"
+    "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"
   ];
 
   const MUSCLE_ICONS = {
     chest: "🫀", back: "🦬", shoulders: "💪", quads: "🦵",
     hamstrings: "🦵", glutes: "🍑", adductors: "🦵", legs: "🦵",
-    biceps: "💪", triceps: "💪", core: "🎯", calves: "🦶", other: "🏋️"
+    biceps: "💪", triceps: "💪", core: "🎯", abs: "🍫", calves: "🦶",
+    forearms: "💪", neck: "🦒", "hip flexors": "🦵", "full body": "🦍", other: "🏋️"
   };
 
   const MUSCLE_LABELS = {
     chest: "Chest", back: "Back", shoulders: "Shoulders",
     quads: "Quads", hamstrings: "Hamstrings", glutes: "Glutes",
     adductors: "Adductors", legs: "Legs", biceps: "Biceps",
-    triceps: "Triceps", core: "Core", calves: "Calves", other: "Other"
+    triceps: "Triceps", core: "Core", abs: "Abs", calves: "Calves",
+    forearms: "Forearms", neck: "Neck", "hip flexors": "Hip Flexors",
+    "full body": "Full Body", other: "Other"
   };
 
   let selectedMuscleGroup = null;
