@@ -41,6 +41,10 @@ def create_custom_exercise(
         name=payload.name,
         category=payload.category,
         muscle_group=payload.muscle_group,
+        secondary_muscle=payload.secondary_muscle,
+        equipment=payload.equipment,
+        difficulty=payload.difficulty,
+        instructions=payload.instructions,
         is_custom=True,
         created_by=current_user.id,
     )

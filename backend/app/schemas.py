@@ -139,6 +139,10 @@ class ExerciseIn(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     category: Optional[str] = None
     muscle_group: Optional[str] = None
+    secondary_muscle: Optional[str] = None
+    equipment: Optional[str] = None
+    difficulty: Optional[str] = None
+    instructions: Optional[str] = None
 
 
 class ExerciseOut(BaseModel):
@@ -146,6 +150,10 @@ class ExerciseOut(BaseModel):
     name: str
     category: Optional[str] = None
     muscle_group: Optional[str] = None
+    secondary_muscle: Optional[str] = None
+    equipment: Optional[str] = None
+    difficulty: Optional[str] = None
+    instructions: Optional[str] = None
     is_custom: bool
 
     model_config = ConfigDict(from_attributes=True)

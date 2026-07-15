@@ -65,6 +65,10 @@ class Exercise(Base):
     name = Column(String, nullable=False, index=True)
     category = Column(String, nullable=True)
     muscle_group = Column(String, nullable=True)
+    secondary_muscle = Column(String, nullable=True)
+    equipment = Column(String, nullable=True)
+    difficulty = Column(String, nullable=True)
+    instructions = Column(String, nullable=True)
     is_custom = Column(Boolean, default=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
