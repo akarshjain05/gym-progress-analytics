@@ -304,6 +304,7 @@ function renderShell(activeId, pageTitle, subtitle) {
           </a>
           <button class="sidebar-logout-btn" id="logoutBtn" title="Log out">
             ${LOGOUT_ICON}
+            <span>Log out</span>
           </button>
         </div>
       </aside>
