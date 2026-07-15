@@ -75,12 +75,12 @@
           <label class="field-label" for="exerciseSelect">Exercise</label>
           <div style="display:flex; gap:8px;">
             <select id="exerciseSelect" class="select-input lifts-select" style="flex:1;"></select>
-            <button class="btn btn-secondary lifts-custom-btn hide-mobile" id="exerciseInfoBtnDesktop" style="margin-top:0;" title="Exercise Info">Info</button>
+            <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtnDesktop" style="margin-top:0;" title="Exercise Info">Info</button>
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
           <button class="btn btn-secondary lifts-custom-btn" id="addCustomBtn">+ Custom</button>
-          <button class="btn btn-secondary lifts-custom-btn hide-desktop" id="exerciseInfoBtnMobile" style="display:none;" title="Exercise Info">Info</button>
+          <button class="btn btn-secondary lifts-custom-btn" id="exerciseInfoBtnMobile" style="display:none;" title="Exercise Info">Info</button>
         </div>
       </div>
 
@@ -327,8 +327,9 @@
       selectedMuscleGroup = select.value;
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
-      document.getElementById("exerciseInfoBtnDesktop").style.display = "";
-      document.getElementById("exerciseInfoBtnMobile").style.display = "";
+      const isMobile = window.innerWidth <= 768;
+      document.getElementById("exerciseInfoBtnDesktop").style.display = isMobile ? "none" : "";
+      document.getElementById("exerciseInfoBtnMobile").style.display = isMobile ? "" : "none";
     });
 
     // Auto-select first group
@@ -337,8 +338,9 @@
       select.value = allGroups[0];
       populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
-      document.getElementById("exerciseInfoBtnDesktop").style.display = "";
-      document.getElementById("exerciseInfoBtnMobile").style.display = "";
+      const isMobile = window.innerWidth <= 768;
+      document.getElementById("exerciseInfoBtnDesktop").style.display = isMobile ? "none" : "";
+      document.getElementById("exerciseInfoBtnMobile").style.display = isMobile ? "" : "none";
     }
   }
 
