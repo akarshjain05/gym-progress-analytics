@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const content = document.getElementById('pageContent');
   content.innerHTML = `
     <div class="card">
-      <input type="text" id="libSearch" class="lib-search" placeholder="Search exercises...">
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <select id="libMuscleSelect" class="lib-search" style="margin-bottom:0; flex:1; max-width:140px;"></select>
+        <input type="text" id="libSearch" class="lib-search" style="margin-bottom:0; flex:2;" placeholder="Search exercises...">
+      </div>
       <div id="libContainer"></div>
     </div>
   `;
@@ -12,23 +15,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   let allExercises = [];
   const container = document.getElementById('libContainer');
   const searchInput = document.getElementById('libSearch');
+  const muscleSelect = document.getElementById('libMuscleSelect');
 
   try {
     allExercises = await Api.listExercises();
+    populateMuscleSelect(allExercises);
     renderLibrary(allExercises);
   } catch (err) {
     handleApiError(err);
     container.innerHTML = buildEmptyState('Failed to load', 'Could not load exercises.');
   }
 
-  searchInput.addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
-    const filtered = allExercises.filter(ex => 
-      ex.name.toLowerCase().includes(q) || 
-      (ex.muscle_group && ex.muscle_group.toLowerCase().includes(q))
-    );
+  function applyFilters() {
+    const q = searchInput.value.toLowerCase();
+    const muscle = muscleSelect.value;
+    const filtered = allExercises.filter(ex => {
+      const matchSearch = ex.name.toLowerCase().includes(q) || (ex.muscle_group && ex.muscle_group.toLowerCase().includes(q));
+      const matchMuscle = muscle ? (ex.muscle_group || 'other').toLowerCase() === muscle : true;
+      return matchSearch && matchMuscle;
+    });
     renderLibrary(filtered);
-  });
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  muscleSelect.addEventListener('change', applyFilters);
+
+  function populateMuscleSelect(exercises) {
+    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
+    const muscles = [...new Set(exercises.map(e => (e.muscle_group || 'other').toLowerCase()))];
+    muscles.sort((a,b) => {
+       const idxA = MUSCLE_GROUP_ORDER.indexOf(a);
+       const idxB = MUSCLE_GROUP_ORDER.indexOf(b);
+       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+       if (idxA !== -1) return -1;
+       if (idxB !== -1) return 1;
+       return a.localeCompare(b);
+    });
+    muscleSelect.innerHTML = `<option value="">All Muscles</option>` + muscles.map(m => 
+      `<option value="${m}">${capitalize(m)}</option>`
+    ).join('');
+  }
 
   function renderLibrary(exercises) {
     if (exercises.length === 0) {
