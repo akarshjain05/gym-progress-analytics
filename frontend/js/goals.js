@@ -1,17 +1,16 @@
 document.addEventListener("DOMContentLoaded", async () => {
   renderShell("goals", "Goals", "Track your progress across lifts, weight, nutrition, and more.");
   
-  // Header Action
   document.getElementById("pageHeaderActions").innerHTML = `
     <div style="display:flex; gap: 8px; align-items: center;">
-      <select id="goalFilter" class="select-input" style="padding: 4px 28px 4px 10px; font-size: 13px; height: 32px; border-radius: 6px;">
+      <select id="goalFilter" class="select-input" style="padding: 4px 28px 4px 10px !important; font-size: 13px !important; height: 32px !important; border-radius: 6px; width: auto !important;">
         <option value="all">All Goals</option>
         <option value="lift">Lift</option>
         <option value="weight">Body Weight</option>
         <option value="nutrition">Nutrition</option>
         <option value="frequency">Frequency</option>
       </select>
-      <button class="btn btn-primary btn-sm" id="openGoalBtn" style="height: 32px; white-space: nowrap;">
+      <button class="btn btn-primary btn-sm" id="openGoalBtn" style="height: 32px; white-space: nowrap; flex-shrink: 0;">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><path d="M12 5v14M5 12h14"/></svg>
         Set Goal
       </button>
