@@ -96,7 +96,8 @@ weightForm.addEventListener("submit", async (e) => {
 });
 
 async function deleteEntry(id) {
-  if (!confirm("Delete this entry?")) return;
+  const ok = await window.appConfirm("Delete Entry", "Delete this entry?", "Delete", "Cancel");
+  if (!ok) return;
   try {
     await Api.deleteWeight(id);
     showToast("Entry deleted.");

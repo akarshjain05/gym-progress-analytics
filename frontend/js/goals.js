@@ -143,17 +143,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       payload.exercise_id = parseInt(document.getElementById("gExercise").value);
       payload.target_weight_kg = parseFloat(document.getElementById("gWeight").value);
       payload.target_reps = parseInt(document.getElementById("gReps").value || "1");
-      if (isNaN(payload.target_weight_kg)) { btn.disabled = false; btn.textContent = "Save Goal"; return alert("Please enter target weight."); }
+      if (isNaN(payload.target_weight_kg)) { btn.disabled = false; btn.textContent = "Save Goal"; await window.appAlert("Validation Error", "Please enter target weight."); return; }
     } else if (type === "weight") {
       payload.target_body_weight_kg = parseFloat(document.getElementById("gBodyWeight").value);
-      if (isNaN(payload.target_body_weight_kg)) { btn.disabled = false; btn.textContent = "Save Goal"; return alert("Please enter target body weight."); }
+      if (isNaN(payload.target_body_weight_kg)) { btn.disabled = false; btn.textContent = "Save Goal"; await window.appAlert("Validation Error", "Please enter target body weight."); return; }
     } else if (type === "nutrition") {
       payload.target_calories = parseFloat(document.getElementById("gCalories").value) || null;
       payload.target_protein_g = parseFloat(document.getElementById("gProtein").value) || null;
-      if (!payload.target_calories && !payload.target_protein_g) { btn.disabled = false; btn.textContent = "Save Goal"; return alert("Please enter calories or protein."); }
+      if (!payload.target_calories && !payload.target_protein_g) { btn.disabled = false; btn.textContent = "Save Goal"; await window.appAlert("Validation Error", "Please enter calories or protein."); return; }
     } else if (type === "frequency") {
       payload.target_workouts_per_week = parseInt(document.getElementById("gFrequency").value);
-      if (isNaN(payload.target_workouts_per_week)) { btn.disabled = false; btn.textContent = "Save Goal"; return alert("Please enter target workouts per week."); }
+      if (isNaN(payload.target_workouts_per_week)) { btn.disabled = false; btn.textContent = "Save Goal"; await window.appAlert("Validation Error", "Please enter target workouts per week."); return; }
     }
 
     try {
@@ -274,7 +274,8 @@ window.toggleGoal = async function(id) {
 };
 
 window.deleteGoal = async function(id) {
-  if (!window.confirm("Are you sure you want to delete this goal?")) return;
+  const ok = await window.appConfirm("Delete Goal", "Are you sure you want to delete this goal?", "Delete", "Cancel");
+  if (!ok) return;
   try {
     await Api.deleteGoal(id);
     showToast("Goal deleted");

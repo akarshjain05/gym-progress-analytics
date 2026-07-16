@@ -776,7 +776,7 @@
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const logId = btn.dataset.logid;
-        const confirmed = await window.appConfirm('Delete Set', 'Delete this set?', 'Delete', 'Cancel', '⚠️');
+        const confirmed = await window.appConfirm('Delete Set', 'Delete this set?', 'Delete', 'Cancel');
         if (!confirmed) return;
         try {
           await apiRequest(`/lifts/${logId}`, { method: "DELETE" });

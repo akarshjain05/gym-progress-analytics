@@ -336,7 +336,7 @@ function handleApiError(err, fallback = "Something went wrong. Try again.") {
 }
 
 // --- custom modals ---
-window.appAlert = function(title, message, icon = '⚠️') {
+window.appAlert = function(title, message) {
   return new Promise((resolve) => {
     let modal = document.getElementById('ironlogAlertModal');
     if (!modal) {
@@ -345,20 +345,18 @@ window.appAlert = function(title, message, icon = '⚠️') {
       modal.className = 'wk-modal-overlay';
       modal.style.zIndex = '9999';
       modal.innerHTML = `
-        <div class="wk-modal" style="max-width:350px; text-align:center; padding-top:32px;">
-          <div id="ironlogAlertIcon" style="font-size:40px; margin-bottom:16px;">⚠️</div>
-          <h2 id="ironlogAlertTitle" style="font-size:20px; margin:0 0 12px 0;">Alert</h2>
-          <div id="ironlogAlertMessage" style="color:#A0AEC0; font-size:15px; margin-bottom:24px;"></div>
-          <div class="wk-modal-footer" id="ironlogAlertFooter" style="justify-content:center; gap:12px;">
-            <button class="btn btn-secondary" id="ironlogAlertCancel" style="display:none;">Cancel</button>
-            <button class="btn btn-primary" id="ironlogAlertOk">OK</button>
+        <div class="wk-modal" style="max-width:350px; text-align:center; padding:32px 24px 24px;">
+          <h2 id="ironlogAlertTitle" style="font-size:22px; font-weight:700; margin:0 0 12px 0;">Alert</h2>
+          <div id="ironlogAlertMessage" style="color:#A0AEC0; font-size:15px; line-height:1.5; margin-bottom:32px;"></div>
+          <div class="wk-modal-footer" id="ironlogAlertFooter" style="justify-content:center; gap:12px; padding:0; border-top:none;">
+            <button class="btn btn-secondary" id="ironlogAlertCancel" style="display:none; flex:1;">Cancel</button>
+            <button class="btn btn-primary" id="ironlogAlertOk" style="flex:1;">OK</button>
           </div>
         </div>
       `;
       document.body.appendChild(modal);
     }
     
-    document.getElementById('ironlogAlertIcon').textContent = icon;
     document.getElementById('ironlogAlertTitle').textContent = title;
     document.getElementById('ironlogAlertMessage').textContent = message;
     document.getElementById('ironlogAlertCancel').style.display = 'none';
@@ -372,14 +370,13 @@ window.appAlert = function(title, message, icon = '⚠️') {
   });
 };
 
-window.appConfirm = function(title, message, okText = 'OK', cancelText = 'Cancel', icon = '❓') {
+window.appConfirm = function(title, message, okText = 'OK', cancelText = 'Cancel') {
   return new Promise((resolve) => {
     let modal = document.getElementById('ironlogAlertModal');
     if (!modal) {
-      window.appAlert(title, message, icon);
+      window.appAlert(title, message);
       modal = document.getElementById('ironlogAlertModal');
     } else {
-      document.getElementById('ironlogAlertIcon').textContent = icon;
       document.getElementById('ironlogAlertTitle').textContent = title;
       document.getElementById('ironlogAlertMessage').textContent = message;
       modal.style.display = 'flex';

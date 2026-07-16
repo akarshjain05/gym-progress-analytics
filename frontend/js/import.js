@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (err.message && err.message.includes('cannot import your own')) {
         msg = 'You cannot import your own template!';
       }
-      alert(msg);
+      await window.appAlert('Import Error', msg);
     }
   });
 });

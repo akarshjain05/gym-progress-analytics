@@ -98,7 +98,8 @@ document.getElementById("calForm").addEventListener("submit", async (e) => {
 });
 
 async function deleteCalEntry(id) {
-  if (!confirm("Delete this entry?")) return;
+  const ok = await window.appConfirm("Delete Entry", "Delete this entry?", "Delete", "Cancel");
+  if (!ok) return;
   try {
     await Api.deleteCalorieLog(id);
     showToast("Entry deleted.");

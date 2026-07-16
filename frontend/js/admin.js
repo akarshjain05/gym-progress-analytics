@@ -115,7 +115,7 @@ async function loadUsers() {
 }
 
 window.promoteUser = async function(id, name) {
-  const ok = await window.appConfirm("Promote User", `Are you sure you want to promote ${name} to admin?`, "Promote", "Cancel", "🛡️");
+  const ok = await window.appConfirm("Promote User", `Are you sure you want to promote ${name} to admin?`, "Promote", "Cancel");
   if (!ok) return;
   try {
     const res = await Api.adminPromoteUser(id);
@@ -125,7 +125,7 @@ window.promoteUser = async function(id, name) {
 };
 
 window.deleteUser = async function(id, name) {
-  const ok = await window.appConfirm("Delete User", `Are you sure you want to delete ${name}? This action cannot be undone.`, "Delete", "Cancel", "🗑️");
+  const ok = await window.appConfirm("Delete User", `Are you sure you want to delete ${name}? This action cannot be undone.`, "Delete", "Cancel");
   if (!ok) return;
   try {
     const res = await Api.adminDeleteUser(id);
@@ -185,7 +185,8 @@ async function loadLogs() {
 }
 
 window.deleteAdminLog = async function(type, id) {
-  if (!confirm(`Delete this ${type} log? This action cannot be undone.`)) return;
+  const ok = await window.appConfirm("Delete Log", `Delete this ${type} log? This action cannot be undone.`, "Delete", "Cancel");
+  if (!ok) return;
   try {
     await Api.adminDeleteLog(type, id);
     showToast("Log deleted.", "success");

@@ -261,7 +261,7 @@ window.CalculatorsPage = {
       document.getElementById('resFfmi').textContent = `${res.ffmi.normalized} (${res.ffmi.category})`;
       document.getElementById('bmResult').style.display = 'flex';
     } catch (e) {
-      alert("Error: " + e.message);
+      await window.appAlert("Error", e.message);
     }
   },
 
@@ -275,7 +275,7 @@ window.CalculatorsPage = {
       document.getElementById('resDots').textContent = res.dots_score.toFixed(2);
       document.getElementById('pwResult').style.display = 'flex';
     } catch (e) {
-      alert("Error: " + e.message);
+      await window.appAlert("Error", e.message);
     }
   },
 
@@ -289,7 +289,7 @@ window.CalculatorsPage = {
       document.getElementById('resFat').textContent = `${res.fat_g}g`;
       document.getElementById('macResult').style.display = 'flex';
     } catch (e) {
-      alert("Error: " + e.message);
+      await window.appAlert("Error", e.message);
     }
   }
 };

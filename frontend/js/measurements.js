@@ -285,7 +285,7 @@ function renderTable(logs) {
 }
 
 window.deleteMeasurement = async function(id) {
-  const ok = await window.appConfirm("Delete entry", "Are you sure you want to delete this measurement log?", "Delete", "Cancel", "🗑️");
+  const ok = await window.appConfirm("Delete entry", "Are you sure you want to delete this measurement log?", "Delete", "Cancel");
   if (!ok) return;
   try {
     await Api.measurementsDelete(id);

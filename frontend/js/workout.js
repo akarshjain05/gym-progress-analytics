@@ -359,7 +359,7 @@
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = parseInt(btn.dataset.id);
-        const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? This will also delete all logged sets from this session.', 'Delete', 'Cancel', '⚠️');
+        const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? This will also delete all logged sets from this session.', 'Delete', 'Cancel');
         if (!confirmed) return;
         try {
           await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
@@ -595,7 +595,7 @@
 
   async function deleteTemplate(id) {
     const t = templates.find(x => x.id === id);
-    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel', '⚠️');
+    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel');
     if (!confirmed) return;
     try {
       await apiRequest(`/templates/${id}`, { method: 'DELETE' });
@@ -1008,7 +1008,7 @@
       return;
     }
 
-    const confirmed = await window.appConfirm('Finish Workout', 'Finish workout? All logged sets will be saved.', 'Finish Workout', 'Keep Going', '💪');
+    const confirmed = await window.appConfirm('Finish Workout', 'Finish workout? All logged sets will be saved.', 'Finish Workout', 'Keep Going');
     if (confirmed) {
       finishWorkout();
     }
@@ -1016,7 +1016,8 @@
 
   async function finishWorkout() {
     if (awExercises.length === 0 || !awExercises.some(e => e.loggedSets.filter(Boolean).length > 0)) {
-      if (confirm('No sets logged. Exit without saving?')) {
+      const exitConfirmed = await window.appConfirm('Exit Workout', 'No sets logged. Exit without saving?', 'Exit', 'Keep Going');
+      if (exitConfirmed) {
         closeWorkout();
       }
       return;
@@ -1042,7 +1043,7 @@
       }));
 
     if (!exercisesPayload.length) {
-      window.appAlert('No Sets Logged', 'Please log at least one completed set before finishing the workout.', '⚠️');
+      window.appAlert('No Sets Logged', 'Please log at least one completed set before finishing the workout.');
       return;
     }
 
