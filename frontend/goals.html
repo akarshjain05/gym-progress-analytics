@@ -14,10 +14,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="shortcut icon" href="/icons/icon-96.png">
 <title>Goals — IRONLOG</title>
-<link rel="stylesheet" href="css/theme.css?v=29">
-<link rel="stylesheet" href="css/style.css?v=29">
-<link rel="stylesheet" href="css/mobile.css?v=29">
-<link rel="stylesheet" href="css/polish.css?v=29">
+<link rel="stylesheet" href="css/theme.css?v=30">
+<link rel="stylesheet" href="css/style.css?v=30">
+<link rel="stylesheet" href="css/mobile.css?v=30">
+<link rel="stylesheet" href="css/polish.css?v=30">
 <style>
   .goal-card {
     display: flex;
@@ -40,12 +40,12 @@
   .goal-checkbox {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    max-width: 20px !important;
-    max-height: 20px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
     flex-shrink: 0;
     border: 2px solid var(--text-tertiary, #6b7280);
     border-radius: 50%;
@@ -53,32 +53,53 @@
     cursor: pointer;
     margin: 0;
     position: relative;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .goal-checkbox:active {
+    transform: scale(0.9);
   }
   .goal-checkbox:checked {
     background: var(--primary, #c0392b);
     border-color: var(--primary, #c0392b);
+    transform: scale(1);
+    animation: check-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .goal-checkbox:checked::after {
-    content: '✓';
+    content: '';
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    opacity: 0;
+    animation: checkmark-in 0.3s forwards;
+    animation-delay: 0.1s;
+  }
+  
+  @keyframes check-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes checkmark-in {
+    0% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.5); }
+    100% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
   }
 </style>
 </head>
 <body>
-<script src="js/config.js?v=29"></script>
-<script src="js/api.js?v=29"></script>
-<script src="js/features.js?v=29"></script>
-<script src="js/layout.js?v=29"></script>
-<script src="js/skeleton.js?v=29"></script>
-<script src="js/goals.js?v=29"></script>
-<script src="js/pwa.js?v=29"></script>
+<script src="js/config.js?v=30"></script>
+<script src="js/api.js?v=30"></script>
+<script src="js/features.js?v=30"></script>
+<script src="js/layout.js?v=30"></script>
+<script src="js/skeleton.js?v=30"></script>
+<script src="js/goals.js?v=30"></script>
+<script src="js/pwa.js?v=30"></script>
 </body>
 </html>

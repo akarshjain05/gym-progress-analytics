@@ -2,16 +2,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderShell("goals", "Goals", "Track your progress across lifts, weight, nutrition, and more.");
   
   document.getElementById("pageHeaderActions").innerHTML = `
-    <div style="display:flex; gap: 8px; align-items: center;">
-      <select id="goalFilter" class="select-input" style="padding: 4px 28px 4px 10px !important; font-size: 13px !important; height: 32px !important; border-radius: 6px; width: auto !important;">
+    <div style="display:flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 8px;">
+      <select id="goalFilter" class="select-input" style="padding: 6px 32px 6px 12px !important; font-size: 14px !important; height: 36px !important; border-radius: 8px; width: auto !important;">
         <option value="all">All Goals</option>
         <option value="lift">Lift</option>
         <option value="weight">Body Weight</option>
         <option value="nutrition">Nutrition</option>
         <option value="frequency">Frequency</option>
       </select>
-      <button class="btn btn-primary btn-sm" id="openGoalBtn" style="height: 32px; white-space: nowrap; flex-shrink: 0;">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><path d="M12 5v14M5 12h14"/></svg>
+      <button class="btn btn-primary" id="openGoalBtn" style="height: 36px; padding: 0 16px; font-size: 14px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;"><path d="M12 5v14M5 12h14"/></svg>
         Set Goal
       </button>
     </div>
