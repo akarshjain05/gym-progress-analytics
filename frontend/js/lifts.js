@@ -195,14 +195,21 @@
               <option value="chest">Chest</option>
               <option value="back">Back</option>
               <option value="shoulders">Shoulders</option>
-              <option value="biceps">Biceps</option>
-              <option value="triceps">Triceps</option>
-              <option value="legs">Legs</option>
               <option value="quads">Quads</option>
               <option value="hamstrings">Hamstrings</option>
               <option value="glutes">Glutes</option>
+              <option value="adductors">Adductors</option>
+              <option value="legs">Legs</option>
+              <option value="biceps">Biceps</option>
+              <option value="triceps">Triceps</option>
               <option value="core">Core</option>
+              <option value="abs">Abs</option>
               <option value="calves">Calves</option>
+              <option value="forearms">Forearms</option>
+              <option value="neck">Neck</option>
+              <option value="hip flexors">Hip Flexors</option>
+              <option value="full body">Full Body</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <div class="field">
