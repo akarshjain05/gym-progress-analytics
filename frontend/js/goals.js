@@ -3,10 +3,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   // Header Action
   document.getElementById("pageHeaderActions").innerHTML = `
-    <button class="btn btn-primary btn-sm" id="openGoalBtn">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      Set Goal
-    </button>
+    <div style="display:flex; gap: 8px; align-items: center;">
+      <select id="goalFilter" class="select-input" style="padding: 4px 28px 4px 10px; font-size: 13px; height: 32px; border-radius: 6px;">
+        <option value="all">All Goals</option>
+        <option value="lift">Lift</option>
+        <option value="weight">Body Weight</option>
+        <option value="nutrition">Nutrition</option>
+        <option value="frequency">Frequency</option>
+      </select>
+      <button class="btn btn-primary btn-sm" id="openGoalBtn" style="height: 32px; white-space: nowrap;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;"><path d="M12 5v14M5 12h14"/></svg>
+        Set Goal
+      </button>
+    </div>
   `;
 
   const container = document.getElementById("pageContent");
@@ -69,18 +78,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>
 
     <div class="flex flex-col gap-12 mb-16">
-      <div class="flex justify-between items-center" style="gap:12px; flex-wrap:wrap; align-items: flex-end;">
-        <div class="tabs" style="margin-bottom:0;">
-          <button class="tab active" data-tab="active">Active</button>
-          <button class="tab" data-tab="completed">Completed</button>
-        </div>
-        <select id="goalFilter" class="select-input" style="width: auto; padding: 6px 32px 6px 12px; font-size: 13px;">
-          <option value="all">All Goals</option>
-          <option value="lift">Lift</option>
-          <option value="weight">Body Weight</option>
-          <option value="nutrition">Nutrition</option>
-          <option value="frequency">Frequency</option>
-        </select>
+      <div class="tabs" style="margin-bottom:0; width: 100%; display: flex; padding: 4px; box-sizing: border-box;">
+        <button class="tab active" data-tab="active" style="flex: 1; text-align: center;">Active</button>
+        <button class="tab" data-tab="completed" style="flex: 1; text-align: center;">Completed</button>
       </div>
     </div>
 
@@ -238,10 +238,7 @@ function renderGoalCard(g, isCompleted) {
 
   return `
     <div class="goal-card ${isCompleted ? 'goal-card-completed' : ''}">
-      <label class="checkbox-wrapper" style="margin-bottom:0;">
-        <input type="checkbox" onchange="toggleGoal(${g.id})" ${isCompleted ? 'checked' : ''}>
-        <span class="checkmark"></span>
-      </label>
+      <input type="checkbox" class="goal-checkbox" onchange="toggleGoal(${g.id})" ${isCompleted ? 'checked' : ''}>
       <div class="goal-details">
         <div class="goal-title">${escapeHtml(title)}</div>
         <div class="goal-subtitle">${subtitleHTML}</div>
