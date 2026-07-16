@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderShell("goals", "Goals", "Track your progress across lifts, weight, nutrition, and more.");
   
   document.getElementById("pageHeaderActions").innerHTML = `
-    <div style="display:flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 8px;">
+    <div class="goals-header-actions">
       <select id="goalFilter" class="select-input" style="padding: 6px 32px 6px 12px !important; font-size: 14px !important; height: 36px !important; border-radius: 8px; width: auto !important;">
         <option value="all">All Goals</option>
         <option value="lift">Lift</option>
@@ -83,10 +83,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     </div>
 
-    <div class="card" style="padding: 0;">
-      <div id="goalsWrap">
-        <div class="empty-state"><p>Loading...</p></div>
-      </div>
+    <div id="goalsWrap">
+      <div class="empty-state"><p>Loading...</p></div>
     </div>
   `;
 
@@ -197,10 +195,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const wrap = document.getElementById("goalsWrap");
     if (!filtered.length) {
-      wrap.innerHTML = `<div class="empty-state"><p>No ${currentTab} goals found.</p></div>`;
+      wrap.className = "";
+      wrap.style.padding = "";
+      wrap.innerHTML = `<div class="empty-state" style="padding: 64px 20px;">
+        <p style="font-size: 15px; color: var(--text-secondary); margin: 0;">No ${currentTab} goals found.</p>
+      </div>`;
       return;
     }
 
+    wrap.className = "card";
+    wrap.style.padding = "0";
     wrap.innerHTML = filtered.map(g => renderGoalCard(g, g.is_completed)).join("");
   }
 });
