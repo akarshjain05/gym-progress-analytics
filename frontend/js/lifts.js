@@ -449,9 +449,14 @@
         document.getElementById("latest1rm").textContent = fmtKg(data.latest_session_1rm_kg);
         document.getElementById("pr1rm").textContent = fmtKg(data.personal_record_1rm_kg);
         document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
-        const delta = fmtDelta(data.change_pct, "%");
-        document.getElementById("changePct").textContent = delta.text + " since first log";
-        document.getElementById("changePct").className = "stat-sub " + delta.cls;
+        if (data.change_pct != null) {
+          const delta = fmtDelta(data.change_pct, "%");
+          document.getElementById("changePct").textContent = delta.text + " since last log";
+          document.getElementById("changePct").className = "stat-sub " + delta.cls;
+        } else {
+          document.getElementById("changePct").textContent = "First log";
+          document.getElementById("changePct").className = "stat-sub neutral";
+        }
       }
 
       // Chart title
