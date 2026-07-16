@@ -642,6 +642,7 @@
   let awTimerInterval = null;
   let awRestInterval = null;
   let awTemplateId = 0;
+  let awIsStarted = false;
 
   async function startWorkout(templateId) {
     try {
@@ -662,24 +663,22 @@
         rest_seconds: e.rest_seconds,
         loggedSets: [],
         notes: '',
-      })) : [{
-        exercise_id: exercises[0]?.id || 0,
-        exercise_name: exercises[0]?.name || '',
-        target_sets: 3,
-        target_reps: 10,
-        target_weight_kg: null,
-        rest_seconds: 90,
-        loggedSets: [],
-        notes: '',
-      }];
+      })) : [];
 
       awCurrentIdx = 0;
-      awStartTime = Date.now();
+      awIsStarted = false;
+      awStartTime = null;
       document.getElementById('awName').textContent = t ? t.name : 'Free Workout';
+      
+      const topBtn = document.getElementById('awFinishBtn');
+      topBtn.className = 'wk-start-btn';
+      topBtn.textContent = 'Start';
+      document.getElementById('awTimer').textContent = '00:00';
+      clearInterval(awTimerInterval);
+      
       document.getElementById('activeWorkout').style.display = 'flex';
       document.body.style.overflow = 'hidden';
 
-      startTimer();
       renderAwTabs();
       renderAwPanel();
     } catch (err) {
@@ -690,6 +689,7 @@
   function startTimer() {
     clearInterval(awTimerInterval);
     awTimerInterval = setInterval(() => {
+      if (!awIsStarted) return;
       const elapsed = Math.floor((Date.now() - awStartTime) / 1000);
       const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
       const s = (elapsed % 60).toString().padStart(2, '0');
@@ -795,6 +795,19 @@
 
   function renderAwPanel() {
     const panel = document.getElementById('awPanel');
+    if (awExercises.length === 0) {
+      panel.innerHTML = `
+        <div class="wk-empty" style="margin-top:60px;">
+          <div class="wk-empty-icon" style="font-size:48px;">💪</div>
+          <h3 style="margin-top:16px;">Ready to train?</h3>
+          <p style="color:var(--text-tertiary); margin-bottom: 24px;">Add your first exercise to get started.</p>
+          <button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>
+        </div>
+      `;
+      document.getElementById('awEmptyAddBtn')?.addEventListener('click', addExerciseToWorkout);
+      return;
+    }
+
     const ex = awExercises[awCurrentIdx];
     if (!ex) return;
 
@@ -985,6 +998,16 @@
 
   // ── Finish workout ─────────────────────────────────────────────────────────
   document.getElementById('awFinishBtn').addEventListener('click', async () => {
+    if (!awIsStarted) {
+      awIsStarted = true;
+      awStartTime = Date.now();
+      startTimer();
+      const topBtn = document.getElementById('awFinishBtn');
+      topBtn.className = 'wk-finish-btn';
+      topBtn.textContent = 'Finish';
+      return;
+    }
+
     const confirmed = await window.appConfirm('Finish Workout', 'Finish workout? All logged sets will be saved.', 'Finish Workout', 'Keep Going', '💪');
     if (confirmed) {
       finishWorkout();
@@ -992,8 +1015,20 @@
   });
 
   async function finishWorkout() {
+    if (awExercises.length === 0 || !awExercises.some(e => e.loggedSets.filter(Boolean).length > 0)) {
+      if (confirm('No sets logged. Exit without saving?')) {
+        closeWorkout();
+      }
+      return;
+    }
+
     clearInterval(awTimerInterval);
     clearInterval(awRestInterval);
+
+    if (!awIsStarted) {
+      awIsStarted = true;
+      awStartTime = Date.now();
+    }
 
     const duration = Math.floor((Date.now() - awStartTime) / 1000);
     const today = new Date().toISOString().split('T')[0];

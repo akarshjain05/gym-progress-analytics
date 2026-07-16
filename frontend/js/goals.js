@@ -19,61 +19,67 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const container = document.getElementById("pageContent");
   container.innerHTML = `
-    <div id="formCard" class="card mb-16" style="display:none;">
-      <div class="card-title">Set a New Goal</div>
-      <form id="goalForm">
-        <div class="field">
-          <label for="gType">Goal Type</label>
-          <select id="gType" required>
-            <option value="lift">Lift Goal</option>
-            <option value="weight">Body Weight</option>
-            <option value="nutrition">Nutrition</option>
-            <option value="frequency">Workout Frequency</option>
-          </select>
+    <div id="formCard" class="wk-modal-overlay" style="display:none; z-index: 9999;">
+      <div class="wk-modal" style="max-width:500px;">
+        <div class="wk-modal-header">
+          <span class="wk-modal-title">Set a New Goal</span>
+          <button type="button" class="wk-modal-close" id="closeGoalModalBtn">✕</button>
         </div>
-        
-        <div id="fields-lift" class="goal-type-fields">
-          <div class="field">
-            <label for="gExercise">Exercise</label>
-            <select id="gExercise"></select>
-          </div>
-          <div class="form-row">
-            <div class="field"><label for="gWeight">Target weight (kg)</label><input type="number" id="gWeight" min="1" step="0.5" placeholder="e.g. 120"></div>
-            <div class="field"><label for="gReps">At reps</label><input type="number" id="gReps" min="1" value="1"></div>
-          </div>
-        </div>
-        
-        <div id="fields-weight" class="goal-type-fields" style="display:none;">
-          <div class="field">
-            <label for="gBodyWeight">Target body weight (kg)</label>
-            <input type="number" id="gBodyWeight" min="1" step="0.5" placeholder="e.g. 75">
-          </div>
-        </div>
+        <div class="wk-modal-body">
+          <form id="goalForm">
+            <div class="field">
+              <label for="gType">Goal Type</label>
+              <select id="gType" required>
+                <option value="lift">Lift Goal</option>
+                <option value="weight">Body Weight</option>
+                <option value="nutrition">Nutrition</option>
+                <option value="frequency">Workout Frequency</option>
+              </select>
+            </div>
+            
+            <div id="fields-lift" class="goal-type-fields">
+              <div class="field">
+                <label for="gExercise">Exercise</label>
+                <select id="gExercise"></select>
+              </div>
+              <div class="form-row">
+                <div class="field"><label for="gWeight">Target weight (kg)</label><input type="number" id="gWeight" min="1" step="0.5" placeholder="e.g. 120"></div>
+                <div class="field"><label for="gReps">At reps</label><input type="number" id="gReps" min="1" value="1"></div>
+              </div>
+            </div>
+            
+            <div id="fields-weight" class="goal-type-fields" style="display:none;">
+              <div class="field">
+                <label for="gBodyWeight">Target body weight (kg)</label>
+                <input type="number" id="gBodyWeight" min="1" step="0.5" placeholder="e.g. 75">
+              </div>
+            </div>
 
-        <div id="fields-nutrition" class="goal-type-fields" style="display:none;">
-          <div class="form-row">
-            <div class="field"><label for="gCalories">Daily Calories</label><input type="number" id="gCalories" min="1" placeholder="e.g. 2500"></div>
-            <div class="field"><label for="gProtein">Daily Protein (g)</label><input type="number" id="gProtein" min="1" placeholder="e.g. 150"></div>
-          </div>
-        </div>
-        
-        <div id="fields-frequency" class="goal-type-fields" style="display:none;">
-          <div class="field">
-            <label for="gFrequency">Workouts per week</label>
-            <input type="number" id="gFrequency" min="1" max="14" placeholder="e.g. 4">
-          </div>
-        </div>
+            <div id="fields-nutrition" class="goal-type-fields" style="display:none;">
+              <div class="form-row">
+                <div class="field"><label for="gCalories">Daily Calories</label><input type="number" id="gCalories" min="1" placeholder="e.g. 2500"></div>
+                <div class="field"><label for="gProtein">Daily Protein (g)</label><input type="number" id="gProtein" min="1" placeholder="e.g. 150"></div>
+              </div>
+            </div>
+            
+            <div id="fields-frequency" class="goal-type-fields" style="display:none;">
+              <div class="field">
+                <label for="gFrequency">Workouts per week</label>
+                <input type="number" id="gFrequency" min="1" max="14" placeholder="e.g. 4">
+              </div>
+            </div>
 
-        <div class="field">
-          <label for="gDate">Target Date (Optional)</label>
-          <input type="date" id="gDate">
+            <div class="field" style="margin-bottom:0;">
+              <label for="gDate">Target Date (Optional)</label>
+              <input type="date" id="gDate">
+            </div>
+          </form>
         </div>
-        
-        <div class="flex gap-12 mt-16">
-          <button type="submit" class="btn btn-primary" id="gSubmitBtn">Save Goal</button>
+        <div class="wk-modal-footer" style="display:flex; justify-content:flex-end; gap:12px;">
           <button type="button" class="btn btn-ghost" id="gCancelBtn">Cancel</button>
+          <button type="submit" form="goalForm" class="btn btn-primary" id="gSubmitBtn">Save Goal</button>
         </div>
-      </form>
+      </div>
     </div>
 
     <div class="flex flex-col gap-12 mb-16">
@@ -93,9 +99,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const formCard = document.getElementById("formCard");
   document.getElementById("openGoalBtn").addEventListener("click", () => {
-    formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+    formCard.style.display = formCard.style.display === "none" || formCard.style.display === "" ? "flex" : "none";
   });
   document.getElementById("gCancelBtn").addEventListener("click", () => {
+    formCard.style.display = "none";
+  });
+  document.getElementById("closeGoalModalBtn").addEventListener("click", () => {
     formCard.style.display = "none";
   });
 
