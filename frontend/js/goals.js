@@ -72,9 +72,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   `;
 
   // Bind type switching
-  document.getElementById("gType").addEventListener("change", (e) => {
+  document.getElementById("gType").addEventListener("change", async (e) => {
     document.querySelectorAll(".goal-type-fields").forEach(el => el.style.display = "none");
     document.getElementById(`fields-${e.target.value}`).style.display = "block";
+    await loadGoals();
   });
 
   // Load options & data
@@ -137,7 +138,10 @@ async function loadGoalExerciseOptions() {
 
 async function loadGoals() {
   try {
-    const goals = await Api.listGoals();
+    const typeFilter = document.getElementById("gType").value;
+    const allGoals = await Api.listGoals();
+    const goals = allGoals.filter(g => g.goal_type === typeFilter);
+
     const activeWrap = document.getElementById("activeGoalsWrap");
     const completedWrap = document.getElementById("completedGoalsWrap");
     
