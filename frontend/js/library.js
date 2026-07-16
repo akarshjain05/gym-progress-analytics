@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   muscleSelect.addEventListener('change', applyFilters);
 
   function populateMuscleSelect(exercises) {
-    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
+    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
     const muscles = [...new Set(exercises.map(e => (e.muscle_group || 'other').toLowerCase()))];
     muscles.sort((a,b) => {
        const idxA = MUSCLE_GROUP_ORDER.indexOf(a);
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Re-use api.js groupExercisesByMuscle
   function groupExercisesByMuscle(exercises) {
-    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
+    const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
     const groups = {};
     for (const e of exercises) {
       const key = e.muscle_group || "other";

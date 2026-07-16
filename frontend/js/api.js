@@ -434,7 +434,7 @@ function capitalize(str) {
 // Sensible anatomical grouping order; anything not in this list (custom
 // exercises with an unrecognized or missing muscle_group) is grouped
 // under "Other" at the end.
-const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
+const MUSCLE_GROUP_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
 
 function groupExercisesByMuscle(exercises) {
   const groups = {};

@@ -202,7 +202,6 @@
               <option value="legs">Legs</option>
               <option value="biceps">Biceps</option>
               <option value="triceps">Triceps</option>
-              <option value="core">Core</option>
               <option value="abs">Abs</option>
               <option value="calves">Calves</option>
               <option value="forearms">Forearms</option>
@@ -218,7 +217,7 @@
               <option value="">Select…</option>
               <option value="compound">Compound</option>
               <option value="isolation">Isolation</option>
-              <option value="core">Core</option>
+              <option value="bodyweight">Bodyweight</option>
             </select>
           </div>
           <div class="field">
@@ -274,13 +273,13 @@
   const MUSCLE_ORDER = [
     "chest", "back", "shoulders", "quads", "hamstrings",
     "glutes", "adductors", "legs", "biceps", "triceps",
-    "core", "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"
+    "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"
   ];
 
   const MUSCLE_ICONS = {
     chest: "🫀", back: "🦬", shoulders: "💪", quads: "🦵",
     hamstrings: "🦵", glutes: "🍑", adductors: "🦵", legs: "🦵",
-    biceps: "💪", triceps: "💪", core: "🎯", abs: "🍫", calves: "🦶",
+    biceps: "💪", triceps: "💪", abs: "🍫", calves: "🦶",
     forearms: "💪", neck: "🦒", "hip flexors": "🦵", "full body": "🦍", other: "🏋️"
   };
 
@@ -288,7 +287,7 @@
     chest: "Chest", back: "Back", shoulders: "Shoulders",
     quads: "Quads", hamstrings: "Hamstrings", glutes: "Glutes",
     adductors: "Adductors", legs: "Legs", biceps: "Biceps",
-    triceps: "Triceps", core: "Core", abs: "Abs", calves: "Calves",
+    triceps: "Triceps", abs: "Abs", calves: "Calves",
     forearms: "Forearms", neck: "Neck", "hip flexors": "Hip Flexors",
     "full body": "Full Body", other: "Other"
   };

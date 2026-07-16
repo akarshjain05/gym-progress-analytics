@@ -476,7 +476,6 @@ window.showCustomExerciseModal = function(onSuccess) {
               <option value="legs">Legs</option>
               <option value="biceps">Biceps</option>
               <option value="triceps">Triceps</option>
-              <option value="core">Core</option>
               <option value="abs">Abs</option>
               <option value="calves">Calves</option>
               <option value="forearms">Forearms</option>
@@ -492,7 +491,7 @@ window.showCustomExerciseModal = function(onSuccess) {
               <option value="">Select…</option>
               <option value="compound">Compound</option>
               <option value="isolation">Isolation</option>
-              <option value="core">Core</option>
+              <option value="bodyweight">Bodyweight</option>
             </select>
           </div>
           <div class="wk-field" style="margin-bottom:12px;">

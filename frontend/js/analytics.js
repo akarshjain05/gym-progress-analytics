@@ -19,7 +19,7 @@ function chartColors() {
 const MUSCLE_GROUP_COLORS = {
   chest: "#E2402D", back: "#3E7CB1", shoulders: "#D4A33B", biceps: "#4F9D69",
   triceps: "#8B6BB7", legs: "#C9CCD1", quads: "#5FA8D3", hamstrings: "#E08A6B",
-  glutes: "#D46BA3", calves: "#7BAE7F", core: "#B0A458", other: "#6B7480",
+  glutes: "#D46BA3", calves: "#7BAE7F", abs: "#B0A458", other: "#6B7480",
 };
 
 document.getElementById("pageContent").innerHTML = `

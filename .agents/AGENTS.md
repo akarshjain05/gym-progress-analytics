@@ -12,7 +12,6 @@ When adding or modifying UI components that require a list of muscle groups, ALW
 - legs
 - biceps
 - triceps
-- core
 - abs
 - calves
 - forearms

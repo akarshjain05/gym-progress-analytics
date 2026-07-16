@@ -285,12 +285,12 @@ PREDEFINED_EXERCISES = [
     ("Weighted Push-up", "compound", "chest", "triceps, shoulders", "bodyweight", "intermediate",
      "Perform a standard push-up with a plate or vest added for resistance."),
 
-    # ── CORE ────────────────────────────────────────────────────────
-    ("Bear Crawl", "bodyweight", "core", "shoulders", "bodyweight", "beginner",
+    # ── ABS ────────────────────────────────────────────────────────
+    ("Bear Crawl", "bodyweight", "abs", "shoulders", "bodyweight", "beginner",
      "On hands and feet with knees hovering off the floor, crawl forward while keeping the hips level."),
-    ("Suitcase Carry", "compound", "core", "forearms", "dumbbell", "intermediate",
+    ("Suitcase Carry", "compound", "abs", "forearms", "dumbbell", "intermediate",
      "Carry a weight in one hand at your side, keeping the torso upright to resist lateral flexion."),
-    ("Zercher Carry", "compound", "core", "biceps", "barbell", "advanced",
+    ("Zercher Carry", "compound", "abs", "biceps", "barbell", "advanced",
      "Cradling a loaded barbell in the crooks of your elbows, walk for distance while keeping the torso braced."),
 
     # ── FOREARMS ────────────────────────────────────────────────────
