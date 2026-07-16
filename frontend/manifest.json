@@ -4,12 +4,55 @@
   "description": "Track your lifts, weight, and nutrition. Real trend analysis.",
   "start_url": "/login.html",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#1e2327",
   "theme_color": "#c0392b",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
+  "dir": "ltr",
   "categories": ["fitness", "health", "sports"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "shortcuts": [
+    {
+      "name": "Log Workout",
+      "short_name": "Workout",
+      "description": "Start logging a new workout session",
+      "url": "/workout.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Weight",
+      "short_name": "Weight",
+      "description": "Log today's body weight",
+      "url": "/weight.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your progress dashboard",
+      "url": "/dashboard.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Nutrition",
+      "short_name": "Nutrition",
+      "description": "Log today's calories and macros",
+      "url": "/nutrition.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/nutrition.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  },
   "icons": [
     {
       "src": "icons/icon-72.png",
@@ -58,6 +101,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-wide.png",
+      "sizes": "2940x1604",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "IRONLOG dashboard on desktop"
+    },
+    {
+      "src": "icons/screenshot-narrow.png",
+      "sizes": "759x1600",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "IRONLOG dashboard on mobile"
     }
   ]
 }

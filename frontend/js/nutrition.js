@@ -56,6 +56,23 @@ document.getElementById("openLogBtn").addEventListener("click", () => {
 });
 document.getElementById("cCancelBtn").addEventListener("click", () => formCard.style.display = "none");
 
+// Handle content shared into the app via the OS share sheet (see share_target
+// in manifest.json). e.g. sharing a food item's name/label from another app
+// opens the log form here with the shared text pre-filled into notes.
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const sharedTitle = params.get("title");
+  const sharedText = params.get("text");
+  if (sharedTitle || sharedText) {
+    document.getElementById("cDate").value = todayIso();
+    document.getElementById("cNotes").value = [sharedTitle, sharedText].filter(Boolean).join(" — ");
+    formCard.style.display = "block";
+    showToast("Shared content added to notes — fill in the calories.");
+    // clean the URL so a page refresh doesn't re-trigger this
+    window.history.replaceState({}, "", "/nutrition.html");
+  }
+})();
+
 document.getElementById("calForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = document.getElementById("cSubmitBtn");
