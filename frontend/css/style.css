@@ -43,7 +43,24 @@
   --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
 }
 
-* { box-sizing: border-box; }
+* { 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--plate-red) !important;
+  outline-offset: 2px !important;
+}
+
+button:active, .btn:active, .tab:active, .icon-btn:active, .drawer-link:active, .bottom-nav-link:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
 
 html, body {
   margin: 0;
