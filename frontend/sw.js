@@ -4,9 +4,9 @@
 // IMPORTANT: bump this version number every time you deploy new JS/CSS.
 // This forces the browser to fetch fresh files instead of serving stale
 // cached versions — the root cause of "old code still running" bugs.
-const CACHE_NAME = 'ironlog-v37';
-const STATIC_CACHE = 'ironlog-static-v37';
-const API_CACHE = 'ironlog-api-v37';
+const CACHE_NAME = 'ironlog-v38';
+const STATIC_CACHE = 'ironlog-static-v38';
+const API_CACHE = 'ironlog-api-v38';
 
 // All frontend pages and assets to cache for offline use
 const STATIC_ASSETS = [
@@ -247,8 +247,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'IRONLOG';
   const options = {
     body: data.body || 'You have a new notification',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-96.png',
+    icon: self.location.origin + '/icons/icon-192.png',
+    badge: self.location.origin + '/icons/icon-96.png',
     vibrate: [100, 50, 100],
     data: { url: data.url || '/' },
   };
