@@ -349,8 +349,8 @@ window.appAlert = function(title, message) {
           <h2 id="ironlogAlertTitle" style="font-size:22px; font-weight:700; margin:0 0 12px 0;">Alert</h2>
           <div id="ironlogAlertMessage" style="color:#A0AEC0; font-size:15px; line-height:1.5; margin-bottom:32px;"></div>
           <div class="wk-modal-footer" id="ironlogAlertFooter" style="justify-content:center; gap:12px; padding:0; border-top:none;">
-            <button class="btn btn-secondary" id="ironlogAlertCancel" style="display:none; flex:1;">Cancel</button>
-            <button class="btn btn-primary" id="ironlogAlertOk" style="flex:1;">OK</button>
+            <button class="btn btn-secondary" id="ironlogAlertCancel" style="display:none;">Cancel</button>
+            <button class="btn btn-primary" id="ironlogAlertOk">OK</button>
           </div>
         </div>
       `;
