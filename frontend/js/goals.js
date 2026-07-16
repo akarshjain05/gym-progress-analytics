@@ -159,8 +159,8 @@ async function loadGoals() {
 
 function renderGoalCard(g, isCompleted) {
   let title = "";
-  let subtitle = g.target_date ? `Target: ${fmtDate(g.target_date)}` : "No target date";
   let badge = `<span class="badge-goal badge-${g.goal_type}">${g.goal_type}</span>`;
+  let subtitleHTML = g.target_date ? `${badge} &bull; Target: ${fmtDate(g.target_date)}` : badge;
   
   if (g.goal_type === "lift") {
     title = `${exerciseMap[g.exercise_id] || "Unknown Lift"}: ${fmtKg(g.target_weight_kg)} kg × ${g.target_reps}`;
@@ -183,7 +183,7 @@ function renderGoalCard(g, isCompleted) {
       </label>
       <div class="goal-details">
         <div class="goal-title">${escapeHtml(title)}</div>
-        <div class="goal-subtitle">${badge} • ${subtitle}</div>
+        <div class="goal-subtitle">${subtitleHTML}</div>
       </div>
       <div class="goal-actions">
         <button class="icon-btn icon-btn-danger" onclick="deleteGoal(${g.id})" title="Delete Goal">
