@@ -639,3 +639,14 @@ textarea:focus,
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Sliding segmented tabs ──────────────────────────────── */
+.tabs {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border);
+}
+.tab.active {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
