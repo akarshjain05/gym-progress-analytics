@@ -5,10 +5,10 @@ def create_demo_templates(db: Session, user_id: int):
     """
     Creates standard Push/Pull/Legs demo templates for a user.
     """
-    # Check if user already has the Push Day demo template to avoid duplicates
+    # Check if user already has the Push demo template to avoid duplicates
     existing = db.query(models.WorkoutTemplate).filter(
         models.WorkoutTemplate.user_id == user_id,
-        models.WorkoutTemplate.name == "Push Day"
+        models.WorkoutTemplate.name == "Push"
     ).first()
     if existing:
         return
@@ -26,7 +26,7 @@ def create_demo_templates(db: Session, user_id: int):
     # Define the templates
     demo_templates = [
         {
-            "name": "Push Day",
+            "name": "Push",
             "description": "Chest, Shoulders, and Triceps focus.",
             "exercises": [
                 {"name": "Bench Press", "sets": 3, "reps": 8},
@@ -38,7 +38,7 @@ def create_demo_templates(db: Session, user_id: int):
             ]
         },
         {
-            "name": "Pull Day",
+            "name": "Pull",
             "description": "Back and Biceps focus.",
             "exercises": [
                 {"name": "Pull-up", "sets": 3, "reps": 8},
@@ -50,7 +50,7 @@ def create_demo_templates(db: Session, user_id: int):
             ]
         },
         {
-            "name": "Leg Day",
+            "name": "Legs",
             "description": "Quads, Hamstrings, and Calves focus.",
             "exercises": [
                 {"name": "Squat", "sets": 3, "reps": 8},
