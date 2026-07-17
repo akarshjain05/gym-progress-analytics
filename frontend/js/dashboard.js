@@ -1,5 +1,58 @@
 renderShell("dashboard", "Dashboard", "");
 
+function renderHeatmap(heatmapData) {
+  if (!heatmapData) return "";
+  
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+  const endOfThisWeek = new Date(today);
+  endOfThisWeek.setDate(today.getDate() + (6 - dayOfWeek)); 
+  
+  const startOfGrid = new Date(endOfThisWeek);
+  startOfGrid.setDate(endOfThisWeek.getDate() - 83); // 84 days total (12 weeks)
+  
+  let html = `<div class="card heatmap-card">
+    <div class="heatmap-header">Consistency (Last 12 Weeks)</div>
+    <div class="heatmap-container">`;
+    
+  let currentDate = new Date(startOfGrid);
+  
+  for (let w = 0; w < 12; w++) {
+    html += `<div class="heatmap-col">`;
+    for (let d = 0; d < 7; d++) {
+      if (currentDate > today) {
+        html += `<div class="heatmap-cell level-empty"></div>`;
+      } else {
+        const yyyy = currentDate.getFullYear();
+        const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(currentDate.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
+        const sets = heatmapData[dateStr] || 0;
+        let level = 0;
+        if (sets > 0) {
+          if (sets <= 5) level = 1;
+          else if (sets <= 12) level = 2;
+          else if (sets <= 20) level = 3;
+          else level = 4;
+        }
+        
+        const displayDate = currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const tooltipText = sets === 0 ? `Rest on ${displayDate}` : `${sets} sets on ${displayDate}`;
+        
+        html += `<div class="heatmap-cell level-${level}">
+          <span class="heatmap-tooltip">${tooltipText}</span>
+        </div>`;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    html += `</div>`;
+  }
+  
+  html += `</div></div>`;
+  return html;
+}
+
 async function loadDashboard() {
   const content = document.getElementById("pageContent");
   content.innerHTML = `<div class="loading-block"><div class="spinner"></div> Loading your stats…</div>`;
@@ -84,7 +137,10 @@ async function loadDashboard() {
         `;
       }
 
+      const heatmapHtml = renderHeatmap(dash.heatmap_data);
+
       content.innerHTML = `
+        ${heatmapHtml}
         ${statsGridHtml}
 
 

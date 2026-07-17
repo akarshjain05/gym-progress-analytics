@@ -102,6 +102,20 @@ def dashboard(
         last7 = calorie_logs[-7:]
         avg_calories_7d = round(sum(c.calories for c in last7) / len(last7), 0)
 
+    # Heatmap Data (Last 90 days)
+    ninety_days_ago = date.today() - timedelta(days=90)
+    sessions = (
+        db.query(models.WorkoutSession)
+        .filter(models.WorkoutSession.user_id == current_user.id)
+        .filter(models.WorkoutSession.date >= ninety_days_ago)
+        .all()
+    )
+    
+    heatmap_data = {}
+    for s in sessions:
+        ds = s.date.isoformat()
+        heatmap_data[ds] = heatmap_data.get(ds, 0) + s.sets_count
+
     return {
         "username": current_user.username,
         "current_weight_kg": current_weight,
@@ -111,6 +125,7 @@ def dashboard(
         "total_lift_sessions_logged": len({l.date for l in lift_logs}),
         "total_weight_entries": len(weight_logs),
         "total_calorie_entries": len(calorie_logs),
+        "heatmap_data": heatmap_data,
         **streak,
     }
 
