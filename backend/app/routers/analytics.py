@@ -103,16 +103,10 @@ def dashboard(
         avg_calories_7d = round(sum(c.calories for c in last7) / len(last7), 0)
 
     # Heatmap Data (All time history for calendar)
-    sessions = (
-        db.query(models.WorkoutSession)
-        .filter(models.WorkoutSession.user_id == current_user.id)
-        .all()
-    )
-    
     heatmap_data = {}
-    for s in sessions:
-        ds = s.date.isoformat()
-        heatmap_data[ds] = heatmap_data.get(ds, 0) + s.sets_count
+    for l in lift_logs:
+        ds = l.date.isoformat()
+        heatmap_data[ds] = heatmap_data.get(ds, 0) + 1
 
     return {
         "username": current_user.username,
