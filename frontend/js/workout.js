@@ -1092,18 +1092,88 @@
     `;
 
     const prsEl = document.getElementById('wcPRs');
+    const titleEl = document.querySelector('.wk-complete-title');
+    const emojiEl = document.querySelector('.wk-complete-emoji');
+
     if (result.new_prs && result.new_prs.length > 0) {
-      prsEl.innerHTML = `
-        <div class="wk-prs-title">🏆 New Personal Records!</div>
-        ${result.new_prs.map(pr => `
-          <div class="wk-pr-item">
-            <strong>${escHtml(pr.exercise)}</strong>
-            <span>${pr.new_1rm_kg}kg est. 1RM</span>
-            ${pr.old_1rm_kg > 0 ? `<span class="wk-pr-delta">+${Math.round((pr.new_1rm_kg - pr.old_1rm_kg)*10)/10}kg</span>` : '<span class="wk-pr-delta">First log!</span>'}
-          </div>
-        `).join('')}
+      // Sort PRs to find the biggest jump (absolute delta)
+      const sortedPrs = [...result.new_prs].sort((a, b) => {
+        const deltaA = a.new_1rm_kg - (a.old_1rm_kg || 0);
+        const deltaB = b.new_1rm_kg - (b.old_1rm_kg || 0);
+        return deltaB - deltaA; // Descending
+      });
+      
+      const topPr = sortedPrs[0];
+      const delta = Math.round((topPr.new_1rm_kg - (topPr.old_1rm_kg || 0)) * 10) / 10;
+      const deltaText = topPr.old_1rm_kg > 0 ? `+${delta}kg` : 'First log!';
+      
+      let html = `
+        <div class="pr-celebration-container">
+          <div class="pr-fire-icon">🔥</div>
+          <div class="pr-massive-number">${topPr.new_1rm_kg}kg</div>
+          <div class="pr-subtitle">NEW PR: <span>${escHtml(topPr.exercise)}</span> — your biggest jump yet.</div>
+        </div>
       `;
+      
+      if (sortedPrs.length > 1) {
+        html += `
+          <div class="wk-prs-other">
+            <div class="wk-prs-other-title">Also Crushed</div>
+            ${sortedPrs.slice(1).map(pr => {
+              const d = Math.round((pr.new_1rm_kg - (pr.old_1rm_kg || 0)) * 10) / 10;
+              const dt = pr.old_1rm_kg > 0 ? `+${d}kg` : 'First log!';
+              return `
+                <div class="wk-pr-item">
+                  <strong>${escHtml(pr.exercise)}</strong>
+                  <span>${pr.new_1rm_kg}kg est. 1RM</span>
+                  <span class="wk-pr-delta">${dt}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+      prsEl.innerHTML = html;
+      
+      // Hide standard completion title/emoji to let PR shine
+      if (titleEl) titleEl.style.display = 'none';
+      if (emojiEl) emojiEl.style.display = 'none';
+      
+      // Trigger Confetti
+      setTimeout(() => {
+        if (window.confetti) {
+          const duration = 3000;
+          const end = Date.now() + duration;
+
+          (function frame() {
+            window.confetti({
+              particleCount: 5,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#E2402D', '#D4A33B', '#ffffff'],
+              zIndex: 9999
+            });
+            window.confetti({
+              particleCount: 5,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#E2402D', '#D4A33B', '#ffffff'],
+              zIndex: 9999
+            });
+
+            if (Date.now() < end) {
+              requestAnimationFrame(frame);
+            }
+          }());
+        }
+      }, 300); // slight delay for impact
+      
     } else {
+      // Standard layout
+      if (titleEl) titleEl.style.display = 'block';
+      if (emojiEl) emojiEl.style.display = 'block';
       prsEl.innerHTML = '';
     }
 
