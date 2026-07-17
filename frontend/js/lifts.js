@@ -94,10 +94,13 @@
             <div class="stat-big"><span id="latest1rm">—</span> <span class="stat-unit" id="latest1rmUnit">kg</span></div>
             <div class="stat-sub" id="changePct"></div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="position:relative;">
             <div class="stat-label" data-label="pr">PERSONAL RECORD</div>
             <div class="stat-big"><span id="pr1rm">—</span> <span class="stat-unit" id="pr1rmUnit">kg</span></div>
-            <div class="stat-sub" id="prDate"></div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+              <div class="stat-sub" id="prDate"></div>
+              <button id="btnSharePr" style="display:none; background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:14px; padding:0; display:flex; align-items:center; gap:4px; font-weight:600;" title="Share PR to Instagram">📤 Share</button>
+            </div>
           </div>
           <div class="stat-card" id="strengthCard">
             <div class="stat-label">STRENGTH LEVEL</div>
@@ -473,6 +476,18 @@
 
       // Sessions grouped by date
       renderSessionsGrouped(data.sessions_grouped, exerciseId);
+
+      // PR Sharing
+      if (data.personal_record_1rm_kg || data.best_reps_ever) {
+        const shareBtn = document.getElementById("btnSharePr");
+        if (shareBtn) {
+          shareBtn.style.display = "flex";
+          shareBtn.onclick = () => generatePRShareImage(data, isBWExercise, "btnSharePr");
+        }
+      } else {
+        const shareBtn = document.getElementById("btnSharePr");
+        if (shareBtn) shareBtn.style.display = "none";
+      }
 
     } catch (err) {
       handleApiError(err);
@@ -1118,3 +1133,112 @@
   // has fully committed before we query for elements inside it.
   setTimeout(init, 0);
 })();
+  // ── PR Sharing ────────────────────────────────────────────────────────────
+  async function generatePRShareImage(data, isBWExercise, btnId) {
+    if (!window.html2canvas) {
+      showToast("Sharing is loading, please try again in a second.");
+      return;
+    }
+    
+    const shareBtn = document.getElementById(btnId);
+    const origText = shareBtn.innerHTML;
+    shareBtn.innerHTML = "⏳ Generating...";
+    shareBtn.disabled = true;
+
+    const shareContainer = document.createElement("div");
+    shareContainer.style.position = "absolute";
+    shareContainer.style.left = "-9999px";
+    shareContainer.style.top = "-9999px";
+    
+    const card = document.createElement("div");
+    card.style.width = "1080px";
+    card.style.height = "1920px";
+    card.style.background = "#15181B";
+    card.style.color = "#F2F0EA";
+    card.style.display = "flex";
+    card.style.flexDirection = "column";
+    card.style.justifyContent = "center";
+    card.style.alignItems = "center";
+    card.style.fontFamily = "'Inter', sans-serif";
+    card.style.padding = "100px";
+    card.style.boxSizing = "border-box";
+    card.style.position = "relative";
+    card.style.overflow = "hidden";
+    
+    // Gradient effects
+    card.style.backgroundImage = "radial-gradient(circle at 50% -20%, rgba(226,64,45,0.25), transparent 60%), radial-gradient(circle at 120% 100%, rgba(62,124,177,0.15), transparent 70%)";
+
+    const prValue = isBWExercise ? data.best_reps_ever + " reps" : fmtKg(data.personal_record_1rm_kg) + " kg";
+    const prDateStr = fmtDate(data.personal_record_date);
+    const estText = isBWExercise ? "Max Reps" : "est. 1RM";
+    
+    card.innerHTML = `
+      <div style="font-size: 72px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: #E2402D; margin-bottom: 24px; text-shadow: 0 0 40px rgba(226,64,45,0.4);">NEW PERSONAL RECORD 🔥</div>
+      
+      <div style="background: rgba(30, 34, 39, 0.7); border-radius: 40px; padding: 120px 80px; width: 100%; max-width: 900px; text-align: center; border: 2px solid rgba(255,255,255,0.05); margin-top: 160px; margin-bottom: 200px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
+        <div style="font-size: 56px; font-weight: 700; color: #9CA5AC; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">${escHtml(data.exercise)}</div>
+        <div style="font-size: 140px; color: #D4A33B; font-weight: 900; line-height: 1;">${prValue}</div>
+        <div style="font-size: 40px; color: #6B7480; font-weight: 500; margin-top: 24px;">${estText}</div>
+        <div style="font-size: 32px; color: #4F9D69; font-weight: 600; margin-top: 60px;">Hit on ${prDateStr}</div>
+      </div>
+      
+      <div style="position: absolute; bottom: 120px; display: flex; align-items: center; justify-content: center; gap: 32px; width: 100%;">
+        <div style="width: 100px; height: 100px; background: #E2402D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 40px; font-family: 'Oswald', sans-serif; box-shadow: 0 10px 30px rgba(226,64,45,0.4);">IL</div>
+        <div style="font-size: 48px; font-weight: 700; letter-spacing: 4px;">IRONLOG</div>
+      </div>
+      
+      <div style="position: absolute; bottom: 60px; font-size: 28px; color: #6B7480; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Track your true strength</div>
+    `;
+    
+    shareContainer.appendChild(card);
+    document.body.appendChild(shareContainer);
+
+    try {
+      const canvas = await html2canvas(card, {
+        scale: 1,
+        useCORS: true,
+        backgroundColor: "#15181B"
+      });
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error("Failed to generate image blob");
+        const file = new File([blob], 'ironlog-pr.png', { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'New PR on IRONLOG',
+              text: `Just hit a new PR on ${data.exercise}: ${prValue}!`
+            });
+          } catch (err) {
+            console.error("Share failed", err);
+            downloadFallback(blob, 'ironlog-pr.png');
+          }
+        } else {
+          downloadFallback(blob, 'ironlog-pr.png');
+        }
+        
+        document.body.removeChild(shareContainer);
+        shareBtn.innerHTML = origText;
+        shareBtn.disabled = false;
+      }, 'image/png');
+    } catch (err) {
+      console.error("html2canvas error:", err);
+      showToast("Error generating image.");
+      document.body.removeChild(shareContainer);
+      shareBtn.innerHTML = origText;
+      shareBtn.disabled = false;
+    }
+  }
+
+  function downloadFallback(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast("Image downloaded!");
+  }
