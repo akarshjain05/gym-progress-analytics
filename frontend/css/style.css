@@ -715,3 +715,7 @@ input[type="number"] {
   border-radius: 4px;
   transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+.set-dropdown button:hover {
+  background-color: var(--border-color) !important;
+}

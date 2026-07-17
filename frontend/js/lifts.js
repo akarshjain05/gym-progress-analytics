@@ -748,9 +748,12 @@
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
           <span class="set-note">${set.notes || ""}</span>
-          <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
-            <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' title="Edit" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:14px; padding:4px;">✏️</button>
-            <button class="set-delete-btn" data-logid="${set.id}" title="Delete" style="background:none; border:none; color:#FC8181; cursor:pointer; font-size:14px; padding:4px;">🗑️</button>
+          <div style="position:relative; display:flex; justify-content:flex-end;">
+            <button class="set-menu-btn" title="Options" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:18px; padding:4px 8px;">⋮</button>
+            <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; padding:4px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.4); min-width:110px;">
+              <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">✏️ Edit</button>
+              <button class="set-delete-btn" data-logid="${set.id}" style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--plate-red); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">🗑️ Delete</button>
+            </div>
           </div>
         </div>
       `).join("");
@@ -792,10 +795,29 @@
       });
     });
 
+    // Toggle dropdowns
+    container.querySelectorAll(".set-menu-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = btn.nextElementSibling;
+        const isOpen = dropdown.style.display === "block";
+        document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
+        if (!isOpen) {
+          dropdown.style.display = "block";
+        }
+      });
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener("click", () => {
+      document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
+    });
+
     // Delete set buttons
     container.querySelectorAll(".set-delete-btn").forEach(btn => {
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
+        document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
         const logId = btn.dataset.logid;
         const confirmed = await window.appConfirm('Delete Set', 'Delete this set?', 'Delete', 'Cancel');
         if (!confirmed) return;
