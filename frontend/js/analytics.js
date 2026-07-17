@@ -55,12 +55,54 @@ function escapeHtml(str) {
 }
 
 async function loadInsights() {
-  const list = document.getElementById("fullInsightList");
+  const container = document.getElementById("fullInsightList").parentElement;
   try {
     const res = await Api.insights();
-    list.innerHTML = res.insights.map(line => `
-      <li class="insight-item"><div class="insight-dot"></div><div>${escapeHtml(line)}</div></li>
-    `).join("");
+    if (!res.insights || res.insights.length === 0) {
+      container.innerHTML = `<ul class="insight-list"><li class="insight-item"><div>No insights generated yet. Keep logging!</div></li></ul>`;
+      return;
+    }
+    
+    let html = "";
+    let regularInsights = [];
+    
+    for (const insight of res.insights) {
+      if (typeof insight === 'string') {
+        regularInsights.push(insight);
+        continue;
+      }
+      
+      if (insight.type === 'percentile') {
+        html += `
+          <div class="percentile-card">
+            <div class="pct-header">
+              <span class="pct-title">${escapeHtml(insight.title)} Rank</span>
+              <span class="pct-badge">Top ${100 - Math.round(insight.value)}%</span>
+            </div>
+            <div class="pct-body">
+              <div class="pct-circle">
+                <span class="pct-num">${Math.round(insight.value)}</span>
+                <span class="pct-sym">%</span>
+              </div>
+              <div class="pct-text">${escapeHtml(insight.text)}</div>
+            </div>
+            <div class="pct-bar-bg">
+              <div class="pct-bar-fill" style="width: ${insight.value}%;"></div>
+            </div>
+          </div>
+        `;
+      } else {
+        regularInsights.push(`<strong>${escapeHtml(insight.title)}:</strong> ${escapeHtml(insight.text)}`);
+      }
+    }
+    
+    if (regularInsights.length > 0) {
+      html += `<ul class="insight-list" style="margin-top: 16px;">` + regularInsights.map(line => `
+        <li class="insight-item"><div class="insight-dot"></div><div>${line}</div></li>
+      `).join("") + `</ul>`;
+    }
+    
+    container.innerHTML = html;
   } catch (err) {
     handleApiError(err);
   }

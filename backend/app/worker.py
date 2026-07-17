@@ -53,9 +53,11 @@ def generate_insights(user_id: int):
         if not user:
             return {"insights": []}
 
-        lines = []
-        today_ist = ist_today()
-        week_start_ist = ist_week_start()
+        weight_logs = db.query(models.BodyWeightLog).filter(models.BodyWeightLog.user_id == user_id).order_by(models.BodyWeightLog.date.asc()).all()
+        current_bw = weight_logs[-1].weight_kg if weight_logs else 70.0
+        gender = user.gender if user.gender else "male"
+
+        insights = []
 
         lift_logs = db.query(models.LiftLog).filter(models.LiftLog.user_id == user_id).order_by(models.LiftLog.date.asc()).all()
         by_exercise = defaultdict(list)
@@ -73,25 +75,49 @@ def generate_insights(user_id: int):
             recent_dates = [d for d in session_dates if d >= cutoff]
             baseline_date = recent_dates[0] if recent_dates else session_dates[0]
 
-            first_1rm = calc.best_estimated_1rm(sessions[baseline_date])
             latest_1rm = calc.best_estimated_1rm(sessions[session_dates[-1]])
-            change = calc.percent_change(first_1rm, latest_1rm)
-            if change is None or change == 0: continue
-
             exercise = db.get(models.Exercise, exercise_id)
             name = exercise.name if exercise else "Exercise"
-            sign = "+" if change > 0 else ""
-            lines.append(f"{name} {sign}{change}% over the last 90 days ({first_1rm}kg → {latest_1rm}kg est. 1RM)")
 
-        weight_logs = db.query(models.BodyWeightLog).filter(models.BodyWeightLog.user_id == user_id).order_by(models.BodyWeightLog.date.asc()).all()
+            pct = calc.calculate_strength_percentile(name, gender, current_bw, latest_1rm)
+            if pct is not None and pct > 0:
+                insights.append({
+                    "type": "percentile",
+                    "title": name,
+                    "text": f"You {name.lower()} more than {pct}% of {gender} lifters your bodyweight.",
+                    "value": pct
+                })
+
+            first_1rm = calc.best_estimated_1rm(sessions[baseline_date])
+            change = calc.percent_change(first_1rm, latest_1rm)
+            if change is not None and change != 0:
+                sign = "+" if change > 0 else ""
+                insights.append({
+                    "type": "trend",
+                    "title": f"{name} Progress",
+                    "text": f"{sign}{change}% over the last 90 days ({first_1rm}kg → {latest_1rm}kg est. 1RM)",
+                    "value": change
+                })
+
         if len(weight_logs) >= 2:
             cutoff = weight_logs[-1].date - timedelta(days=28)
             recent = [(w.date, w.weight_kg) for w in weight_logs if w.date >= cutoff]
             rate = calc.weekly_rate_of_change(recent) if len(recent) >= 2 else None
             if rate is not None and abs(rate) >= 0.05:
                 direction = "gaining" if rate > 0 else "losing"
-                lines.append(f"You're {direction} about {abs(rate)}kg/week over the last 4 weeks")
+                insights.append({
+                    "type": "weight",
+                    "title": "Body Weight",
+                    "text": f"You're {direction} about {abs(rate)}kg/week over the last 4 weeks",
+                    "value": abs(rate)
+                })
 
-        return {"insights": lines}
+        percentiles = sorted([i for i in insights if i["type"] == "percentile"], key=lambda x: x["value"], reverse=True)
+        trends = sorted([i for i in insights if i["type"] == "trend"], key=lambda x: x["value"], reverse=True)
+        weights = [i for i in insights if i["type"] == "weight"]
+        
+        final_insights = percentiles[:3] + trends[:3] + weights
+
+        return {"insights": final_insights}
     finally:
         db.close()

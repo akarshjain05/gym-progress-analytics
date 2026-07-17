@@ -965,3 +965,66 @@ def calculate_macros(calories: float, goal: str) -> dict:
         "carbs_g": round(c_kcal / 4),
         "fat_g": round(f_kcal / 9),
     }
+def calculate_strength_percentile(
+    exercise_name: str,
+    gender: str,
+    bodyweight_kg: float,
+    one_rm_kg: float,
+) -> Optional[int]:
+    """
+    Returns an estimated percentile (0-99) for the lifter based on strength standards.
+    """
+    name_lower = exercise_name.strip().lower()
+    std_key = EXERCISE_TO_STANDARD.get(name_lower)
+    
+    if gender not in ["male", "female"]:
+        return None
+        
+    def get_percentile(val: float, bounds: list[tuple[float, float]]) -> int:
+        if val <= bounds[0][0]:
+            if bounds[0][0] == 0: return int(bounds[0][1])
+            return int(bounds[0][1] * (val / bounds[0][0]))
+        if val >= bounds[-1][0]:
+            extra = 1.9 * ((val - bounds[-1][0]) / (bounds[-1][0] * 0.2))
+            return int(min(99, bounds[-1][1] + extra))
+            
+        for i in range(len(bounds) - 1):
+            low_val, low_pct = bounds[i]
+            high_val, high_pct = bounds[i+1]
+            if low_val <= val < high_val:
+                fraction = (val - low_val) / (high_val - low_val)
+                pct = low_pct + fraction * (high_pct - low_pct)
+                return int(pct)
+        return 0
+
+    percentile_anchors = {
+        "beginner": 20.0,
+        "novice": 40.0,
+        "intermediate": 60.0,
+        "advanced": 85.0,
+        "elite": 98.0
+    }
+
+    if std_key is None:
+        if name_lower in BODYWEIGHT_EXERCISE_MAP:
+            bw_key = BODYWEIGHT_EXERCISE_MAP[name_lower]
+            table = BODYWEIGHT_REP_STANDARDS.get(gender, {}).get(bw_key)
+            if not table:
+                return None
+            bounds = sorted([(table[t], percentile_anchors[t]) for t in table])
+            return get_percentile(one_rm_kg, bounds)
+        return None
+
+    if bodyweight_kg <= 0:
+        return None
+
+    standards = STRENGTH_STANDARDS.get(gender)
+    if not standards or std_key not in standards:
+        return None
+
+    table = standards[std_key]
+    ratio = one_rm_kg / bodyweight_kg
+    
+    bounds = sorted([(table[t], percentile_anchors[t]) for t in table])
+    return get_percentile(ratio, bounds)
+
