@@ -750,9 +750,9 @@
           <span class="set-note">${set.notes || ""}</span>
           <div style="position:relative; display:flex; justify-content:flex-end;">
             <button class="set-menu-btn" title="Options" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:18px; padding:4px 8px;">⋮</button>
-            <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; padding:4px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.4); min-width:110px;">
-              <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">✏️ Edit</button>
-              <button class="set-delete-btn" data-logid="${set.id}" style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--plate-red); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">🗑️ Delete</button>
+            <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--bg-elevated-2); border:1px solid var(--border-color); border-radius:8px; padding:4px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.8); min-width:110px;">
+              <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Edit</button>
+              <button class="set-delete-btn" data-logid="${set.id}" style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--plate-red); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Delete</button>
             </div>
           </div>
         </div>
