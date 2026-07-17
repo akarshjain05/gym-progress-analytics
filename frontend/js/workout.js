@@ -706,7 +706,7 @@
         data-idx="${i}">${i + 1}. ${e.exercise_name.split(' ').slice(0, 2).join(' ')}</button>`;
     }).join('');
 
-    if (awTemplateId === 0) {
+    if (awTemplateId === 0 && awIsStarted) {
       tabs.innerHTML += `<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`;
       document.getElementById('awAddExBtn')?.addEventListener('click', addExerciseToWorkout);
     }
@@ -800,8 +800,8 @@
         <div class="wk-empty" style="margin-top:60px;">
           <div class="wk-empty-icon" style="font-size:48px;">💪</div>
           <h3 style="margin-top:16px;">Ready to train?</h3>
-          <p style="color:var(--text-tertiary); margin-bottom: 24px;">Add your first exercise to get started.</p>
-          <button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>
+          <p style="color:var(--text-tertiary); margin-bottom: 24px;">${awIsStarted ? 'Add your first exercise to get started.' : 'Click "Start" at the top to begin your workout.'}</p>
+          ${awIsStarted ? '<button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>' : ''}
         </div>
       `;
       document.getElementById('awEmptyAddBtn')?.addEventListener('click', addExerciseToWorkout);
@@ -832,23 +832,23 @@
               value="${prefillWeight}"
               placeholder="${ex.target_weight_kg != null ? ex.target_weight_kg + ' kg' : 'kg'}"
               min="0.5" max="600" step="0.5"
-              ${isDone ? 'disabled' : ''}>
+              ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>`}
           <div class="wk-set-field">
             <label>Reps</label>
             <input type="number" class="wk-input aw-reps" data-set="${i}"
               value="${logged ? logged.reps : ex.target_reps}"
               placeholder="${ex.target_reps}" min="1" max="100"
-              ${isDone ? 'disabled' : ''}>
+              ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>
           <div class="wk-set-field">
             <label>RPE</label>
             <input type="number" class="wk-input aw-rpe" data-set="${i}"
               value="${logged ? (logged.rpe || '') : ''}"
               placeholder="—" min="1" max="10" step="0.5"
-              ${isDone ? 'disabled' : ''}>
+              ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>
-          <button class="wk-log-set-btn ${isDone ? 'done' : ''}" data-set="${i}">
+          <button class="wk-log-set-btn ${isDone ? 'done' : ''}" data-set="${i}" ${isDone || !awIsStarted ? 'disabled' : ''}>
             ${isDone ? '✓' : 'Log Set'}
           </button>
         </div>
@@ -1005,6 +1005,8 @@
       const topBtn = document.getElementById('awFinishBtn');
       topBtn.className = 'wk-finish-btn';
       topBtn.textContent = 'Finish';
+      renderAwTabs();
+      renderAwPanel();
       return;
     }
 
