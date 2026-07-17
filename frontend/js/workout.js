@@ -783,8 +783,8 @@
       const name = exSel.options[exSel.selectedIndex]?.text || '';
       awExercises.push({
         exercise_id: id, exercise_name: name,
-        target_sets: 3, target_reps: 10, target_weight_kg: null,
-        rest_seconds: 90, loggedSets: [], notes: '',
+        target_sets: 1, target_reps: '', target_weight_kg: null,
+        rest_seconds: 90, loggedSets: [], notes: '', is_adhoc: true
       });
       awCurrentIdx = awExercises.length - 1;
       overlay.remove();
@@ -819,9 +819,17 @@
       // Prefill weight: use logged value, then template target, then previous logged set
       const prefillWeight = logged
         ? logged.weight_kg
-        : (ex.target_weight_kg != null
+        : (ex.target_weight_kg != null && ex.target_weight_kg !== ''
             ? ex.target_weight_kg
             : (i > 0 && ex.loggedSets[i - 1] ? ex.loggedSets[i - 1].weight_kg : ''));
+            
+      // Prefill reps: use logged value, then template target, then previous logged set
+      const prefillReps = logged
+        ? logged.reps
+        : (ex.target_reps != null && ex.target_reps !== '' 
+            ? ex.target_reps 
+            : (i > 0 && ex.loggedSets[i - 1] ? ex.loggedSets[i - 1].reps : ''));
+
       return `
         <div class="wk-set-row ${isDone ? 'done' : ''}" data-set="${i}">
           <div class="wk-set-num">Set ${i + 1}</div>
@@ -830,15 +838,15 @@
             <label>Weight (kg)</label>
             <input type="number" class="wk-input aw-weight" data-set="${i}"
               value="${prefillWeight}"
-              placeholder="${ex.target_weight_kg != null ? ex.target_weight_kg + ' kg' : 'kg'}"
+              placeholder="${ex.target_weight_kg != null && ex.target_weight_kg !== '' ? ex.target_weight_kg + ' kg' : 'kg'}"
               min="0.5" max="600" step="0.5"
               ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>`}
           <div class="wk-set-field">
             <label>Reps</label>
             <input type="number" class="wk-input aw-reps" data-set="${i}"
-              value="${logged ? logged.reps : ex.target_reps}"
-              placeholder="${ex.target_reps}" min="1" max="100"
+              value="${prefillReps}"
+              placeholder="${ex.target_reps != null && ex.target_reps !== '' ? ex.target_reps : '—'}" min="1" max="100"
               ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>
           <div class="wk-set-field">
@@ -861,14 +869,19 @@
           <span>${escHtml(ex.exercise_name)}</span>
           <button class="btn btn-secondary btn-sm aw-info-btn" title="Exercise Info" data-id="${ex.exercise_id}">Info</button>
         </div>
-        <div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>
+        ${ex.is_adhoc ? '' : `<div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>`}
         <div class="wk-panel-progress">
           <div class="wk-panel-progress-bar" style="width:${Math.min(100,(ex.loggedSets.filter(Boolean).length/ex.target_sets)*100)}%"></div>
         </div>
         <div class="wk-panel-progress-txt">${ex.loggedSets.filter(Boolean).length}/${ex.target_sets} sets done</div>
       </div>
 
-      <div class="wk-sets-container">${setsHtml}</div>
+      <div class="wk-sets-container">
+        ${setsHtml}
+        <div style="text-align: center; margin-top: 16px;">
+          <button class="btn btn-secondary btn-sm" id="awAddSetBtn">+ Add Set</button>
+        </div>
+      </div>
 
       <div class="wk-panel-nav">
         ${awCurrentIdx > 0 ? `<button class="btn btn-secondary" id="awPrevBtn">← Previous</button>` : '<div></div>'}
@@ -884,6 +897,11 @@
       if (exId && window.showExerciseInfo) {
         window.showExerciseInfo(exId);
       }
+    });
+
+    panel.querySelector('#awAddSetBtn')?.addEventListener('click', () => {
+      ex.target_sets++;
+      renderAwPanel();
     });
 
     // Log set buttons — validate, auto-fill, no full re-render
