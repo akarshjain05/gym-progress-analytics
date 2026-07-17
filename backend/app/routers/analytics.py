@@ -102,12 +102,10 @@ def dashboard(
         last7 = calorie_logs[-7:]
         avg_calories_7d = round(sum(c.calories for c in last7) / len(last7), 0)
 
-    # Heatmap Data (Last 90 days)
-    ninety_days_ago = ist_today() - timedelta(days=90)
+    # Heatmap Data (All time history for calendar)
     sessions = (
         db.query(models.WorkoutSession)
         .filter(models.WorkoutSession.user_id == current_user.id)
-        .filter(models.WorkoutSession.date >= ninety_days_ago)
         .all()
     )
     

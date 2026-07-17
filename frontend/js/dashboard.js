@@ -1,52 +1,74 @@
 renderShell("dashboard", "Dashboard", "");
 
-function renderHeatmap(heatmapData) {
+let currentCalendarDate = new Date();
+let dashboardData = null;
+
+window.updateCalendarState = function(offsetMonths) {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offsetMonths);
+  const container = document.getElementById("calendarWrapper");
+  if (container && dashboardData) {
+    container.innerHTML = renderCalendar(dashboardData.heatmap_data);
+  }
+};
+
+function renderCalendar(heatmapData) {
   if (!heatmapData) return "";
   
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  
+  const monthName = currentCalendarDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  
+  const firstDay = new Date(year, month, 1).getDay(); // 0 = Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-  const endOfThisWeek = new Date(today);
-  endOfThisWeek.setDate(today.getDate() + (6 - dayOfWeek)); 
+  const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
+  const nextDisabled = isCurrentMonth ? "disabled" : "";
   
-  const startOfGrid = new Date(endOfThisWeek);
-  startOfGrid.setDate(endOfThisWeek.getDate() - 83); // 84 days total (12 weeks)
+  let html = `<div class="card cal-card">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="updateCalendarState(-1)">&#10094;</button>
+      <div class="cal-title">${monthName}</div>
+      <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${nextDisabled}>&#10095;</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-name">S</div>
+      <div class="cal-day-name">M</div>
+      <div class="cal-day-name">T</div>
+      <div class="cal-day-name">W</div>
+      <div class="cal-day-name">T</div>
+      <div class="cal-day-name">F</div>
+      <div class="cal-day-name">S</div>
+  `;
   
-  let html = `<div class="card heatmap-card">
-    <div class="heatmap-header">Consistency (Last 12 Weeks)</div>
-    <div class="heatmap-container">`;
-    
-  let currentDate = new Date(startOfGrid);
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-cell empty"></div>`;
+  }
   
-  for (let w = 0; w < 12; w++) {
-    html += `<div class="heatmap-col">`;
-    for (let d = 0; d < 7; d++) {
-      if (currentDate > today) {
-        html += `<div class="heatmap-cell level-empty"></div>`;
-      } else {
-        const yyyy = currentDate.getFullYear();
-        const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(currentDate.getDate()).padStart(2, '0');
-        const dateStr = `${yyyy}-${mm}-${dd}`;
-        
-        const sets = heatmapData[dateStr] || 0;
-        let level = 0;
-        if (sets > 0) {
-          if (sets <= 5) level = 1;
-          else if (sets <= 12) level = 2;
-          else if (sets <= 20) level = 3;
-          else level = 4;
-        }
-        
-        const displayDate = currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        const tooltipText = sets === 0 ? `Rest on ${displayDate}` : `${sets} sets on ${displayDate}`;
-        
-        html += `<div class="heatmap-cell level-${level}">
-          <span class="heatmap-tooltip">${tooltipText}</span>
-        </div>`;
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const loopDate = new Date(year, month, d);
+    if (loopDate > today) {
+      html += `<div class="cal-cell empty"></div>`;
+      continue;
     }
-    html += `</div>`;
+    
+    const yyyy = loopDate.getFullYear();
+    const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(loopDate.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    
+    const sets = heatmapData[dateStr] || 0;
+    
+    if (sets > 0) {
+      const tooltipText = `${sets} sets on ${monthName.split(' ')[0]} ${d}`;
+      html += `<div class="cal-cell cal-cell-active">
+        ${d}
+        <span class="cal-tooltip">${tooltipText}</span>
+      </div>`;
+    } else {
+      html += `<div class="cal-cell">${d}</div>`;
+    }
   }
   
   html += `</div></div>`;
@@ -63,6 +85,8 @@ async function loadDashboard() {
       Api.dashboard(),
       Api.weightSummary(),
     ]);
+    
+    dashboardData = dash;
 
     const subtitleEl = document.getElementById("pageSubtitle");
     subtitleEl.textContent = `Welcome back, ${dash.username}.`;
@@ -137,10 +161,10 @@ async function loadDashboard() {
         `;
       }
 
-      const heatmapHtml = renderHeatmap(dash.heatmap_data);
+      const calendarHtml = renderCalendar(dash.heatmap_data);
 
       content.innerHTML = `
-        ${heatmapHtml}
+        <div id="calendarWrapper">${calendarHtml}</div>
         ${statsGridHtml}
 
 

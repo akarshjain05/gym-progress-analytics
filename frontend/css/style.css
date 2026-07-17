@@ -516,54 +516,83 @@ input[type="number"] {
   flex-shrink: 0;
 }
 
-/* ── Heatmap Component ────────────────────────────────────────────── */
-.heatmap-card {
+/* ── Monthly Calendar Component ────────────────────────────────────────────── */
+.cal-card {
   margin-bottom: 24px;
 }
-.heatmap-header {
-  font-size: 14px;
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+.cal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+.cal-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.cal-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+.cal-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.cal-day-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.heatmap-container {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  padding-bottom: 8px; /* For scrollbar */
-}
-.heatmap-col {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.heatmap-cell {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  background-color: var(--card-bg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
-  cursor: pointer;
-}
-/* Level colors */
-.heatmap-cell.level-0 { background-color: #1e2327; }
-.heatmap-cell.level-1 { background-color: #0e4429; border-color: transparent; }
-.heatmap-cell.level-2 { background-color: #006d32; border-color: transparent; }
-.heatmap-cell.level-3 { background-color: #26a641; border-color: transparent; }
-.heatmap-cell.level-4 { background-color: #39d353; border-color: transparent; }
-
-/* Placeholder for future dates */
-.heatmap-cell.level-empty {
-  background-color: transparent;
-  border: 0;
+  transition: all 0.2s;
   cursor: default;
+}
+.cal-cell.empty {
+  visibility: hidden;
+}
+
+/* Premium Highlight for active days */
+.cal-cell-active {
+  background: linear-gradient(135deg, #E2402D 0%, #D4A33B 100%);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 2px 10px rgba(226, 64, 45, 0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* Tooltip */
-.heatmap-tooltip {
+.cal-tooltip {
   visibility: hidden;
   background-color: #24292e;
   color: #c9d1d9;
@@ -572,7 +601,7 @@ input[type="number"] {
   padding: 5px 8px;
   position: absolute;
   z-index: 1000;
-  bottom: 150%;
+  bottom: 120%;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
@@ -582,8 +611,10 @@ input[type="number"] {
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1);
   pointer-events: none;
+  font-weight: normal;
+  text-shadow: none;
 }
-.heatmap-cell:hover .heatmap-tooltip {
+.cal-cell-active:hover .cal-tooltip {
   visibility: visible;
   opacity: 1;
 }
