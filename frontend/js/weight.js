@@ -21,32 +21,38 @@ document.getElementById("pageHeaderActions").innerHTML = `
 `;
 
 document.getElementById("pageContent").innerHTML = `
-  <div id="formCard" class="card mb-16" style="display:none;">
-    <div class="card-title">Log a weigh-in</div>
-    <form id="weightForm">
-      <div class="form-row">
-        <div class="field">
-          <label for="wDate">Date</label>
-          <input type="date" id="wDate" required>
-        </div>
-        <div class="field">
-          <label for="wWeight">Weight (kg)</label>
-          <input type="number" id="wWeight" step="0.1" min="1" max="400" required placeholder="e.g. 82.5">
-        </div>
-        <div class="field">
-          <label for="wBf">Body fat % <span class="text-tertiary">(optional)</span></label>
-          <input type="number" id="wBf" step="0.1" min="0" max="80" placeholder="e.g. 18.5">
-        </div>
+  <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
+    <div class="wk-modal" style="max-width:500px;">
+      <div class="wk-modal-header">
+        <h2 style="margin:0; font-size:18px;">Log a weigh-in</h2>
       </div>
-      <div class="field">
-        <label for="wNotes">Notes <span class="text-tertiary">(optional)</span></label>
-        <input type="text" id="wNotes" placeholder="e.g. after fasted cardio">
+      <div class="wk-modal-body">
+        <form id="weightForm">
+          <div class="form-row">
+            <div class="field">
+              <label for="wDate">Date</label>
+              <input type="date" id="wDate" class="form-control" required>
+            </div>
+            <div class="field">
+              <label for="wWeight">Weight (kg)</label>
+              <input type="number" id="wWeight" class="form-control" step="0.1" min="1" max="400" required placeholder="e.g. 82.5">
+            </div>
+            <div class="field">
+              <label for="wBf">Body fat % <span class="text-tertiary">(optional)</span></label>
+              <input type="number" id="wBf" class="form-control" step="0.1" min="0" max="80" placeholder="e.g. 18.5">
+            </div>
+          </div>
+          <div class="field">
+            <label for="wNotes">Notes <span class="text-tertiary">(optional)</span></label>
+            <input type="text" id="wNotes" class="form-control" placeholder="e.g. after fasted cardio">
+          </div>
+          <div class="flex gap-12" style="margin-top:16px;">
+            <button type="submit" class="btn btn-primary" id="wSubmitBtn">Save entry</button>
+            <button type="button" class="btn btn-ghost" id="wCancelBtn">Cancel</button>
+          </div>
+        </form>
       </div>
-      <div class="flex gap-12">
-        <button type="submit" class="btn btn-primary" id="wSubmitBtn">Save entry</button>
-        <button type="button" class="btn btn-ghost" id="wCancelBtn">Cancel</button>
-      </div>
-    </form>
+    </div>
   </div>
 
   <div class="grid grid-stats mb-16" id="summaryStats"></div>
