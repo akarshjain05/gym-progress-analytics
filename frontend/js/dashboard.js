@@ -1,79 +1,6 @@
 renderShell("dashboard", "Dashboard", "");
 
-let currentCalendarDate = new Date();
-let dashboardData = null;
 
-window.updateCalendarState = function(offsetMonths) {
-  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offsetMonths);
-  const container = document.getElementById("calendarWrapper");
-  if (container && dashboardData) {
-    container.innerHTML = renderCalendar(dashboardData.heatmap_data);
-  }
-};
-
-function renderCalendar(heatmapData) {
-  if (!heatmapData) return "";
-  
-  const year = currentCalendarDate.getFullYear();
-  const month = currentCalendarDate.getMonth();
-  
-  const monthName = currentCalendarDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-  
-  const firstDay = new Date(year, month, 1).getDay(); // 0 = Sun
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-  const today = new Date();
-  const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
-  const nextDisabled = isCurrentMonth ? "disabled" : "";
-  
-  let html = `<div class="card cal-card">
-    <div class="cal-header">
-      <button class="cal-nav-btn" onclick="updateCalendarState(-1)">&#10094;</button>
-      <div class="cal-title">${monthName}</div>
-      <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${nextDisabled}>&#10095;</button>
-    </div>
-    <div class="cal-grid">
-      <div class="cal-day-name">S</div>
-      <div class="cal-day-name">M</div>
-      <div class="cal-day-name">T</div>
-      <div class="cal-day-name">W</div>
-      <div class="cal-day-name">T</div>
-      <div class="cal-day-name">F</div>
-      <div class="cal-day-name">S</div>
-  `;
-  
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="cal-cell empty"></div>`;
-  }
-  
-  for (let d = 1; d <= daysInMonth; d++) {
-    const loopDate = new Date(year, month, d);
-    if (loopDate > today) {
-      html += `<div class="cal-cell empty"></div>`;
-      continue;
-    }
-    
-    const yyyy = loopDate.getFullYear();
-    const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(loopDate.getDate()).padStart(2, '0');
-    const dateStr = `${yyyy}-${mm}-${dd}`;
-    
-    const sets = heatmapData[dateStr] || 0;
-    
-    if (sets > 0) {
-      const tooltipText = `${sets} sets on ${monthName.split(' ')[0]} ${d}`;
-      html += `<div class="cal-cell cal-cell-active">
-        ${d}
-        <span class="cal-tooltip">${tooltipText}</span>
-      </div>`;
-    } else {
-      html += `<div class="cal-cell">${d}</div>`;
-    }
-  }
-  
-  html += `</div></div>`;
-  return html;
-}
 
 async function loadDashboard() {
   const content = document.getElementById("pageContent");
@@ -161,10 +88,10 @@ async function loadDashboard() {
         `;
       }
 
-      const calendarHtml = renderCalendar(dash.heatmap_data);
+      
 
       content.innerHTML = `
-        <div id="calendarWrapper">${calendarHtml}</div>
+        
         ${statsGridHtml}
 
 

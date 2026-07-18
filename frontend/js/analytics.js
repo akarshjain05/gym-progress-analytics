@@ -23,6 +23,7 @@ const MUSCLE_GROUP_COLORS = {
 };
 
 document.getElementById("pageContent").innerHTML = `
+  <div id="calendarWrapper" class="mb-16"></div>
   <div class="bar-divider" style="margin-top:0;"><div class="collar"></div><div class="rail"></div><div class="label">All insights</div><div class="rail"></div><div class="collar"></div></div>
   <div class="card mb-16"><ul class="insight-list" id="fullInsightList"></ul></div>
 
@@ -285,6 +286,78 @@ async function loadMuscleGroupVolumeChart() {
   }
 }
 
+
+let currentCalendarDate = new Date();
+let calendarHeatmapData = null;
+
+window.updateCalendarState = function(offsetMonths) {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offsetMonths);
+  const container = document.getElementById("calendarWrapper");
+  if (container && calendarHeatmapData) {
+    container.innerHTML = renderCalendar(calendarHeatmapData);
+  }
+};
+
+function renderCalendar(heatmapData) {
+  if (!heatmapData) return "";
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  const monthName = currentCalendarDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
+  const nextDisabled = isCurrentMonth ? "disabled" : "";
+  
+  let html = `<div class="card cal-card">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="updateCalendarState(-1)">&#10094;</button>
+      <div class="cal-title">${monthName}</div>
+      <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${nextDisabled}>&#10095;</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-name">S</div>
+      <div class="cal-day-name">M</div>
+      <div class="cal-day-name">T</div>
+      <div class="cal-day-name">W</div>
+      <div class="cal-day-name">T</div>
+      <div class="cal-day-name">F</div>
+      <div class="cal-day-name">S</div>
+  `;
+  for (let i = 0; i < firstDay; i++) { html += `<div class="cal-cell empty"></div>`; }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const loopDate = new Date(year, month, d);
+    if (loopDate > today) { html += `<div class="cal-cell empty"></div>`; continue; }
+    const yyyy = loopDate.getFullYear();
+    const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(loopDate.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const sets = heatmapData[dateStr] || 0;
+    if (sets > 0) {
+      const tooltipText = `${sets} sets on ${monthName.split(' ')[0]} ${d}`;
+      html += `<div class="cal-cell cal-cell-active">${d}<span class="cal-tooltip">${tooltipText}</span></div>`;
+    } else {
+      html += `<div class="cal-cell">${d}</div>`;
+    }
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+async function loadCalendar() {
+  try {
+    const dash = await Api.dashboard();
+    calendarHeatmapData = dash.heatmap_data;
+    const container = document.getElementById("calendarWrapper");
+    if (container) {
+      container.innerHTML = renderCalendar(calendarHeatmapData);
+    }
+  } catch (err) {
+    console.error("Failed to load calendar", err);
+  }
+}
+
+loadCalendar();
 loadInsights();
 loadChangeChart();
 loadWeightTrend();
