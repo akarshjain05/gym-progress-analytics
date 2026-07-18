@@ -344,7 +344,7 @@ def lift_progress(
 
     percentile = None
     if bw_kg:
-        metric = latest_session_best_reps if _is_bodyweight_exercise(exercise.name) else latest_1rm
+        metric = best_reps_ever if _is_bodyweight_exercise(exercise.name) else pr_1rm
         gender = current_user.gender or "male"
         percentile = calc.calculate_strength_percentile(exercise.name, gender, bw_kg, metric)
 
