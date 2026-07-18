@@ -1173,7 +1173,7 @@
     const estText = isBWExercise ? "Max Reps" : "est. 1RM";
     
     card.innerHTML = `
-      <div style="font-size: 72px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: #E2402D; margin-bottom: 24px; text-shadow: 0 0 40px rgba(226,64,45,0.4);">NEW PERSONAL RECORD 🔥</div>
+      <div style="font-size: 72px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: #E2402D; margin-bottom: 24px; text-shadow: 0 0 40px rgba(226,64,45,0.4); text-align: center; width: 100%;">NEW PERSONAL RECORD</div>
       
       <div style="background: rgba(30, 34, 39, 0.7); border-radius: 40px; padding: 120px 80px; width: 100%; max-width: 900px; text-align: center; border: 2px solid rgba(255,255,255,0.05); margin-top: 160px; margin-bottom: 200px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
         <div style="font-size: 56px; font-weight: 700; color: #9CA5AC; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">${escHtml(data.exercise)}</div>
@@ -1183,7 +1183,7 @@
       </div>
       
       <div style="position: absolute; bottom: 120px; display: flex; align-items: center; justify-content: center; gap: 32px; width: 100%;">
-        <div style="width: 100px; height: 100px; background: #E2402D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 40px; font-family: 'Oswald', sans-serif; box-shadow: 0 10px 30px rgba(226,64,45,0.4);">IL</div>
+        <img src="/icons/icon-512.png" style="width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" crossorigin="anonymous" />
         <div style="font-size: 48px; font-weight: 700; letter-spacing: 4px;">IRONLOG</div>
       </div>
       
