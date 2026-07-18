@@ -1,0 +1,189 @@
+26d25
+<   <div id="calendarWrapper" class="mb-16"></div>
+29a29,33
+>   <div class="card mb-16">
+>     <div class="card-title">Where you stand <span class="text-tertiary" style="font-weight:400;">(strength percentile by lift)</span></div>
+>     <div id="percentileList"></div>
+>   </div>
+> 
+58,59c62,68
+< async function loadInsights() {
+<   const container = document.getElementById("fullInsightList").parentElement;
+---
+> const TIER_BADGE = {
+>   beginner: "badge-grey", novice: "badge-blue", intermediate: "badge-green",
+>   advanced: "badge-gold", elite: "badge-red",
+> };
+> 
+> async function loadStrengthPercentiles() {
+>   const container = document.getElementById("percentileList");
+61,63c70,79
+<     const res = await Api.insights();
+<     if (!res.insights || res.insights.length === 0) {
+<       container.innerHTML = `<ul class="insight-list"><li class="insight-item"><div>No insights generated yet. Keep logging!</div></li></ul>`;
+---
+>     const res = await Api.strengthPercentiles();
+> 
+>     if (!res.available) {
+>       const linkHref = res.reason === "set_gender" ? "profile.html" : "weight.html";
+>       const linkText = res.reason === "set_gender" ? "Set it in your profile" : "Log your bodyweight";
+>       container.innerHTML = `
+>         <div class="percentile-empty">
+>           <div class="text-secondary" style="margin-bottom:6px;">${escapeHtml(res.message)}</div>
+>           <a href="${linkHref}">${linkText} &rarr;</a>
+>         </div>`;
+66,97c82,88
+<     
+<     let html = "";
+<     let regularInsights = [];
+<     
+<     for (const insight of res.insights) {
+<       if (typeof insight === 'string') {
+<         regularInsights.push(insight);
+<         continue;
+<       }
+<       
+<       if (insight.type === 'percentile') {
+<         html += `
+<           <div class="percentile-card">
+<             <div class="pct-header">
+<               <span class="pct-title">${escapeHtml(insight.title)} Rank</span>
+<               <span class="pct-badge">Top ${100 - Math.round(insight.value)}%</span>
+<             </div>
+<             <div class="pct-body">
+<               <div class="pct-circle">
+<                 <span class="pct-num">${Math.round(insight.value)}</span>
+<                 <span class="pct-sym">%</span>
+<               </div>
+<               <div class="pct-text">${escapeHtml(insight.text)}</div>
+<             </div>
+<             <div class="pct-bar-bg">
+<               <div class="pct-bar-fill" style="width: ${insight.value}%;"></div>
+<             </div>
+<           </div>
+<         `;
+<       } else {
+<         regularInsights.push(`<strong>${escapeHtml(insight.title)}:</strong> ${escapeHtml(insight.text)}`);
+<       }
+---
+> 
+>     if (res.lifts.length === 0) {
+>       container.innerHTML = `
+>         <div class="percentile-empty">
+>           <div class="text-secondary">Log a few sets on a main lift (bench, squat, deadlift, OHP, rows) to see where you stand.</div>
+>         </div>`;
+>       return;
+99,106c90,105
+<     
+<     if (regularInsights.length > 0) {
+<       html += `<ul class="insight-list" style="margin-top: 16px;">` + regularInsights.map(line => `
+<         <li class="insight-item"><div class="insight-dot"></div><div>${line}</div></li>
+<       `).join("") + `</ul>`;
+<     }
+<     
+<     container.innerHTML = html;
+---
+> 
+>     container.innerHTML = res.lifts.map(l => `
+>       <div class="percentile-row">
+>         <div class="percentile-row-head">
+>           <div class="percentile-exercise-name">${escapeHtml(l.exercise)}</div>
+>           <span class="badge ${TIER_BADGE[l.tier] || 'badge-grey'}">${escapeHtml(l.tier || 'unranked')}</span>
+>         </div>
+>         <div class="percentile-stat" style="margin-bottom:8px;">
+>           Stronger than <strong>${l.percentile}%</strong> of lifters your bodyweight
+>           <span class="text-tertiary">(est. 1RM ${l.best_estimated_1rm_kg}kg)</span>
+>         </div>
+>         <div class="percentile-track">
+>           <div class="percentile-marker" style="left:${l.percentile}%;"></div>
+>         </div>
+>       </div>
+>     `).join("");
+111a111,122
+> async function loadInsights() {
+>   const list = document.getElementById("fullInsightList");
+>   try {
+>     const res = await Api.insights();
+>     list.innerHTML = res.insights.map(line => `
+>       <li class="insight-item"><div class="insight-dot"></div><div>${escapeHtml(line)}</div></li>
+>     `).join("");
+>   } catch (err) {
+>     handleApiError(err);
+>   }
+> }
+> 
+289,360d299
+< 
+< let currentCalendarDate = new Date();
+< let calendarHeatmapData = null;
+< 
+< window.updateCalendarState = function(offsetMonths) {
+<   currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offsetMonths);
+<   const container = document.getElementById("calendarWrapper");
+<   if (container && calendarHeatmapData) {
+<     container.innerHTML = renderCalendar(calendarHeatmapData);
+<   }
+< };
+< 
+< function renderCalendar(heatmapData) {
+<   if (!heatmapData) return "";
+<   const year = currentCalendarDate.getFullYear();
+<   const month = currentCalendarDate.getMonth();
+<   const monthName = currentCalendarDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+<   const firstDay = new Date(year, month, 1).getDay();
+<   const daysInMonth = new Date(year, month + 1, 0).getDate();
+<   const today = new Date();
+<   const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
+<   const nextDisabled = isCurrentMonth ? "disabled" : "";
+<   
+<   let html = `<div class="card cal-card">
+<     <div class="cal-header">
+<       <button class="cal-nav-btn" onclick="updateCalendarState(-1)">&#10094;</button>
+<       <div class="cal-title">${monthName}</div>
+<       <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${nextDisabled}>&#10095;</button>
+<     </div>
+<     <div class="cal-grid">
+<       <div class="cal-day-name">S</div>
+<       <div class="cal-day-name">M</div>
+<       <div class="cal-day-name">T</div>
+<       <div class="cal-day-name">W</div>
+<       <div class="cal-day-name">T</div>
+<       <div class="cal-day-name">F</div>
+<       <div class="cal-day-name">S</div>
+<   `;
+<   for (let i = 0; i < firstDay; i++) { html += `<div class="cal-cell empty"></div>`; }
+<   for (let d = 1; d <= daysInMonth; d++) {
+<     const loopDate = new Date(year, month, d);
+<     if (loopDate > today) { html += `<div class="cal-cell empty"></div>`; continue; }
+<     const yyyy = loopDate.getFullYear();
+<     const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+<     const dd = String(loopDate.getDate()).padStart(2, '0');
+<     const dateStr = `${yyyy}-${mm}-${dd}`;
+<     const sets = heatmapData[dateStr] || 0;
+<     if (sets > 0) {
+<       const tooltipText = `${sets} sets on ${monthName.split(' ')[0]} ${d}`;
+<       html += `<div class="cal-cell cal-cell-active">${d}<span class="cal-tooltip">${tooltipText}</span></div>`;
+<     } else {
+<       html += `<div class="cal-cell">${d}</div>`;
+<     }
+<   }
+<   html += `</div></div>`;
+<   return html;
+< }
+< 
+< async function loadCalendar() {
+<   try {
+<     const dash = await Api.dashboard();
+<     calendarHeatmapData = dash.heatmap_data;
+<     const container = document.getElementById("calendarWrapper");
+<     if (container) {
+<       container.innerHTML = renderCalendar(calendarHeatmapData);
+<     }
+<   } catch (err) {
+<     console.error("Failed to load calendar", err);
+<   }
+< }
+< 
+< loadCalendar();
+361a301
+> loadStrengthPercentiles();

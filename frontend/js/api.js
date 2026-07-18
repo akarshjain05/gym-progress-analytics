@@ -233,6 +233,7 @@ const Api = {
     return apiRequest(url);
   },
   weightSummary() { return apiRequest("/weight/summary"); },
+  strengthPercentiles() { return apiRequest("/analytics/strength-percentiles"); },
   weightAdd(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
   weightDelete(id) { return apiRequest(`/weight/${id}`, { method: "DELETE" }); },
 

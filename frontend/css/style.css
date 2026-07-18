@@ -719,3 +719,41 @@ input[type="number"] {
 .set-dropdown button:hover {
   background-color: var(--border-color) !important;
 }
+
+
+.badge-red { background: rgba(226,64,45,0.15); color: var(--plate-red); }
+
+/* Strength percentile gauge */
+.percentile-row { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.percentile-row:last-child { border-bottom: none; }
+.percentile-row-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 12px; }
+.percentile-exercise-name { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+.percentile-stat { font-size: 13.5px; color: var(--text-secondary); }
+.percentile-stat strong { color: var(--text-primary); font-size: 15px; }
+.percentile-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right,
+    var(--bg-elevated-2) 0%, var(--bg-elevated-2) 5%,
+    var(--plate-blue) 5%, var(--plate-blue) 20%,
+    var(--plate-green) 20%, var(--plate-green) 50%,
+    var(--plate-yellow) 50%, var(--plate-yellow) 80%,
+    var(--plate-red) 80%, var(--plate-red) 100%);
+  opacity: 0.35;
+}
+.percentile-marker {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  transform: translate(-50%, -50%);
+  transition: left 0.6s ease;
+}
+.percentile-empty { padding: 20px 4px; text-align: center; }
+.percentile-empty a { color: var(--plate-blue); text-decoration: none; }
+.percentile-empty a:hover { text-decoration: underline; }

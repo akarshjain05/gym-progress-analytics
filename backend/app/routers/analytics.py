@@ -226,3 +226,80 @@ def wrapped(
         "longest_streak": longest_streak,
         "active_days": len(active_days)
     }
+
+@router.get("/strength-percentiles")
+def strength_percentiles(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    For each of the user's logged lifts that has a strength-standards
+    mapping (bench, squat, deadlift, OHP, rows, etc.), computes a smooth
+    0-100 percentile — "stronger than X% of lifters your bodyweight" —
+    using the user's best estimated 1RM per exercise.
+
+    Requires gender ("male" or "female") and at least one bodyweight
+    entry to be set on the profile; returns an explanatory status if
+    either is missing rather than guessing.
+    """
+    if current_user.gender not in ("male", "female"):
+        return {
+            "available": False,
+            "reason": "set_gender",
+            "message": "Set your gender in your profile to see strength percentiles.",
+            "lifts": [],
+        }
+
+    latest_weight = (
+        db.query(models.BodyWeightLog)
+        .filter(models.BodyWeightLog.user_id == current_user.id)
+        .order_by(models.BodyWeightLog.date.desc())
+        .first()
+    )
+    if not latest_weight:
+        return {
+            "available": False,
+            "reason": "log_bodyweight",
+            "message": "Log your bodyweight to see strength percentiles.",
+            "lifts": [],
+        }
+    bodyweight_kg = latest_weight.weight_kg
+
+    lift_logs = (
+        db.query(models.LiftLog)
+        .filter(models.LiftLog.user_id == current_user.id)
+        .all()
+    )
+
+    # Group sets by exercise name (only exercises with a strength-standard
+    # mapping are worth grouping — everything else can't produce a percentile)
+    sets_by_exercise: dict[str, list[tuple[float, int]]] = defaultdict(list)
+    for log in lift_logs:
+        name = log.exercise.name
+        if calc.EXERCISE_TO_STANDARD.get(name.strip().lower()) is None:
+            continue
+        sets_by_exercise[name].append((log.weight_kg, log.reps))
+
+    results = []
+    for exercise_name, sets in sets_by_exercise.items():
+        best_1rm = calc.best_estimated_1rm(sets)
+        if best_1rm <= 0:
+            continue
+        result = calc.get_strength_percentile(
+            exercise_name, current_user.gender, bodyweight_kg, best_1rm
+        )
+        if result is None:
+            continue
+        results.append({
+            "exercise": exercise_name,
+            "best_estimated_1rm_kg": round(best_1rm, 1),
+            "bodyweight_kg": bodyweight_kg,
+            "percentile": result["percentile"],
+            "tier": result["tier"],
+        })
+
+    results.sort(key=lambda r: r["percentile"], reverse=True)
+
+    return {"available": True, "reason": None, "message": None, "lifts": results}
+
+
