@@ -1,34 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1e2327">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="IRONLOG">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-<link rel="shortcut icon" href="/icons/icon-96.png">
-<link rel="stylesheet" href="css/theme.css?v=55">
-<link rel="stylesheet" href="css/style.css?v=55">
-<link rel="stylesheet" href="css/mobile.css?v=55">
-<link rel="stylesheet" href="css/polish.css?v=55">
-<title>Dashboard — IRONLOG</title>
-</head>
-<body>
-<script src="js/config.js?v=55"></script>
-<script src="js/api.js?v=55"></script>
-<script src="js/features.js?v=55"></script>
-<script src="js/layout.js?v=55"></script>
-<script src="js/skeleton.js?v=55"></script>
-<script src="js/dashboard.js?v=55"></script>
-<script src="js/onboarding.js?v=55"></script>
-<script src="js/pwa.js?v=55"></script>
+import re
 
+with open('frontend/dashboard.html', 'r') as f:
+    content = f.read()
+
+# Add a banner above pageContent
+banner_html = """
+    <div id="wrappedBanner" style="display:none; background: linear-gradient(135deg, #FF0055, #0000FF); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);" onclick="window.DashboardPage.showWrapped()">
+      <div style="position: relative; z-index: 2;">
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">Your Month in IronLog</h2>
+        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Tap to reveal your absurd stats.</p>
+      </div>
+      <div style="position: absolute; right: -20px; bottom: -20px; font-size: 100px; opacity: 0.2; transform: rotate(-15deg); line-height: 1;">🐘</div>
+    </div>
+"""
+
+content = content.replace('<div id="pageContent">', '<div id="pageContent">\n' + banner_html)
+
+# Add the modal to the bottom of body
+modal_html = """
   <!-- Wrapped Modal -->
   <div id="wrappedModal" class="wk-modal-overlay" style="display:none; z-index:10000; background: rgba(0,0,0,0.9);">
     <div class="wk-modal" style="max-width: 450px; background: linear-gradient(to bottom, #111, #222); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden; position: relative;">
@@ -84,6 +73,9 @@
       </div>
     </div>
   </div>
+"""
 
-</body>
-</html>
+content = content.replace('</body>', modal_html + '\n</body>')
+
+with open('frontend/dashboard.html', 'w') as f:
+    f.write(content)
