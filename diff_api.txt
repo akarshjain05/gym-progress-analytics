@@ -1,2 +1,0 @@
-259a260
->   strengthPercentiles() { return apiRequest("/analytics/strength-percentiles"); },
