@@ -831,36 +831,36 @@
             : (i > 0 && ex.loggedSets[i - 1] ? ex.loggedSets[i - 1].reps : ''));
 
       return `
-        <div class="wk-set-row ${isDone ? 'done' : ''}" data-set="${i}" style="flex-wrap: nowrap; padding: 10px 8px; justify-content: space-between;">
-          <div class="wk-set-num" style="min-width: 36px; padding-left: 2px;">Set ${i + 1}</div>
+        <div class="wk-set-row ${isDone ? 'done' : ''}" data-set="${i}" style="flex-wrap: nowrap; padding: 10px 4px 10px 8px; justify-content: space-between;">
+          <div class="wk-set-num" style="min-width: 34px; padding-left: 2px;">Set ${i + 1}</div>
           
-          <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:center;">
+          <div style="display:flex; align-items:center; gap:4px; flex:1; justify-content:center;">
             ${isBodyweight ? '' : `
               <input type="number" class="wk-input aw-weight" data-set="${i}"
                 value="${prefillWeight}"
                 placeholder="${ex.target_weight_kg != null && ex.target_weight_kg !== '' ? ex.target_weight_kg : 'kg'}"
-                min="0.5" max="600" step="0.5" style="width: 55px; padding: 8px 4px; font-size:14px;"
+                min="0.5" max="600" step="0.5" style="width: 68px; padding: 8px 6px; font-size: 16px; font-weight: 700;"
                 ${isDone || !awIsStarted ? 'disabled' : ''}>
-              <div style="color:#6b7280; font-weight:700; font-size:12px;">×</div>
+              <div style="color:#6b7280; font-weight:700; font-size:14px;">×</div>
             `}
             <input type="number" class="wk-input aw-reps" data-set="${i}"
               value="${prefillReps}"
               placeholder="${ex.target_reps != null && ex.target_reps !== '' ? ex.target_reps : 'reps'}" min="1" max="100"
-              style="width: 50px; padding: 8px 4px; font-size:14px;"
+              style="width: 62px; padding: 8px 6px; font-size: 16px; font-weight: 700;"
               ${isDone || !awIsStarted ? 'disabled' : ''}>
               
             <input type="number" class="wk-input aw-rpe" data-set="${i}"
               value="${logged ? (logged.rpe || '') : ''}"
               placeholder="RPE" min="1" max="10" step="0.5"
-              style="width: 44px; padding: 8px 2px; font-size:13px;"
+              style="width: 58px; padding: 8px 4px; font-size: 16px; font-weight: 700;"
               ${isDone || !awIsStarted ? 'disabled' : ''}>
           </div>
           
-          <div style="display:flex; align-items:center; gap:2px; margin-left:auto;">
-            <button class="wk-log-set-btn ${isDone ? 'done' : ''}" data-set="${i}" style="min-width:36px; padding:8px 0; display:flex; justify-content:center; align-items:center;" ${isDone || !awIsStarted ? 'disabled' : ''} title="Log Set">
+          <div style="display:flex; align-items:center; gap:2px; margin-left:auto; margin-right: -4px;">
+            <button class="wk-log-set-btn ${isDone ? 'done' : ''}" data-set="${i}" style="min-width:38px; height:38px; display:flex; justify-content:center; align-items:center; padding:0;" ${isDone || !awIsStarted ? 'disabled' : ''} title="Log Set">
               ✓
             </button>
-            <button class="wk-delete-set-btn" data-set="${i}" style="background:none; border:none; color:#6b7280; font-size:18px; padding:4px; margin-left:2px; cursor:pointer;" title="Delete Set">✕</button>
+            <button class="wk-delete-set-btn" data-set="${i}" style="background:none; border:none; color:#6b7280; font-size:20px; padding:8px 4px; cursor:pointer;" title="Delete Set">✕</button>
           </div>
         </div>
       `;
