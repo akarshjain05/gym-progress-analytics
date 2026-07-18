@@ -978,12 +978,12 @@
     const div = document.createElement("div");
     div.className = "modal-set-row";
     div.innerHTML = `
-      <span class="modal-set-num">Set ${setCount}</span>
-      <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="0.5" style="width:80px;">
-      <span style="color:#a09880;font-size:13px;">×</span>
-      <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" max="100" style="width:70px;">
-      <input type="number" class="text-input set-rpe-input" placeholder="RPE" min="1" max="10" step="0.5" style="width:65px;">
-      <button class="set-remove-btn" title="Remove">✕</button>
+      <span class="modal-set-num" style="min-width: 38px;">Set ${setCount}</span>
+      <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="0.5" style="width: 76px; text-align: center;">
+      <span style="color:#a09880;font-size:13px; font-weight:700;">×</span>
+      <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" max="100" style="width: 72px; text-align: center;">
+      <input type="number" class="text-input set-rpe-input" placeholder="RPE" min="1" max="10" step="0.5" style="width: 68px; text-align: center;">
+      <button class="set-remove-btn" title="Remove" style="margin-left: auto; margin-right: -4px; font-size: 20px;">✕</button>
     `;
     div.querySelector(".set-remove-btn").addEventListener("click", () => div.remove());
     document.getElementById("setsContainer").appendChild(div);
