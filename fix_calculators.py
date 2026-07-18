@@ -1,4 +1,9 @@
-const CALCULATORS_HTML = `
+import re
+
+with open("frontend/js/calculators.js", "r") as f:
+    content = f.read()
+
+new_html = """const CALCULATORS_HTML = `
   <div id="calcMenu">
     <div style="margin-bottom: 1.5rem;">
       <p style="color: var(--text-secondary); font-size: 0.95rem;">Select a calculator</p>
@@ -189,12 +194,9 @@ const CALCULATORS_HTML = `
     </div>
 
   </div>
-`;
+`;"""
 
-renderShell("calculators", "Calculators", "Quick math for lifting and nutrition");
-
-window.CalculatorsPage = {
-
+methods_to_add = """
   showCalc(id) {
     document.getElementById('calcMenu').style.display = 'none';
     document.getElementById('calcDetail').style.display = 'block';
@@ -215,146 +217,13 @@ window.CalculatorsPage = {
     document.getElementById('calcMenu').style.display = 'block';
     document.getElementById('calcDetail').style.display = 'none';
   },
+"""
 
-  init() {
-    // Inject HTML into the shell's content area
-    const content = document.getElementById("pageContent");
-    if (!content) return;
-    content.innerHTML = CALCULATORS_HTML;
-    
-    // Set up plate calculator listeners
-    const pt = document.getElementById('plateTarget');
-    const pb = document.getElementById('plateBar');
-    if (pt && pb) {
-      pt.addEventListener('input', () => this.calcPlates());
-      pb.addEventListener('input', () => this.calcPlates());
-      this.calcPlates();
-    }
+# Replace CALCULATORS_HTML block
+content = re.sub(r'const CALCULATORS_HTML = `.*?`;', new_html, content, flags=re.DOTALL)
 
-    // Set up 1RM calculator listeners
-    const ow = document.getElementById('ormWeight');
-    const or = document.getElementById('ormReps');
-    if (ow && or) {
-      ow.addEventListener('input', () => this.calcORM());
-      or.addEventListener('input', () => this.calcORM());
-    }
+# Insert the showCalc and hideCalc methods into window.CalculatorsPage = {
+content = content.replace("window.CalculatorsPage = {\n  init() {", "window.CalculatorsPage = {\n" + methods_to_add + "\n  init() {")
 
-    // Hide loader
-    if (typeof window.hideLoading === "function") {
-      window.hideLoading();
-    }
-  },
-
-  calcPlates() {
-    const target = parseFloat(document.getElementById('plateTarget').value);
-    const bar = parseFloat(document.getElementById('plateBar').value);
-    
-    if (!target || !bar || target <= bar) {
-      document.getElementById('platePerSide').textContent = '0 kg';
-      document.getElementById('plateVisual').innerHTML = '';
-      return;
-    }
-
-    const perSide = (target - bar) / 2;
-    document.getElementById('platePerSide').textContent = `${perSide} kg`;
-
-    const plates = [25, 20, 15, 10, 5, 2.5, 1.25];
-    const plateCounts = [];
-    let remaining = perSide;
-
-    for (const plate of plates) {
-      let count = Math.floor(remaining / plate);
-      if (count > 0) {
-        plateCounts.push({ weight: plate, count });
-        remaining -= (count * plate);
-        remaining = Math.round(remaining * 100) / 100;
-      }
-    }
-
-    let visualHtml = '';
-    plateCounts.forEach(p => {
-      for (let i=0; i<p.count; i++) {
-        let cls = p.weight.toString().replace('.', '-');
-        visualHtml += `<div class="plate plate-${cls}">${p.weight}</div>`;
-      }
-    });
-    
-    if (visualHtml) {
-      visualHtml += '<div class="bar-end"></div>';
-    }
-
-    document.getElementById('plateVisual').innerHTML = visualHtml;
-  },
-
-  calcORM() {
-    const weight = parseFloat(document.getElementById('ormWeight').value);
-    const reps = parseInt(document.getElementById('ormReps').value, 10);
-    
-    const out = document.getElementById('ormResult');
-    if (!weight || !reps || reps <= 0) {
-      out.textContent = '-';
-      return;
-    }
-    
-    if (reps === 1) {
-      out.textContent = `${weight} kg`;
-      return;
-    }
-    
-    const epley = weight * (1 + reps / 30);
-    let estimated = epley;
-    
-    if (reps < 37) {
-      const brzycki = weight * 36 / (37 - reps);
-      estimated = Math.max(epley, brzycki);
-    }
-    
-    out.textContent = `${Math.round(estimated * 10) / 10} kg`;
-  },
-  
-  async calcBodyMetrics() {
-    const w = parseFloat(document.getElementById('bmWeight').value);
-    const h = parseFloat(document.getElementById('bmHeight').value);
-    const g = document.getElementById('bmGender').value;
-    try {
-      const res = await Api.Calculators.getBodyMetrics({ weight_kg: w, height_cm: h, gender: g });
-      document.getElementById('resBmi').textContent = `${res.bmi.value} (${res.bmi.category})`;
-      document.getElementById('resLbm').textContent = res.lbm_kg ? `${res.lbm_kg} kg` : 'N/A';
-      document.getElementById('resIbw').textContent = res.ibw_kg ? `${res.ibw_kg} kg` : 'N/A';
-      document.getElementById('resFfmi').textContent = `${res.ffmi.normalized} (${res.ffmi.category})`;
-      document.getElementById('bmResult').style.display = 'flex';
-    } catch (e) {
-      await window.appAlert("Error", e.message);
-    }
-  },
-
-  async calcPowerlifting() {
-    const w = parseFloat(document.getElementById('pwWeight').value);
-    const t = parseFloat(document.getElementById('pwTotal').value);
-    const g = document.getElementById('pwGender').value;
-    try {
-      const res = await Api.Calculators.getPowerlifting({ weight_kg: w, total_kg: t, gender: g });
-      document.getElementById('resWilks').textContent = res.wilks_score.toFixed(2);
-      document.getElementById('resDots').textContent = res.dots_score.toFixed(2);
-      document.getElementById('pwResult').style.display = 'flex';
-    } catch (e) {
-      await window.appAlert("Error", e.message);
-    }
-  },
-
-  async calcMacros() {
-    const c = parseFloat(document.getElementById('macCals').value);
-    const g = document.getElementById('macGoal').value;
-    try {
-      const res = await Api.Calculators.getMacros({ calories: c, goal: g });
-      document.getElementById('resPro').textContent = `${res.protein_g}g`;
-      document.getElementById('resCarb').textContent = `${res.carbs_g}g`;
-      document.getElementById('resFat').textContent = `${res.fat_g}g`;
-      document.getElementById('macResult').style.display = 'flex';
-    } catch (e) {
-      await window.appAlert("Error", e.message);
-    }
-  }
-};
-
-CalculatorsPage.init();
+with open("frontend/js/calculators.js", "w") as f:
+    f.write(content)

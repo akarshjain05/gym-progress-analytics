@@ -13,10 +13,10 @@
   <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="shortcut icon" href="/icons/icon-96.png">
-  <link rel="stylesheet" href="css/theme.css?v=50">
-  <link rel="stylesheet" href="css/style.css?v=50">
-  <link rel="stylesheet" href="css/mobile.css?v=50">
-  <link rel="stylesheet" href="css/polish.css?v=50">
+  <link rel="stylesheet" href="css/theme.css?v=52">
+  <link rel="stylesheet" href="css/style.css?v=52">
+  <link rel="stylesheet" href="css/mobile.css?v=52">
+  <link rel="stylesheet" href="css/polish.css?v=52">
   <title>Calculators — IRONLOG</title>
   <style>
     .calculators-grid {
@@ -118,15 +118,56 @@
       border-radius: 2px;
       margin-left: 5px;
     }
+    .calc-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .calc-menu-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .menu-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(192, 57, 43, 0.15);
+      color: var(--accent);
+    }
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .menu-title {
+      flex: 1;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .menu-arrow {
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-top: -2px;
+    }
   </style>
 </head>
 <body>
-  <script src="js/config.js?v=50"></script>
-  <script src="js/api.js?v=50"></script>
-  <script src="js/features.js?v=50"></script>
-  <script src="js/layout.js?v=50"></script>
-  <script src="js/skeleton.js?v=50"></script>
-  <script src="js/calculators.js?v=50"></script>
-  <script src="js/pwa.js?v=50"></script>
+  <script src="js/config.js?v=52"></script>
+  <script src="js/api.js?v=52"></script>
+  <script src="js/features.js?v=52"></script>
+  <script src="js/layout.js?v=52"></script>
+  <script src="js/skeleton.js?v=52"></script>
+  <script src="js/calculators.js?v=52"></script>
+  <script src="js/pwa.js?v=52"></script>
 </body>
 </html>
