@@ -116,7 +116,7 @@ def _days_of_data(logs: list) -> int:
 # ---------------------------------------------------------------------------
 
 def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: int, slope: float, intercept: float, effective_gain: float, r_squared: float, base_date, today_offset: int):
-    if target_1rm <= latest_1rm:
+    if latest_1rm <= 0 or target_1rm <= latest_1rm:
         return None
     
     if trend in ("declining", "plateau") or (phase == 2 and slope <= 0):
@@ -826,7 +826,7 @@ def get_next_eta(db: Session = Depends(get_db), current_user: models.User = Depe
     # Wait, the ETA returned by _predict_strength_hybrid already has the ETA object.
     # We can inject exercise_name from the result directly!
     # Let's find the result that matched the best ETA
-    best_result = next(r for r in strength_results if r.get("eta") == best_eta)
+    best_result = next(r for r in strength_results if r.get("eta") is best_eta)
     best_eta["exercise_name"] = best_result["exercise_name"]
     
     return best_eta
