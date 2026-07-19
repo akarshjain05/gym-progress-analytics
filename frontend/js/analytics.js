@@ -45,9 +45,11 @@ document.getElementById("pageContent").innerHTML = `
     <canvas id="volumeCanvas" height="80"></canvas>
   </div>
 
-  <div class="card">
-    <div class="card-title">Volume by muscle group <span class="text-tertiary" style="font-weight:400;">(all-time, kg × reps)</span></div>
-    <canvas id="muscleVolumeCanvas" height="100"></canvas>
+  <div class="card mb-16">
+    <div class="card-title">Muscle Balance <span class="text-tertiary" style="font-weight:400;">(volume by group)</span></div>
+    <div style="position: relative; height: 320px; width: 100%; display: flex; justify-content: center;">
+      <canvas id="muscleVolumeCanvas"></canvas>
+    </div>
   </div>
 `;
 
@@ -257,7 +259,7 @@ async function loadMuscleGroupVolumeChart() {
   try {
     const [logs, exercisesList] = await Promise.all([Api.listLifts(), Api.listExercises()]);
     if (!logs.length) {
-      ctx.parentElement.innerHTML = `<div class="card-title">Volume by muscle group</div><div class="empty-state"><p>Log some sets to see this breakdown.</p></div>`;
+      ctx.parentElement.parentElement.innerHTML = `<div class="card-title">Muscle Balance</div><div class="empty-state"><p>Log some sets to see this breakdown.</p></div>`;
       return;
     }
 
@@ -267,26 +269,61 @@ async function loadMuscleGroupVolumeChart() {
       const group = exerciseToGroup[l.exercise_id] || "other";
       byGroup[group] = (byGroup[group] || 0) + l.weight_kg * l.reps;
     }
-    const entries = Object.entries(byGroup).sort((a, b) => b[1] - a[1]);
+
+    // Fixed circular order for a meaningful radar shape
+    const radarOrder = [
+      "neck", "shoulders", "chest", "biceps", "forearms", "abs", 
+      "quads", "calves", "hamstrings", "glutes", "back", "triceps"
+    ];
+
+    const labels = [];
+    const data = [];
+    const pointColors = [];
+    
+    radarOrder.forEach(group => {
+      // Only include groups if they have data OR if they are standard groups
+      // This keeps the radar shape consistent, but omits completely unused obscure ones.
+      const vol = byGroup[group] || 0;
+      labels.push(capitalize(group));
+      data.push(Math.round(vol));
+      pointColors.push(MUSCLE_GROUP_COLORS[group] || MUSCLE_GROUP_COLORS.other);
+    });
 
     if (muscleVolumeChart) muscleVolumeChart.destroy();
+    
+    const isDark = !document.documentElement.getAttribute('data-theme') ||
+                    document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(242,240,234,0.1)' : 'rgba(0,0,0,0.1)';
+    const tickColor = chartColors().tick;
+
     muscleVolumeChart = new Chart(ctx, {
-      type: "bar",
+      type: "radar",
       data: {
-        labels: entries.map(([group]) => capitalize(group)),
+        labels: labels,
         datasets: [{
-          data: entries.map(([, volume]) => Math.round(volume)),
-          backgroundColor: entries.map(([group]) => MUSCLE_GROUP_COLORS[group] || MUSCLE_GROUP_COLORS.other),
-          borderRadius: 4,
+          label: "Volume",
+          data: data,
+          backgroundColor: 'rgba(79, 157, 105, 0.25)',
+          borderColor: '#4F9D69',
+          borderWidth: 2,
+          pointBackgroundColor: pointColors,
+          pointBorderColor: isDark ? '#1e2327' : '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
         }],
       },
       options: {
-        indexAxis: "y",
         responsive: true,
-        plugins: { legend: { display: false } },
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => \` \${ctx.raw.toLocaleString()} kg×reps\` } } },
         scales: {
-          x: { ticks: { color: chartColors().tick, font: { size: 11 } }, grid: { color: chartColors().grid } },
-          y: { ticks: { color: chartColors().tickY, font: { size: 12 } }, grid: { display: false } },
+          r: {
+            angleLines: { color: gridColor },
+            grid: { color: gridColor },
+            pointLabels: { color: tickColor, font: { size: 11, family: 'Inter, sans-serif', weight: '500' } },
+            ticks: { display: false, backdropColor: 'transparent' }
+          }
         },
       },
     });
