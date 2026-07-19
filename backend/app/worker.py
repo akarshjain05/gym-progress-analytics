@@ -79,7 +79,10 @@ def generate_insights(user_id: int):
             exercise = db.get(models.Exercise, exercise_id)
             name = exercise.name if exercise else "Exercise"
 
-            pct = calc.calculate_strength_percentile(name, gender, current_bw, latest_1rm)
+            pct = None
+            pct_data = calc.get_strength_percentile(name, gender, current_bw, latest_1rm)
+            if pct_data:
+                pct = pct_data["percentile"]
             if pct is not None and pct > 0:
                 insights.append({
                     "type": "percentile",
