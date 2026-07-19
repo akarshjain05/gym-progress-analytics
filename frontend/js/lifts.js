@@ -530,42 +530,34 @@
     }
 
     if (level) {
-      if (data.percentile != null) {
-        const TIER_BADGE = {
-          beginner: "badge-grey", novice: "badge-blue", intermediate: "badge-green",
-          advanced: "badge-gold", elite: "badge-red",
-        };
-        card.innerHTML = `
-          <div class="percentile-row" style="border-bottom: none; padding: 0;">
-            <div class="percentile-row-head">
-              <div class="percentile-exercise-name">${data.exercise}</div>
-              <span class="badge ${TIER_BADGE[level] || 'badge-grey'}">${level || 'unranked'}</span>
-            </div>
-            <div class="percentile-stat" style="margin-bottom:8px;">
-              Stronger than <strong>${Math.round(data.percentile)}%</strong> of lifters your bodyweight
-            </div>
-            <div class="percentile-track">
-              <div class="percentile-marker" style="left:${data.percentile}%;"></div>
-            </div>
-          </div>
-        `;
-      } else {
-        const color = levelColors[level] || "#a09880";
-        const subtitle = isBW
-          ? `Best: ${bestReps} reps · vs population avg`
-          : "vs population avg";
-        card.innerHTML = `
-          <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
-            <span style="font-size:18px;">${levelEmojis[level] || "💪"}</span>
-            <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
-          </div>
-          <div style="font-size:11px;color:#a09880;margin-top:4px;">${subtitle}</div>
-        `;
-      }
+      const color = levelColors[level] || "#a09880";
+      const subtitle = isBW
+        ? `Best: ${bestReps} reps · vs population avg`
+        : "vs population avg";
+      card.innerHTML = `
+        <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
+          <span style="font-size:18px;">${levelEmojis[level] || "💪"}</span>
+          <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
+        </div>
+        <div style="font-size:11px;color:#a09880;margin-top:4px;">${subtitle}</div>
+      `;
     }
 
     // Visual strength scale
-    if (breakpoints) {
+    if (data.percentile != null) {
+      scaleWrap.style.display = "block";
+      scaleEl.innerHTML = `
+        <div class="percentile-row" style="border-bottom: none; padding: 0; margin-top: 12px;">
+          <div class="percentile-stat" style="margin-bottom:8px; text-align: left;">
+            Stronger than <strong>${Math.round(data.percentile)}%</strong> of lifters your bodyweight
+          </div>
+          <div class="percentile-track">
+            <div class="percentile-marker" style="left:${data.percentile}%;"></div>
+          </div>
+        </div>
+      `;
+      labelsEl.innerHTML = "";
+    } else if (breakpoints) {
       scaleWrap.style.display = "block";
       const tiers = ["beginner", "novice", "intermediate", "advanced", "elite"];
       const tierColors = ["#6b7280", "#3b82f6", "#f59e0b", "#10b981", "#c0392b"];
