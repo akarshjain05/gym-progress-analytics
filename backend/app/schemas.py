@@ -328,3 +328,10 @@ class GoalOut(BaseModel):
     target_workouts_per_week: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
+# ---------- Coach ETA ----------
+class ETAOut(BaseModel):
+    exercise_name: str
+    target_kg: float
+    source: str # "goal" or "next_milestone"
+    date: str
+    days_away: int

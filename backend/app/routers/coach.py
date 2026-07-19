@@ -115,13 +115,43 @@ def _days_of_data(logs: list) -> int:
 # HYBRID Strength Predictions
 # ---------------------------------------------------------------------------
 
+def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: int, slope: float, intercept: float, effective_gain: float, r_squared: float, base_date, today_offset: int):
+    if target_1rm <= latest_1rm:
+        return None
+    
+    if trend in ("declining", "plateau") or (phase == 2 and slope <= 0):
+        return None
+
+    if phase == 2 and r_squared is not None and r_squared < 0.3:
+        return None
+        
+    days_away = 0
+    if phase == 2:
+        future_offset = (target_1rm - intercept) / slope
+        days_away = int(future_offset - today_offset)
+    else:
+        if effective_gain <= 0:
+            return None
+        weeks = math.log(target_1rm / latest_1rm) / math.log(1 + effective_gain)
+        days_away = int(weeks * 7)
+
+    if days_away > 365 or days_away < 0:
+        return None
+
+    target_date = ist_today() + timedelta(days=days_away)
+    return {
+        "target_kg": target_1rm,
+        "date": target_date.isoformat(),
+        "days_away": days_away
+    }
+
 def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
-    """
-    Per exercise: decide Phase 1 or Phase 2 based on sessions count.
-    Phase 1 (< 3 sessions): population baseline prediction.
-    Phase 2 (>= 3 sessions): personal linear regression.
-    """
     today = ist_today()
+    if not lift_logs:
+        return []
+    user_id = lift_logs[0].user_id
+    goals = db.query(models.Goal).filter(models.Goal.user_id == user_id, models.Goal.goal_type == "lift", models.Goal.is_completed == False).all()
+    goals_by_ex = {g.exercise_id: g for g in goals}
     by_exercise: dict[int, list] = defaultdict(list)
     for log in lift_logs:
         by_exercise[log.exercise_id].append(log)
@@ -155,6 +185,22 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
                 predicted = latest_1rm * ((1 + effective_gain) ** weeks)
                 preds[label] = round(predicted, 1)
 
+            eta = None
+            target_1rm = None
+            source = "goal"
+            if eid in goals_by_ex and goals_by_ex[eid].target_weight_kg:
+                target_1rm = goals_by_ex[eid].target_weight_kg
+            else:
+                target_1rm = math.ceil(latest_1rm / 10.0) * 10
+                if target_1rm <= latest_1rm:
+                    target_1rm += 10
+                source = "next_milestone"
+
+            if target_1rm:
+                eta = _eta_for_exercise(latest_1rm, target_1rm, "improving", 1, 0, 0, effective_gain, None, dates[0], 0)
+                if eta:
+                    eta["source"] = source
+
             results.append({
                 "exercise_id": eid,
                 "exercise_name": ex.name,
@@ -170,6 +216,7 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
                 "phase_label": "Population baseline (log more sessions for personal predictions)",
                 "first_date": dates[0].isoformat(),
                 "latest_date": dates[-1].isoformat(),
+                "eta": eta
             })
 
         else:
@@ -194,6 +241,22 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
             weekly_gain = round(slope * 7, 2)
             trend = "improving" if slope > 0.05 else ("declining" if slope < -0.05 else "plateau")
 
+            eta = None
+            target_1rm = None
+            source = "goal"
+            if eid in goals_by_ex and goals_by_ex[eid].target_weight_kg:
+                target_1rm = goals_by_ex[eid].target_weight_kg
+            else:
+                target_1rm = math.ceil(latest_1rm / 10.0) * 10
+                if target_1rm <= latest_1rm:
+                    target_1rm += 10
+                source = "next_milestone"
+
+            if target_1rm:
+                eta = _eta_for_exercise(latest_1rm, target_1rm, trend, 2, slope, intercept, 0, r2, base, today_offset)
+                if eta:
+                    eta["source"] = source
+
             results.append({
                 "exercise_id": eid,
                 "exercise_name": ex.name,
@@ -209,6 +272,7 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
                 "phase_label": "Personal regression (based on your own history)",
                 "first_date": dates[0].isoformat(),
                 "latest_date": dates[-1].isoformat(),
+                "eta": eta
             })
 
     return sorted(results, key=lambda r: r["sessions_count"], reverse=True)
@@ -732,3 +796,37 @@ Be direct and specific. Use their actual numbers. Sound like a real coach. Max 3
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+@router.get("/next-eta")
+def get_next_eta(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    """
+    Returns the single most imminent, highest-confidence ETA across all lifts for the dashboard.
+    """
+    lift_logs = db.query(models.LiftLog).filter(models.LiftLog.user_id == current_user.id).all()
+    if not lift_logs:
+        return None
+        
+    strength_results = _predict_strength_hybrid(lift_logs, db)
+    
+    valid_etas = []
+    for res in strength_results:
+        if res.get("eta"):
+            valid_etas.append(res["eta"])
+            
+    if not valid_etas:
+        return None
+        
+    # Sort by nearest ETA first
+    valid_etas.sort(key=lambda e: e["days_away"])
+    
+    # Return the closest ETA
+    best_eta = valid_etas[0]
+    
+    # Need to enrich with exercise name
+    # Wait, the ETA returned by _predict_strength_hybrid already has the ETA object.
+    # We can inject exercise_name from the result directly!
+    # Let's find the result that matched the best ETA
+    best_result = next(r for r in strength_results if r.get("eta") == best_eta)
+    best_eta["exercise_name"] = best_result["exercise_name"]
+    
+    return best_eta
