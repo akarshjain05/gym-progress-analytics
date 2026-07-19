@@ -158,13 +158,13 @@
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
           <div class="sk-grid-2 sk-mt12">
-            ${repeat(4, '<div class="sk-card-inner"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
+            ${repeat(8, '<div class="sk-card-inner"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
           </div>
         </div>
         <!-- History -->
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
-          ${repeat(3, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>')}
+          ${repeat(10, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>')}
         </div>
       </div>`,
 
@@ -194,7 +194,7 @@
         </div>
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
-          ${repeat(4, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm"></div></div>')}
+          ${repeat(12, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm"></div></div>')}
         </div>
       </div>`,
   };
