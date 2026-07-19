@@ -4,7 +4,7 @@ renderShell("dashboard", "Dashboard", "");
 
 async function loadDashboard() {
   const content = document.getElementById("pageContent");
-  content.innerHTML = `<div class="loading-block"><div class="spinner"></div> Loading your stats…</div>`;
+  // Skeleton handles the loading state
 
   try {
     const user = Auth.getUser();

@@ -113,7 +113,7 @@ function buildEmptyState(title, message, ctaText, ctaHref) {
 
 // ── Loading overlay ───────────────────────────────────────────────────────────
 function buildLoadingOverlay() {
-  return `<div id="ironlog-loading" role="status" aria-label="Loading">
+  return `<div id="ironlog-loading" role="status" aria-label="Loading" class="hidden">
     <div class="ironlog-spinner"></div>
     <span class="ironlog-loading-text">Loading your stats…</span>
   </div>`;
@@ -131,7 +131,7 @@ window.hideLoading = function () {
 };
 
 function setupLoadingAutoHide() {
-  const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value';
+  const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value,.goal-card,.tabs,.wk-header-row,.wk-template-card,.wk-empty,.coach-card,.profile-card,.calc-card,.measurement-card,#goalsWrap,#templatesSection,#workoutPage,#coachPage,.field';
   const observer = new MutationObserver(() => {
     const elements = document.querySelectorAll(SELECTORS);
     const hasReal = Array.from(elements).some(el => !el.closest('.hidden-by-skeleton'));
@@ -141,7 +141,7 @@ function setupLoadingAutoHide() {
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(() => { window.hideLoading(); observer.disconnect(); }, 5000);
+  setTimeout(() => { window.hideLoading(); observer.disconnect(); }, 3000);
 }
 
 // ── Mobile drawer nav ─────────────────────────────────────────────────────────
