@@ -177,15 +177,33 @@ def wrapped(
         .all()
     )
 
-    active_days = {l.date for l in weight_logs} | {l.date for l in lift_logs} | {l.date for l in calorie_logs}
+    active_days = set()
+    def _parse_date(d):
+        if not d: return None
+        if hasattr(d, 'date'): return d.date()
+        if isinstance(d, str):
+            try:
+                from datetime import datetime
+                return datetime.strptime(d.split('T')[0], "%Y-%m-%d").date()
+            except:
+                return None
+        return d
+
+    for logs in (weight_logs, lift_logs, calorie_logs):
+        for l in logs:
+            pd = _parse_date(l.date)
+            if pd:
+                active_days.add(pd)
     
     # Calculate streak just for this month's active days
     # (Simplified streak logic just for the month)
     longest_streak = 0
     current_run = 0
     prev_date = None
-    for d in sorted(active_days):
-        if prev_date is not None and (d - prev_date).days == 1:
+    # Sort robustly, filtering out any uncomparable types just in case
+    sorted_days = sorted([d for d in active_days if hasattr(d, 'days') or hasattr(d, 'toordinal')])
+    for d in sorted_days:
+        if prev_date is not None and getattr(d - prev_date, 'days', 0) == 1:
             current_run += 1
         else:
             current_run = 1
@@ -193,7 +211,7 @@ def wrapped(
         prev_date = d
 
     total_volume_kg = sum((l.weight_kg * l.reps) for l in lift_logs if l.weight_kg and l.reps)
-    elephants = round(total_volume_kg / 4000, 2)
+    elephants = round(total_volume_kg / 4000, 2) if total_volume_kg else 0.0
     
     # Muscle group tracking
     muscle_volume = defaultdict(float)
@@ -202,25 +220,33 @@ def wrapped(
     
     for l in lift_logs:
         vol = (l.weight_kg * l.reps) if l.weight_kg and l.reps else 0
-        group = l.exercise.muscle_group or "other"
+        
+        # Safely access exercise
+        ex = getattr(l, 'exercise', None)
+        group = getattr(ex, 'muscle_group', None) or "other"
         muscle_volume[group] += vol
         
         # Max weight lifted (simple PR for narrative)
         if l.weight_kg and l.weight_kg > biggest_pr_weight:
             biggest_pr_weight = l.weight_kg
-            biggest_pr_exercise = l.exercise.name
+            biggest_pr_exercise = getattr(ex, 'name', "Unknown Exercise")
 
     most_trained_muscle = "Nothing yet"
     if muscle_volume:
-        most_trained_muscle = max(muscle_volume, key=muscle_volume.get)
+        best_muscle = max(muscle_volume, key=muscle_volume.get)
+        if best_muscle:
+            most_trained_muscle = best_muscle
 
-    month_name = date_type(target_year, target_month, 1).strftime('%B')
+    try:
+        month_name = date_type(target_year, target_month, 1).strftime('%B')
+    except Exception:
+        month_name = "Month"
 
     return {
         "period": f"{month_name} {target_year}",
         "total_volume_kg": total_volume_kg,
         "elephants": elephants,
-        "most_trained_muscle": most_trained_muscle.capitalize(),
+        "most_trained_muscle": most_trained_muscle.capitalize() if isinstance(most_trained_muscle, str) else str(most_trained_muscle),
         "biggest_pr_weight": biggest_pr_weight,
         "biggest_pr_exercise": biggest_pr_exercise,
         "longest_streak": longest_streak,
