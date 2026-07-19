@@ -379,10 +379,12 @@ function renderShell(activeId, pageTitle, subtitle) {
   if (window.Skeleton) {
     const skeletonMap = {
       dashboard: "dashboard", weight: "weight", lifts: "lifts",
-      nutrition: "nutrition", analytics: "analytics", workout: null,
-      library: "lifts", // use lifts skeleton for library
+      nutrition: "nutrition", analytics: "analytics",
+      library: "lifts", workout: "workout", coach: "coach",
+      profile: "generic", admin: "generic", goals: "generic",
+      measurements: "generic", calculators: "generic"
     };
-    const skPage = skeletonMap[activeId];
+    const skPage = skeletonMap[activeId] || "generic";
     if (skPage) {
       window.Skeleton.show(skPage);
     }

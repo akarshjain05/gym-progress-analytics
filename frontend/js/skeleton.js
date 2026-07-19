@@ -146,6 +146,57 @@
           </div>`)}
         </div>
       </div>`,
+
+    workout: `
+      <div class="sk-page">
+        <!-- Header -->
+        <div class="sk-grid-2 sk-mt4">
+          <div class="sk-btn"></div>
+          <div class="sk-btn"></div>
+        </div>
+        <!-- Templates -->
+        <div class="sk-card sk-mt16">
+          <div class="sk-line sk-line-sm"></div>
+          <div class="sk-grid-2 sk-mt12">
+            ${repeat(4, '<div class="sk-card-inner"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
+          </div>
+        </div>
+        <!-- History -->
+        <div class="sk-card sk-mt16">
+          <div class="sk-line sk-line-sm"></div>
+          ${repeat(3, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>')}
+        </div>
+      </div>`,
+
+    coach: `
+      <div class="sk-page">
+        <div class="sk-card sk-mt16" style="min-height: 200px;">
+          <div class="sk-line sk-line-sm"></div>
+          <div class="sk-line sk-line-xl sk-mt12"></div>
+          <div class="sk-line sk-line-lg sk-mt8"></div>
+          <div class="sk-line sk-line-md sk-mt8"></div>
+        </div>
+        <div class="sk-card sk-mt16" style="min-height: 200px;">
+          <div class="sk-line sk-line-sm"></div>
+          <div class="sk-line sk-line-xl sk-mt12"></div>
+          <div class="sk-line sk-line-lg sk-mt8"></div>
+          <div class="sk-line sk-line-md sk-mt8"></div>
+        </div>
+      </div>`,
+
+    generic: `
+      <div class="sk-page">
+        <!-- Generic blocks -->
+        <div class="sk-card sk-mt16">
+          <div class="sk-line sk-line-sm"></div>
+          <div class="sk-line sk-line-xl sk-mt8"></div>
+          <div class="sk-line sk-line-md sk-mt6"></div>
+        </div>
+        <div class="sk-card sk-mt16">
+          <div class="sk-line sk-line-sm"></div>
+          ${repeat(4, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm"></div></div>')}
+        </div>
+      </div>`,
   };
 
   function repeat(n, html) {
@@ -221,6 +272,8 @@
         '.log-entry', '.lift-row', '.session-group', '.pr-group',
         '.coach-card', '.vol-row', '.strength-row',
         '[data-loaded]', '.entry-list', '.empty-state',
+        '.wk-template-card', '.wk-history-card', '.wk-empty',
+        '.profile-card', '.goals-card'
       ].join(',');
 
       const observer = new MutationObserver(() => {
