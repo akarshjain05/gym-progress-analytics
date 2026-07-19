@@ -316,7 +316,7 @@ async function loadMuscleGroupVolumeChart() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => \` \${ctx.raw.toLocaleString()} kg×reps\` } } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString()} kg×reps` } } },
         scales: {
           r: {
             angleLines: { color: gridColor },
