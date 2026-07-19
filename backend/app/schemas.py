@@ -335,3 +335,4 @@ class ETAOut(BaseModel):
     source: str # "goal" or "next_milestone"
     date: str
     days_away: int
+    sessions_away: int

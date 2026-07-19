@@ -115,7 +115,7 @@ def _days_of_data(logs: list) -> int:
 # HYBRID Strength Predictions
 # ---------------------------------------------------------------------------
 
-def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: int, slope: float, intercept: float, effective_gain: float, r_squared: float, base_date, today_offset: int):
+def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: int, slope: float, intercept: float, effective_gain: float, r_squared: float, base_date, today_offset: int, session_count: int, first_date, latest_date):
     if latest_1rm <= 0 or target_1rm <= latest_1rm:
         return None
     
@@ -139,10 +139,18 @@ def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: i
         return None
 
     target_date = ist_today() + timedelta(days=days_away)
+    
+    avg_days_between = 7.0
+    if session_count > 1 and latest_date > first_date:
+        avg_days_between = (latest_date - first_date).days / (session_count - 1)
+        
+    sessions_away = math.ceil(days_away / max(1, avg_days_between))
+    
     return {
         "target_kg": target_1rm,
         "date": target_date.isoformat(),
-        "days_away": days_away
+        "days_away": days_away,
+        "sessions_away": sessions_away
     }
 
 def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
@@ -197,7 +205,7 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
                 source = "next_milestone"
 
             if target_1rm:
-                eta = _eta_for_exercise(latest_1rm, target_1rm, "improving", 1, 0, 0, effective_gain, None, dates[0], 0)
+                eta = _eta_for_exercise(latest_1rm, target_1rm, "improving", 1, 0, 0, effective_gain, None, dates[0], 0, session_count, first_date, dates[-1])
                 if eta:
                     eta["source"] = source
 
@@ -253,7 +261,7 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
                 source = "next_milestone"
 
             if target_1rm:
-                eta = _eta_for_exercise(latest_1rm, target_1rm, trend, 2, slope, intercept, 0, r2, base, today_offset)
+                eta = _eta_for_exercise(latest_1rm, target_1rm, trend, 2, slope, intercept, 0, r2, base, today_offset, session_count, dates[0], dates[-1])
                 if eta:
                     eta["source"] = source
 
