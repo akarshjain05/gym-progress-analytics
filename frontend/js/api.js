@@ -274,6 +274,7 @@ const Api = {
 
   // --- analytics ---
   dashboard() { return apiRequest("/analytics/dashboard"); },
+  nextEta() { return apiRequest("/coach/next-eta"); },
   insights() { return apiRequest("/analytics/insights"); },
 
   // --- workout templates ---
