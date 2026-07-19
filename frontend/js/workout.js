@@ -183,7 +183,7 @@
       ]);
       setupTwoStepSelector('tmplAddMuscleSelect', 'tmplAddExerciseSelect');
       renderTemplates();
-      loadHistory();
+      await loadHistory();
       window.hideLoading && window.hideLoading();
     } catch (err) {
       handleApiError(err);

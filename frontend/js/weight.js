@@ -108,8 +108,10 @@ async function deleteEntry(id) {
     await Api.deleteWeight(id);
     showToast("Entry deleted.");
     await loadAll();
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    window.hideLoading && window.hideLoading();
   }
 }
 window.deleteEntry = deleteEntry;

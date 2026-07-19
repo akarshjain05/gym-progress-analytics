@@ -129,6 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadGoalExerciseOptions();
   await loadGoals();
+  window.hideLoading && window.hideLoading();
 
   // Form submission
   document.getElementById("goalForm").addEventListener("submit", async (e) => {
@@ -170,6 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       formCard.style.display = "none";
       await loadGoals();
+  window.hideLoading && window.hideLoading();
     } catch (err) {
       handleApiError(err);
     } finally {

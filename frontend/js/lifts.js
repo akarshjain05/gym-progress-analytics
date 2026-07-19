@@ -262,9 +262,8 @@
   async function init() {
     try {
       exercises = await apiRequest("/exercises");
-      populateExerciseSelects();
-      // loadProgress is called inside populateMuscleGroupPills automatically
-      loadPersonalRecords();
+      await populateExerciseSelects();
+      await loadPersonalRecords();
       window.hideLoading && window.hideLoading();
     } catch (err) {
       handleApiError(err);
@@ -306,15 +305,14 @@
     return groups;
   }
 
-  function populateMuscleGroupPills() {
+  async function populateMuscleGroupPills() {
     const groups = getGroupedExercises();
     const select = document.getElementById("muscleGroupSelect");
 
     // Defensive check
     if (!select) {
       console.warn("[lifts.js] muscleGroupSelect not found in DOM, retrying in 100ms...");
-      setTimeout(populateMuscleGroupPills, 100);
-      return;
+      return new Promise(resolve => setTimeout(async () => resolve(await populateMuscleGroupPills()), 100));
     }
 
     // Build ordered list of groups that have exercises
@@ -341,13 +339,15 @@
     if (allGroups.length > 0) {
       selectedMuscleGroup = allGroups[0];
       select.value = allGroups[0];
-      populateExerciseSelect(groups[selectedMuscleGroup]);
+      const p = populateExerciseSelect(groups[selectedMuscleGroup]);
       document.getElementById("exerciseStep").style.display = "";
       const isMobile = window.innerWidth <= 768;
       document.getElementById("customBtnWrapper").style.width = isMobile ? "100%" : "auto";
       document.getElementById("exerciseInfoBtnDesktop").style.display = isMobile ? "none" : "";
       document.getElementById("exerciseInfoBtnMobile").style.display = isMobile ? "" : "none";
+      return p;
     }
+    return Promise.resolve();
   }
 
   function populateExerciseSelect(groupExercises) {
@@ -357,12 +357,13 @@
     ).join("");
     // Trigger load for first exercise in group
     if (groupExercises.length > 0) {
-      loadProgress(groupExercises[0].id);
+      return loadProgress(groupExercises[0].id);
     }
+    return Promise.resolve();
   }
 
-  function populateExerciseSelects() {
-    populateMuscleGroupPills();
+  async function populateExerciseSelects() {
+    await populateMuscleGroupPills();
     populateModalMuscleGroup();
   }
 

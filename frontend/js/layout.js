@@ -131,17 +131,9 @@ window.hideLoading = function () {
 };
 
 function setupLoadingAutoHide() {
-  const SELECTORS = '.stats-card,.log-entry,.lift-row,.chart-container,#weightChart,#dashStats,.table-wrapper,.entry-list,[data-loaded],.card,.dash-grid,.stat-value,.goal-card,.tabs,.wk-header-row,.wk-template-card,.wk-empty,.coach-card,.profile-card,.calc-card,.measurement-card,#goalsWrap,#templatesSection,#workoutPage,#coachPage,.field';
-  const observer = new MutationObserver(() => {
-    const elements = document.querySelectorAll(SELECTORS);
-    const hasReal = Array.from(elements).some(el => !el.closest('.hidden-by-skeleton'));
-    if (hasReal) {
-      window.hideLoading();
-      observer.disconnect();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(() => { window.hideLoading(); observer.disconnect(); }, 3000);
+  // Skeleton is now explicitly hidden by each page's JS once data finishes loading.
+  // We keep a fallback timeout just in case an error prevents hideLoading from firing.
+  setTimeout(() => { window.hideLoading && window.hideLoading(); }, 5000);
 }
 
 // ── Mobile drawer nav ─────────────────────────────────────────────────────────

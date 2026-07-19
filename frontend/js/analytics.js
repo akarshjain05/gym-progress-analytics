@@ -109,8 +109,10 @@ async function loadInsights() {
     }
     
     container.innerHTML = html;
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    window.hideLoading && window.hideLoading();
   }
 }
 

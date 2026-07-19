@@ -132,9 +132,11 @@ async function loadDashboard() {
 
 
 
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
     content.innerHTML = `<div class="empty-state"><p>Couldn't load your dashboard. Try refreshing.</p></div>`;
+    window.hideLoading && window.hideLoading();
   }
 }
 

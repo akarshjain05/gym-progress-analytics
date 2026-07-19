@@ -110,8 +110,10 @@ async function deleteCalEntry(id) {
     await Api.deleteCalorieLog(id);
     showToast("Entry deleted.");
     await loadAll();
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    window.hideLoading && window.hideLoading();
   }
 }
 window.deleteCalEntry = deleteCalEntry;

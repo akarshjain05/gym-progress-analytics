@@ -217,25 +217,17 @@
       const template = TEMPLATES[page];
       if (!template) return;
 
-      // Wrap current children of container into a hidden div to preserve elements and event listeners
-      let realContent = container.querySelector('.hidden-by-skeleton');
-      if (!realContent) {
-        realContent = document.createElement('div');
-        realContent.className = 'hidden-by-skeleton';
-        realContent.style.display = 'none';
-        while (container.firstChild) {
-          realContent.appendChild(container.firstChild);
-        }
-        container.appendChild(realContent);
-      }
+      // Hide the real container so it can be safely populated by page JS without breaking skeleton
+      container.style.display = 'none';
+      container.classList.add('hidden-by-skeleton');
 
-      // Inject skeleton as a sibling to the hidden real content
+      // Inject skeleton as a sibling before the container
       let activeSk = document.getElementById('sk-active');
       if (!activeSk) {
         activeSk = document.createElement('div');
         activeSk.className = 'sk-wrapper';
         activeSk.id = 'sk-active';
-        container.appendChild(activeSk);
+        container.parentNode.insertBefore(activeSk, container);
       }
       activeSk.innerHTML = template;
 
@@ -249,18 +241,15 @@
       if (!container) return;
 
       const wrapper = document.getElementById('sk-active');
+      
+      // Before removing the wrapper, show the container so charts can render properly
+      container.style.display = '';
+      container.classList.remove('hidden-by-skeleton');
+
       if (wrapper) {
         wrapper.classList.add('sk-fadeout');
         setTimeout(() => {
           wrapper.remove();
-          const realContent = container.querySelector('.hidden-by-skeleton');
-          if (realContent) {
-            // Unwrap realContent back to the container
-            while (realContent.firstChild) {
-              container.appendChild(realContent.firstChild);
-            }
-            realContent.remove();
-          }
         }, 300);
       }
     },
