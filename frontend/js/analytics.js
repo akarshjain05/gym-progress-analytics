@@ -29,15 +29,9 @@ document.getElementById("pageContent").innerHTML = `
   <div class="bar-divider" style="margin-top:0;"><div class="collar"></div><div class="rail"></div><div class="label">All insights</div><div class="rail"></div><div class="collar"></div></div>
   <div class="card mb-16"><ul class="insight-list" id="fullInsightList"></ul></div>
 
-  <div class="grid grid-2 mb-16">
-    <div class="card">
-      <div class="card-title">Strength change by exercise <span class="text-tertiary" style="font-weight:400;">(90 days)</span></div>
-      <canvas id="changeCanvas" height="100"></canvas>
-    </div>
-    <div class="card">
-      <div class="card-title">Weight trend</div>
-      <canvas id="weightTrendCanvas" height="100"></canvas>
-    </div>
+  <div class="card mb-16">
+    <div class="card-title">Weight trend</div>
+    <canvas id="weightTrendCanvas" height="100"></canvas>
   </div>
 
   <div class="card mb-16">
@@ -115,52 +109,6 @@ async function loadInsights() {
     }
     
     container.innerHTML = html;
-  } catch (err) {
-    handleApiError(err);
-  }
-}
-
-async function loadChangeChart() {
-  const ctx = document.getElementById("changeCanvas");
-  try {
-    const exercises = await Api.listExercises();
-    const prsResponse = await Api.personalRecords();
-    const prs = Array.isArray(prsResponse) ? prsResponse : (prsResponse.flat || []);
-    const loggedIds = new Set(prs.map(p => p.exercise_id));
-    const relevant = exercises.filter(e => loggedIds.has(e.id));
-
-    const results = await Promise.all(relevant.map(e => Api.liftProgress(e.id)));
-    const points = relevant
-      .map((e, i) => ({ name: e.name, change: results[i].change_pct }))
-      .filter(p => p.change !== null && p.change !== undefined)
-      .sort((a, b) => b.change - a.change);
-
-    if (!points.length) {
-      ctx.parentElement.innerHTML = `<div class="card-title">Strength change by exercise</div><div class="empty-state"><p>Log the same exercise on at least two different days to see change here.</p></div>`;
-      return;
-    }
-
-    if (changeChart) changeChart.destroy();
-    changeChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: points.map(p => p.name),
-        datasets: [{
-          data: points.map(p => p.change),
-          backgroundColor: points.map(p => p.change >= 0 ? "#4F9D69" : "#C9594A"),
-          borderRadius: 4,
-        }],
-      },
-      options: {
-        indexAxis: "y",
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: chartColors().tick, font: { size: 11 }, callback: (v) => v + "%" }, grid: { color: chartColors().grid } },
-          y: { ticks: { color: chartColors().tickY, font: { size: 12 } }, grid: { display: false } },
-        },
-      },
-    });
   } catch (err) {
     handleApiError(err);
   }
@@ -405,7 +353,6 @@ async function loadCalendar() {
 
 loadCalendar();
 loadInsights();
-loadChangeChart();
 loadWeightTrend();
 loadVolumeChart();
 loadMuscleGroupVolumeChart();
