@@ -279,12 +279,7 @@
     "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"
   ];
 
-  const MUSCLE_ICONS = {
-    chest: "🫀", back: "🦬", shoulders: "💪", quads: "🦵",
-    hamstrings: "🦵", glutes: "🍑", adductors: "🦵", legs: "🦵",
-    biceps: "💪", triceps: "💪", abs: "🍫", calves: "🦶",
-    forearms: "💪", neck: "🦒", "hip flexors": "🦵", "full body": "🦍", other: "🏋️"
-  };
+
 
   const MUSCLE_LABELS = {
     chest: "Chest", back: "Back", shoulders: "Shoulders",
@@ -515,13 +510,7 @@
       advanced: "#10b981",
       elite: "#c0392b",
     };
-    const levelEmojis = {
-      beginner: "🌱",
-      novice: "📈",
-      intermediate: "💪",
-      advanced: "🔥",
-      elite: "🏆",
-    };
+
 
     if (!level && reason) {
       card.innerHTML = `<div style="font-size:13px;color:#a09880;line-height:1.4;">${reason}</div>`;
@@ -553,7 +542,6 @@
           : "vs population avg";
         card.innerHTML = `
           <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
-            <span style="font-size:18px;">${levelEmojis[level] || "💪"}</span>
             <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
           </div>
           <div style="font-size:11px;color:#a09880;margin-top:4px;">${subtitle}</div>

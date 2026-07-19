@@ -235,9 +235,9 @@
           <h2 class="ob-title">You're all set!</h2>
           <p class="ob-subtitle">IRONLOG is ready to track your progress. Come back every day to log your weight and workouts.</p>
           <div class="ob-done-tips">
-            <div class="ob-done-tip">📊 Check <strong>Dashboard</strong> for your overview</div>
-            <div class="ob-done-tip">💪 Use <strong>Lifts</strong> to track strength progress</div>
-            <div class="ob-done-tip">🤖 Visit <strong>AI Coach</strong> for personalised advice</div>
+            <div class="ob-done-tip">Check <strong>Dashboard</strong> for your overview</div>
+            <div class="ob-done-tip">Use <strong>Lifts</strong> to track strength progress</div>
+            <div class="ob-done-tip">Visit <strong>AI Coach</strong> for personalised advice</div>
           </div>
           <div class="ob-actions ob-actions-center">
             <button class="ob-btn-primary ob-btn-wide" id="obFinish">Start Training →</button>

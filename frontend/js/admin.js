@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   container.innerHTML = `
     <!-- Tab bar -->
     <div class="profile-tabs mb-16">
-      <button class="profile-tab active" data-tab="users">👥 Users</button>
-      <button class="profile-tab" data-tab="stats">📊 Platform Stats</button>
-      <button class="profile-tab" data-tab="logs">📜 Activity Logs</button>
+      <button class="profile-tab active" data-tab="users">Users</button>
+      <button class="profile-tab" data-tab="stats">Platform Stats</button>
+      <button class="profile-tab" data-tab="logs">Activity Logs</button>
     </div>
 
     <!-- Tab: Users -->

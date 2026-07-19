@@ -15,7 +15,7 @@
       <!-- AI Advice Card -->
       <div class="coach-card coach-advice-card">
         <div class="coach-card-header">
-          <div class="coach-icon">🤖</div>
+          <div class="coach-icon"></div>
           <div class="coach-header-text">
             <div class="coach-card-title">Your Personal AI Coach</div>
             <div class="coach-card-sub" id="adviceSubtitle">Analysing your training data…</div>

@@ -338,9 +338,9 @@
               <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete" style="font-size: 16px;">✕</button>
             </div>
             <div class="wk-history-meta">
-              <span>⏱ ${fmtDuration(s.duration_seconds)}</span>
-              <span>💪 ${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
-              <span>📊 ${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
+              <span>${fmtDuration(s.duration_seconds)}</span>
+              <span>${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
+              <span>${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
             </div>
             ${s.notes ? `<div class="wk-history-notes">${escHtml(s.notes)}</div>` : ''}
           </div>
@@ -383,8 +383,8 @@
       const data = await apiRequest(`/templates/history/${sessionId}`);
       
       let html = `<div style="margin-bottom:16px; color:#A0AEC0; font-size:14px;">
-        <div>⏱ ${fmtDuration(data.duration_seconds)}</div>
-        <div>📅 ${fmtDate(data.date)}</div>
+        <div>${fmtDuration(data.duration_seconds)}</div>
+        <div>${fmtDate(data.date)}</div>
       </div>`;
 
       if (data.notes) {
@@ -798,7 +798,7 @@
     if (awExercises.length === 0) {
       panel.innerHTML = `
         <div class="wk-empty" style="margin-top:60px;">
-          <div class="wk-empty-icon" style="font-size:48px;">💪</div>
+          <div class="wk-empty-icon" style="font-size:48px;"></div>
           <h3 style="margin-top:16px;">Ready to train?</h3>
           <p style="color:var(--text-tertiary); margin-bottom: 24px;">${awIsStarted ? 'Add your first exercise to get started.' : 'Click "Start" at the top to begin your workout.'}</p>
           ${awIsStarted ? '<button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>' : ''}
@@ -1322,7 +1322,7 @@
             await navigator.share({
               files: [file],
               title: 'IRONLOG Workout',
-              text: 'Just crushed a workout on IRONLOG! 💪'
+              text: 'Just crushed a workout on IRONLOG!'
             });
           } catch (shareErr) {
             // Ignore AbortError when user cancels the share dialog

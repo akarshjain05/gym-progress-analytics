@@ -105,7 +105,7 @@ async function loadDashboard() {
             <h2 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">Your Month in IronLog</h2>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Tap to reveal your absurd stats.</p>
           </div>
-          <div style="position: absolute; right: -20px; bottom: -20px; font-size: 100px; opacity: 0.2; transform: rotate(-15deg); line-height: 1;">🐘</div>
+          <div style="position: absolute; right: -20px; bottom: -20px; font-size: 100px; opacity: 0.2; transform: rotate(-15deg); line-height: 1;"></div>
         </div>
 
         ${statsGridHtml}
