@@ -154,11 +154,7 @@ window.DashboardPage.showWrapped = async function() {
   document.getElementById('wrappedContent').style.display = 'none';
 
   try {
-    const res = await fetch(Api.baseUrl + "/analytics/wrapped", {
-      headers: Api.headers()
-    });
-    if (!res.ok) throw new Error("Failed to load wrapped data");
-    const data = await res.json();
+    const data = await apiRequest("/analytics/wrapped");
     
     document.getElementById('wrapPeriod').textContent = data.period;
     document.getElementById('wrapVol').textContent = Math.round(data.total_volume_kg).toLocaleString();
