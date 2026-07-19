@@ -531,21 +531,21 @@
 
     if (level) {
       if (data.percentile != null) {
+        const TIER_BADGE = {
+          beginner: "badge-grey", novice: "badge-blue", intermediate: "badge-green",
+          advanced: "badge-gold", elite: "badge-red",
+        };
         card.innerHTML = `
-          <div class="percentile-card" style="margin-bottom: 24px; text-align: left;">
-            <div class="pct-header">
-              <span class="pct-title">${data.exercise} Rank</span>
-              <span class="pct-badge">Top ${100 - Math.round(data.percentile)}%</span>
+          <div class="percentile-row" style="border-bottom: none; padding: 0;">
+            <div class="percentile-row-head">
+              <div class="percentile-exercise-name">${data.exercise}</div>
+              <span class="badge ${TIER_BADGE[level] || 'badge-grey'}">${level || 'unranked'}</span>
             </div>
-            <div class="pct-body">
-              <div class="pct-circle">
-                <span class="pct-num">${Math.round(data.percentile)}</span>
-                <span class="pct-sym">%</span>
-              </div>
-              <div class="pct-text">You are stronger than ${Math.round(data.percentile)}% of lifters your bodyweight.</div>
+            <div class="percentile-stat" style="margin-bottom:8px;">
+              Stronger than <strong>${Math.round(data.percentile)}%</strong> of lifters your bodyweight
             </div>
-            <div class="pct-bar-bg">
-              <div class="pct-bar-fill" style="width: ${data.percentile}%;"></div>
+            <div class="percentile-track">
+              <div class="percentile-marker" style="left:${data.percentile}%;"></div>
             </div>
           </div>
         `;

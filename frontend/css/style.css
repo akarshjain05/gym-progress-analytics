@@ -735,11 +735,18 @@ input[type="number"] {
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(to right,
-    var(--bg-elevated-2) 0%, var(--bg-elevated-2) 5%,
+    #6b7280 0%, #6b7280 5%,
     var(--plate-blue) 5%, var(--plate-blue) 20%,
     var(--plate-green) 20%, var(--plate-green) 50%,
     var(--plate-yellow) 50%, var(--plate-yellow) 80%,
     var(--plate-red) 80%, var(--plate-red) 100%);
+}
+.percentile-track::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: inherit;
+  border-radius: inherit;
   opacity: 0.35;
 }
 .percentile-marker {
