@@ -231,8 +231,7 @@
       }
       activeSk.innerHTML = template;
 
-      // Auto-remove when real content appears
-      this._watchForContent(container);
+
     },
 
     /** Manually hide skeleton */
@@ -254,34 +253,7 @@
       }
     },
 
-    _watchForContent(container) {
-      // Remove skeleton when any non-skeleton child appears
-      const REAL_CONTENT_SELECTORS = [
-        '.stats-card', '.stat-card', '.dash-grid', '.chart-card',
-        '.log-entry', '.lift-row', '.session-group', '.pr-group',
-        '.coach-card', '.vol-row', '.strength-row',
-        '[data-loaded]', '.entry-list', '.empty-state',
-        '.wk-template-card', '.wk-history-card', '.wk-empty',
-        '.profile-card', '.goals-card'
-      ].join(',');
 
-      const observer = new MutationObserver(() => {
-        const elements = container.querySelectorAll(REAL_CONTENT_SELECTORS);
-        const hasReal = Array.from(elements).some(el => !el.closest('.hidden-by-skeleton'));
-        if (hasReal) {
-          this.hide(container.id);
-          observer.disconnect();
-        }
-      });
-
-      observer.observe(container, { childList: true, subtree: true });
-
-      // Hard timeout — always remove after 8s
-      setTimeout(() => {
-        this.hide(container.id);
-        observer.disconnect();
-      }, 8000);
-    },
   };
 
 })();

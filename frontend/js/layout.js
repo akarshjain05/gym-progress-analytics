@@ -132,8 +132,8 @@ window.hideLoading = function () {
 
 function setupLoadingAutoHide() {
   // Skeleton is now explicitly hidden by each page's JS once data finishes loading.
-  // We keep a fallback timeout just in case an error prevents hideLoading from firing.
-  setTimeout(() => { window.hideLoading && window.hideLoading(); }, 5000);
+  // We keep a single 8-second fallback timeout just in case an error prevents hideLoading from firing.
+  setTimeout(() => { window.hideLoading && window.hideLoading(); }, 8000);
 }
 
 // ── Mobile drawer nav ─────────────────────────────────────────────────────────
