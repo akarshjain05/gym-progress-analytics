@@ -363,6 +363,7 @@ async function loadCompare(days = 90) {
     <div class="card">
       <div class="card-title">Compare to past you</div>
       <div class="compare-toggles mb-12">
+        <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
         <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
         <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
         <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
@@ -379,6 +380,7 @@ async function loadCompare(days = 90) {
         <div class="card">
           <div class="card-title">Compare to past you</div>
           <div class="compare-toggles mb-12">
+            <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
             <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
             <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
             <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
@@ -410,6 +412,7 @@ async function loadCompare(days = 90) {
       <div class="card">
         <div class="card-title">Compare to past you</div>
         <div class="compare-toggles mb-16">
+          <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
           <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
           <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
           <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
