@@ -764,3 +764,66 @@ input[type="number"] {
 .percentile-empty { padding: 20px 4px; text-align: center; }
 .percentile-empty a { color: var(--plate-blue); text-decoration: none; }
 .percentile-empty a:hover { text-decoration: underline; }
+
+/* ── Compare to Past You ─────────────────────────────────────────────────── */
+.compare-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.compare-toggles {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-tertiary);
+  padding: 0.25rem;
+  border-radius: 8px;
+  width: fit-content;
+}
+.compare-toggles .btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+.compare-toggles .btn.active {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.compare-col.past {
+  opacity: 0.6;
+}
+.compare-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+.compare-delta.positive { color: var(--accent-green); }
+.compare-delta.negative { color: var(--plate-red); }
+.compare-delta.neutral { color: var(--text-secondary); }
+.compare-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+.compare-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}

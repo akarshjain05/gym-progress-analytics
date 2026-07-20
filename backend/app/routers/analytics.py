@@ -329,3 +329,117 @@ def strength_percentiles(
     return {"available": True, "reason": None, "message": None, "lifts": results}
 
 
+@router.get("/compare")
+def get_compare(
+    days: int = 90,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    today = ist_today()
+    current_end = today
+    current_start = today - timedelta(days=days)
+    
+    past_end = current_start
+    past_start = current_start - timedelta(days=days)
+    
+    current = _period_stats(current_user.id, current_start, current_end, db)
+    past = _period_stats(current_user.id, past_start, past_end, db)
+    
+    # Delta
+    delta = {}
+    if past["active_days"] < 3:
+        # Not enough history
+        delta = None
+    else:
+        delta = {
+            "volume_pct": calc.percent_change(past["total_volume_kg"], current["total_volume_kg"]),
+            "pr_count_diff": current["pr_count"] - past["pr_count"],
+            "active_days_diff": current["active_days"] - past["active_days"],
+            "sessions_per_week_diff": round(current["sessions_per_week"] - past["sessions_per_week"], 2)
+        }
+        
+    return {
+        "current": current,
+        "past": past,
+        "delta": delta,
+        "days": days
+    }
+
+def _period_stats(user_id: int, start: date_type, end: date_type, db: Session) -> dict:
+    # We need logs < end for PR calculation
+    all_lift_logs = (
+        db.query(models.LiftLog)
+        .filter(models.LiftLog.user_id == user_id, models.LiftLog.date < end)
+        .order_by(models.LiftLog.date.asc())
+        .all()
+    )
+    
+    # Other logs for consistency just need to be in range
+    weight_logs = (
+        db.query(models.BodyWeightLog)
+        .filter(models.BodyWeightLog.user_id == user_id, models.BodyWeightLog.date >= start, models.BodyWeightLog.date < end)
+        .all()
+    )
+    calorie_logs = (
+        db.query(models.CalorieLog)
+        .filter(models.CalorieLog.user_id == user_id, models.CalorieLog.date >= start, models.CalorieLog.date < end)
+        .all()
+    )
+    
+    active_days = set()
+    def _parse_date(d):
+        if not d: return None
+        if hasattr(d, 'date'): return d.date()
+        if isinstance(d, str):
+            try:
+                from datetime import datetime
+                return datetime.strptime(d.split('T')[0], "%Y-%m-%d").date()
+            except:
+                return None
+        return d
+        
+    total_volume_kg = 0.0
+    pr_count = 0
+    max_1rm_by_ex = {}
+    
+    for l in all_lift_logs:
+        pd = _parse_date(l.date)
+        if not pd: continue
+        
+        # Calculate 1RM
+        est_1rm = calc.best_estimated_1rm(l)
+        
+        # PR logic
+        is_pr = False
+        prev_max = max_1rm_by_ex.get(l.exercise_id, 0)
+        if est_1rm > prev_max:
+            max_1rm_by_ex[l.exercise_id] = est_1rm
+            is_pr = True
+            
+        # Is it in our target window?
+        if pd >= start and pd < end:
+            active_days.add(pd)
+            if l.weight_kg and l.reps:
+                total_volume_kg += (l.weight_kg * l.reps)
+            if is_pr:
+                pr_count += 1
+
+    # Add active days from other logs
+    for l in weight_logs:
+        pd = _parse_date(l.date)
+        if pd: active_days.add(pd)
+    for l in calorie_logs:
+        pd = _parse_date(l.date)
+        if pd: active_days.add(pd)
+        
+    days_in_range = (end - start).days
+    sessions_per_week = len(active_days) / (days_in_range / 7.0) if days_in_range > 0 else 0
+    
+    return {
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "total_volume_kg": total_volume_kg,
+        "pr_count": pr_count,
+        "active_days": len(active_days),
+        "sessions_per_week": round(sessions_per_week, 2)
+    }

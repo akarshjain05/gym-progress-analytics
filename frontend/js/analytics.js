@@ -24,6 +24,7 @@ const MUSCLE_GROUP_COLORS = {
 
 document.getElementById("pageContent").innerHTML = `
   <div id="calendarWrapper" class="mb-16"></div>
+  <div id="compareWrapper" class="mb-16"></div>
 
 
   <div class="bar-divider" style="margin-top:0;"><div class="collar"></div><div class="rail"></div><div class="label">All insights</div><div class="rail"></div><div class="collar"></div></div>
@@ -353,6 +354,119 @@ async function loadCalendar() {
   }
 }
 
+async function loadCompare(days = 90) {
+  const container = document.getElementById("compareWrapper");
+  if (!container) return;
+  
+  // Render loading state or skeleton
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-title">Compare to past you</div>
+      <div class="compare-toggles mb-12">
+        <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
+        <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
+        <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+      </div>
+      <div class="empty-state"><p>Loading comparison...</p></div>
+    </div>
+  `;
+  
+  try {
+    const res = await Api.compare(days);
+    
+    if (!res.delta) {
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">Compare to past you</div>
+          <div class="compare-toggles mb-12">
+            <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
+            <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
+            <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+          </div>
+          <div class="empty-state"><p>Not enough history in the past period to compare. Check back later!</p></div>
+        </div>
+      `;
+      return;
+    }
+    
+    const fmtPct = (val) => {
+      if (val === null || val === undefined) return "-";
+      return (val > 0 ? "+" : "") + val.toFixed(1) + "%";
+    };
+    
+    const fmtDiff = (val) => {
+      if (val === null || val === undefined) return "-";
+      return (val > 0 ? "+" : "") + val;
+    };
+    
+    const dVol = res.delta.volume_pct;
+    const dPr = res.delta.pr_count_diff;
+    const dDays = res.delta.active_days_diff;
+    const dSes = res.delta.sessions_per_week_diff;
+    
+    const getCls = (val) => (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+    
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-title">Compare to past you</div>
+        <div class="compare-toggles mb-16">
+          <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
+          <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
+          <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+        </div>
+        
+        <!-- Volume -->
+        <div class="compare-grid mb-16">
+          <div class="compare-col past">
+            <div class="compare-label">Past ${days}</div>
+            <div class="compare-value">${Math.round(res.past.total_volume_kg).toLocaleString()} kg</div>
+          </div>
+          <div class="compare-delta ${getCls(dVol)}">
+            ${fmtPct(dVol)}
+            <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">Volume</div>
+          </div>
+          <div class="compare-col">
+            <div class="compare-label">Last ${days}</div>
+            <div class="compare-value">${Math.round(res.current.total_volume_kg).toLocaleString()} kg</div>
+          </div>
+        </div>
+        
+        <!-- PRs -->
+        <div class="compare-grid mb-16">
+          <div class="compare-col past">
+            <div class="compare-value">${res.past.pr_count}</div>
+          </div>
+          <div class="compare-delta ${getCls(dPr)}">
+            ${fmtDiff(dPr)}
+            <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">PRs Hit</div>
+          </div>
+          <div class="compare-col">
+            <div class="compare-value">${res.current.pr_count}</div>
+          </div>
+        </div>
+        
+        <!-- Consistency -->
+        <div class="compare-grid">
+          <div class="compare-col past">
+            <div class="compare-value">${res.past.sessions_per_week} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
+          </div>
+          <div class="compare-delta ${getCls(dSes)}">
+            ${fmtDiff(dSes)}
+            <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">Consistency</div>
+          </div>
+          <div class="compare-col">
+            <div class="compare-value">${res.current.sessions_per_week} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+  } catch (err) {
+    console.error("Failed to load comparison", err);
+  }
+}
+
+loadCompare(90);
 loadCalendar();
 loadInsights();
 loadWeightTrend();

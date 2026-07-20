@@ -276,6 +276,13 @@ const Api = {
   dashboard() { return apiRequest("/analytics/dashboard"); },
   nextEta() { return apiRequest("/coach/next-eta"); },
   insights() { return apiRequest("/analytics/insights"); },
+  wrapped(year, month) {
+    const q = new URLSearchParams();
+    if (year) q.append("year", year);
+    if (month) q.append("month", month);
+    return apiRequest(`/analytics/wrapped?${q.toString()}`);
+  },
+  compare(days) { return apiRequest(`/analytics/compare?days=${days}`); },
 
   // --- workout templates ---
   listTemplates() { return apiRequest("/templates"); },
