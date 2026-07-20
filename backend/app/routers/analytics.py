@@ -407,7 +407,7 @@ def _period_stats(user_id: int, start: date_type, end: date_type, db: Session) -
         if not pd: continue
         
         # Calculate 1RM
-        est_1rm = calc.best_estimated_1rm(l)
+        est_1rm = calc.estimate_1rm_epley(l.weight_kg, l.reps) if l.weight_kg and l.reps else 0.0
         
         # PR logic
         is_pr = False
