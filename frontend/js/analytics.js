@@ -27,8 +27,7 @@ document.getElementById("pageContent").innerHTML = `
   <div id="compareWrapper" class="mb-16"></div>
 
 
-  <div class="bar-divider" style="margin-top:0;"><div class="collar"></div><div class="rail"></div><div class="label">All insights</div><div class="rail"></div><div class="collar"></div></div>
-  <div class="card mb-16"><ul class="insight-list" id="fullInsightList"></ul></div>
+
 
   <div class="card mb-16">
     <div class="card-title">Weight trend</div>
@@ -60,62 +59,6 @@ const TIER_BADGE = {
   advanced: "badge-gold", elite: "badge-red",
 };
 
-
-async function loadInsights() {
-  const container = document.getElementById("fullInsightList").parentElement;
-  try {
-    const res = await Api.insights();
-    if (!res.insights || res.insights.length === 0) {
-      container.innerHTML = `<ul class="insight-list"><li class="insight-item"><div>No insights generated yet. Keep logging!</div></li></ul>`;
-      return;
-    }
-    
-    let html = "";
-    let regularInsights = [];
-    
-    for (const insight of res.insights) {
-      if (typeof insight === 'string') {
-        regularInsights.push(insight);
-        continue;
-      }
-      
-      if (insight.type === 'percentile') {
-        html += `
-          <div class="percentile-card">
-            <div class="pct-header">
-              <span class="pct-title">${escapeHtml(insight.title)} Rank</span>
-              <span class="pct-badge">Top ${100 - Math.round(insight.value)}%</span>
-            </div>
-            <div class="pct-body">
-              <div class="pct-circle">
-                <span class="pct-num">${Math.round(insight.value)}</span>
-                <span class="pct-sym">%</span>
-              </div>
-              <div class="pct-text">${escapeHtml(insight.text)}</div>
-            </div>
-            <div class="pct-bar-bg">
-              <div class="pct-bar-fill" style="width: ${insight.value}%;"></div>
-            </div>
-          </div>
-        `;
-      } else {
-        regularInsights.push(`<strong>${escapeHtml(insight.title)}:</strong> ${escapeHtml(insight.text)}`);
-      }
-    }
-    
-    if (regularInsights.length > 0) {
-      html += `<ul class="insight-list" style="margin-top: 16px;">` + regularInsights.map(line => `
-        <li class="insight-item"><div class="insight-dot"></div><div>${line}</div></li>
-      `).join("") + `</ul>`;
-    }
-    
-    container.innerHTML = html;
-    window.hideLoading && window.hideLoading();
-  } catch (err) {
-    handleApiError(err);
-    window.hideLoading && window.hideLoading();
-  }
-}
 
 async function loadWeightTrend() {
   const ctx = document.getElementById("weightTrendCanvas");
@@ -471,7 +414,6 @@ async function loadCompare(days = 90) {
 
 loadCompare(90);
 loadCalendar();
-loadInsights();
 loadWeightTrend();
 loadVolumeChart();
 loadMuscleGroupVolumeChart();
