@@ -19,7 +19,10 @@ Nothing here is decorative — every number on screen comes from a tested formul
 - **True Maintenance Calories** — Back-calculated from *your own* logged calories and *your own* real weight change (using ~7700 kcal per kg of body mass). Needs at least 10 overlapping days of calorie + weight logs.
 - **Weekly Weight Trend** — Linear regression over your last 28 days of weigh-ins, smoothing out daily fluctuations.
 - **Strength Level** (Beginner → Elite) — Approximate, bodyweight-ratio-based classification for major lifts.
+- **Compare to Past You** — Real-time period-over-period delta tracking (7, 30, 90 days, 1 year) comparing training volume, new PRs hit, and consistency metrics to prove your hard work is paying off.
+- **ETA Forecasting** — Linear regression models predict exactly what date you'll hit a target weight for a given exercise based on your recent 1RM trajectories.
 - **AI Coach** — Uses Gemini to analyze your recent logs, strength levels, and trends, providing actionable feedback tailored to your progress.
+- **Progressive Web App (PWA)** — Installable on iOS/Android home screens for a native app feel, complete with optimized data-fetching and skeleton loading states.
 
 ## Premium UI / UX
 
