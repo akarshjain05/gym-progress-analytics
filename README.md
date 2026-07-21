@@ -1,5 +1,7 @@
 # IRONLOG — Gym Progress Analytics
 
+**Live at: [ironlog.in](https://ironlog.in)**
+
 A full-stack, multi-user fitness tracker: body weight, lifts, and calories in, real trend analysis out. Built with a robust backend and a blazing-fast vanilla frontend, deployed autonomously via CI/CD.
 
 ## Tech Stack & Infrastructure
@@ -92,4 +94,4 @@ This project features a fully automated deployment pipeline. When code is pushed
 1. Logs into the EC2 instance via SSH.
 2. Pulls the latest changes from `main`.
 3. Runs `docker compose up -d --build` to seamlessly update the live application.
-4. Caddy handles routing and maintains secure HTTPS connections automatically.
+4. Caddy handles routing for **ironlog.in** and maintains secure HTTPS connections automatically via Let's Encrypt.
