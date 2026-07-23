@@ -75,7 +75,7 @@ const weightForm = document.getElementById("weightForm");
 
 openLogBtn.addEventListener("click", () => {
   document.getElementById("wDate").value = todayIso();
-  formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+  formCard.style.display = formCard.style.display === "none" ? "flex" : "none";
 });
 wCancelBtn.addEventListener("click", () => formCard.style.display = "none");
 
