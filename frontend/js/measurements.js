@@ -27,9 +27,13 @@ document.getElementById("pageHeaderActions").innerHTML = `
 `;
 
 document.getElementById("pageContent").innerHTML = `
-  <div id="formCard" class="card mb-16" style="display:none;">
-    <div class="card-title">Log measurements (<span id="formUnitLabel">cm</span>)</div>
-    <form id="measurementForm">
+  <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
+    <div class="wk-modal" style="max-width:550px;">
+      <div class="wk-modal-header">
+        <h2 style="margin:0; font-size:18px;">Log measurements (<span id="formUnitLabel">cm</span>)</h2>
+      </div>
+      <div class="wk-modal-body">
+        <form id="measurementForm">
       <div class="form-row">
         <div class="field">
           <label for="mDate">Date</label>
@@ -82,11 +86,13 @@ document.getElementById("pageContent").innerHTML = `
         <label for="mNotes">Notes <span class="text-tertiary">(optional)</span></label>
         <input type="text" id="mNotes" placeholder="e.g. morning, unflexed">
       </div>
-      <div class="flex gap-12">
+      <div class="flex gap-12" style="margin-top:16px;">
         <button type="submit" class="btn btn-primary" id="mSubmitBtn">Save entry</button>
         <button type="button" class="btn btn-ghost" id="mCancelBtn">Cancel</button>
       </div>
     </form>
+      </div>
+    </div>
   </div>
 
   <div class="card mb-16">
