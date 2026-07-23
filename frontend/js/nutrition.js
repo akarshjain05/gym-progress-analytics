@@ -58,7 +58,7 @@ document.getElementById("pageContent").innerHTML = `
 const formCard = document.getElementById("formCard");
 document.getElementById("openLogBtn").addEventListener("click", () => {
   document.getElementById("cDate").value = todayIso();
-  formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+  formCard.style.display = formCard.style.display === "none" ? "flex" : "none";
 });
 document.getElementById("cCancelBtn").addEventListener("click", () => formCard.style.display = "none");
 
@@ -72,7 +72,7 @@ document.getElementById("cCancelBtn").addEventListener("click", () => formCard.s
   if (sharedTitle || sharedText) {
     document.getElementById("cDate").value = todayIso();
     document.getElementById("cNotes").value = [sharedTitle, sharedText].filter(Boolean).join(" — ");
-    formCard.style.display = "block";
+    formCard.style.display = "flex";
     showToast("Shared content added to notes — fill in the calories.");
     // clean the URL so a page refresh doesn't re-trigger this
     window.history.replaceState({}, "", "/nutrition.html");

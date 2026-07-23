@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mDate").value = new Date().toISOString().split("T")[0];
 
   openBtn.addEventListener("click", () => {
-    formCard.style.display = "block";
+    formCard.style.display = "flex";
     document.getElementById("mChest").focus();
   });
 
