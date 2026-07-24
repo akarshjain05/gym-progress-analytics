@@ -138,8 +138,6 @@ def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: i
     if days_away > 365 or days_away < 0:
         return None
 
-    target_date = ist_today() + timedelta(days=days_away)
-    
     avg_days_between = 7.0
     if session_count > 1 and latest_date > first_date:
         avg_days_between = (latest_date - first_date).days / (session_count - 1)
@@ -148,8 +146,6 @@ def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: i
     
     return {
         "target_kg": target_1rm,
-        "date": target_date.isoformat(),
-        "days_away": days_away,
         "sessions_away": sessions_away
     }
 
