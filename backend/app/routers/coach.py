@@ -821,7 +821,7 @@ def get_next_eta(db: Session = Depends(get_db), current_user: models.User = Depe
         return None
         
     # Sort by nearest ETA first
-    valid_etas.sort(key=lambda e: e["days_away"])
+    valid_etas.sort(key=lambda e: e["sessions_away"])
     
     # Return the closest ETA
     best_eta = valid_etas[0]
