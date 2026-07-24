@@ -144,7 +144,7 @@ def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: i
     if session_count > 1 and latest_date > first_date:
         avg_days_between = (latest_date - first_date).days / (session_count - 1)
         
-    sessions_away = math.ceil(days_away / max(1, avg_days_between))
+    sessions_away = max(1, math.ceil(days_away / max(1, avg_days_between)))
     
     return {
         "target_kg": target_1rm,
