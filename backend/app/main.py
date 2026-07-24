@@ -26,32 +26,31 @@ async def lifespan(app: FastAPI):
     import subprocess
     import os
     
-    # Automatically run alembic upgrade head on startup
-    # We do this via subprocess so it uses the alembic CLI context cleanly
-    try:
-        subprocess.run(
-            ["alembic", "upgrade", "head"],
-            cwd=os.path.dirname(os.path.dirname(__file__)),
-            check=True
-        )
-    except Exception as e:
-        print(f"Warning: Alembic migration failed to run automatically: {e}")
+    if not os.getenv("TESTING"):
+        # Automatically run alembic upgrade head on startup
+        try:
+            subprocess.run(
+                ["alembic", "upgrade", "head"],
+                cwd=os.path.dirname(os.path.dirname(__file__)),
+                check=True
+            )
+        except Exception as e:
+            print(f"Warning: Alembic migration failed to run automatically: {e}")
 
-    db = SessionLocal()
-    try:
-        if settings.initial_admin_username:
-            try:
-                db.execute(
-                    text("UPDATE users SET role = 'admin' WHERE username = :u AND role != 'admin'"),
-                    {"u": settings.initial_admin_username}
-                )
-                db.commit()
-            except Exception:
-                db.rollback()
-
-        seed_exercises(db)
-    finally:
-        db.close()
+        db = SessionLocal()
+        try:
+            if settings.initial_admin_username:
+                try:
+                    db.execute(
+                        text("UPDATE users SET role = 'admin' WHERE username = :u AND role != 'admin'"),
+                        {"u": settings.initial_admin_username}
+                    )
+                    db.commit()
+                except Exception as e:
+                    print(f"Failed to set initial admin: {e}")
+            seed_exercises(db)
+        finally:
+            db.close()
     yield
 
 

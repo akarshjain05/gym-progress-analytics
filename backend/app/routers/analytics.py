@@ -132,7 +132,7 @@ def insights(
     """
     Generate insights synchronously since it's extremely fast.
     """
-    return generate_insights(current_user.id)
+    return generate_insights(current_user.id, db)
 
 @router.get("/wrapped")
 def wrapped(

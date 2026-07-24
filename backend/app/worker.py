@@ -46,8 +46,11 @@ def run_inactivity_check():
         db.close()
 
 @celery_app.task(name="generate_insights")
-def generate_insights(user_id: int):
-    db: Session = SessionLocal()
+def generate_insights(user_id: int, db: Session = None):
+    own_session = False
+    if db is None:
+        db = SessionLocal()
+        own_session = True
     try:
         user = db.query(models.User).filter(models.User.id == user_id).first()
         if not user:
@@ -123,4 +126,5 @@ def generate_insights(user_id: int):
 
         return {"insights": final_insights}
     finally:
-        db.close()
+        if own_session:
+            db.close()
