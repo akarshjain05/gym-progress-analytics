@@ -113,12 +113,17 @@ async function loadDashboard() {
       content.innerHTML = `
         
         ${etaHtml}
-        <div id="wrappedBanner" style="background: linear-gradient(135deg, #FF0055, #0000FF); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);" onclick="window.DashboardPage.showWrapped()">
+        <div id="wrappedBanner" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.4)';" onclick="window.DashboardPage.showWrapped()">
           <div style="position: relative; z-index: 2;">
-            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">Your Month in IronLog</h2>
-            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Tap to reveal your absurd stats.</p>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.25rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;">Your Month in IronLog</h2>
+            </div>
+            <p style="margin: 0; font-size: 0.85rem; color: #94a3b8;">Tap to review your progress and milestones.</p>
           </div>
-          <div style="position: absolute; right: -20px; bottom: -20px; font-size: 100px; opacity: 0.2; transform: rotate(-15deg); line-height: 1;"></div>
+          <div style="opacity: 0.5; display: flex; align-items: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
         </div>
 
         ${statsGridHtml}
