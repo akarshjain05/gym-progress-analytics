@@ -20,7 +20,7 @@
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((reg) => {
-          console.log('[PWA] Service worker registered, scope:', reg.scope);
+
 
           // Notify user when a new version is available
           reg.addEventListener('updatefound', () => {
@@ -58,7 +58,7 @@
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     hideInstallBanner();
-    console.log('[PWA] App installed successfully');
+
   });
 
   function showInstallBanner() {
@@ -101,7 +101,7 @@
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log('[PWA] Install prompt outcome:', outcome);
+
       deferredPrompt = null;
       hideInstallBanner();
     });
@@ -172,12 +172,12 @@
 
   window.addEventListener('offline', () => {
     showOfflineBanner();
-    console.log('[PWA] Gone offline');
+
   });
 
   window.addEventListener('online', () => {
     hideOfflineBanner();
-    console.log('[PWA] Back online');
+
     // Trigger background sync if supported
     if ('serviceWorker' in navigator && 'SyncManager' in window) {
       navigator.serviceWorker.ready.then((reg) => {
