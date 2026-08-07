@@ -66,7 +66,7 @@
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Welcome to IRONLOG');
 
-    overlay.innerHTML = `
+    overlay.innerHTML = purify(`
       <div class="ob-modal">
 
         <!-- Progress bar -->
@@ -245,7 +245,7 @@
         </div>
 
       </div>
-    `;
+    `);
 
     document.body.appendChild(overlay);
     bindEvents(overlay);
@@ -271,9 +271,9 @@
         ...exercises.filter(e => priority.includes(e.name)),
         ...exercises.filter(e => !priority.includes(e.name)).sort((a, b) => a.name.localeCompare(b.name)),
       ];
-      select.innerHTML = sorted.map(e =>
+      select.innerHTML = purify(sorted.map(e =>
         `<option value="${e.id}">${e.name}</option>`
-      ).join('');
+      ).join(''));
     } catch (e) {
       // Non-fatal — step 3 can still be skipped
     }

@@ -1,6 +1,6 @@
 renderShell("profile", "Profile", "Your stats power the BMR/TDEE and strength-level calculations.");
 
-document.getElementById("pageContent").innerHTML = `
+document.getElementById("pageContent").innerHTML = purify(`
   <!-- Tab bar -->
   <div class="profile-tabs">
     <button class="profile-tab active" data-tab="profile">👤 Profile</button>
@@ -80,7 +80,7 @@ document.getElementById("pageContent").innerHTML = `
   <div id="tab-settings" class="profile-tab-content" style="display:none;">
     <div class="settings-grid" id="settingsSection"></div>
   </div>
-`;
+`);
 
 async function loadProfile() {
   try {
@@ -161,7 +161,7 @@ async function loadSettingsSection() {
     vapidConfigured = !!(vk && vk.configured);
   } catch(e) {}
 
-  settingsEl.innerHTML = `
+  settingsEl.innerHTML = purify(`
     <div class="card">
       <div class="card-title">Appearance</div>
       <div class="settings-row">
@@ -233,7 +233,7 @@ async function loadSettingsSection() {
         </div>
       </div>
     </div>
-  `;
+  `);
 
   // Theme toggle
   document.getElementById('themeToggleBtn')?.addEventListener('click', () => {

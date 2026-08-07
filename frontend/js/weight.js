@@ -13,14 +13,14 @@ function chartColors() {
   };
 }
 
-document.getElementById("pageHeaderActions").innerHTML = `
+document.getElementById("pageHeaderActions").innerHTML = purify(`
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     Log weight
   </button>
-`;
+`);
 
-document.getElementById("pageContent").innerHTML = `
+document.getElementById("pageContent").innerHTML = purify(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:500px;">
       <div class="wk-modal-header">
@@ -66,7 +66,7 @@ document.getElementById("pageContent").innerHTML = `
     <div class="card-title">History</div>
     <div id="weightTableWrap"></div>
   </div>
-`;
+`);
 
 const formCard = document.getElementById("formCard");
 const openLogBtn = document.getElementById("openLogBtn");
@@ -119,12 +119,12 @@ window.deleteEntry = deleteEntry;
 function renderSummary(summary) {
   const el = document.getElementById("summaryStats");
   if (!summary.has_data) {
-    el.innerHTML = buildEmptyState(
+    el.innerHTML = purify(buildEmptyState(
       "No entries yet",
       "Log your first weigh-in to start tracking your trend.",
       "Log weight now",
       "#"
-    );
+    ));
     // Bind click to open the form
     setTimeout(() => {
       const btn = el.querySelector('.btn-primary');
@@ -139,7 +139,7 @@ function renderSummary(summary) {
   }
   const totalDelta = fmtDelta(summary.total_change_kg, " kg");
   const weeklyDelta = fmtDelta(summary.weekly_rate_kg, " kg/wk");
-  el.innerHTML = `
+  el.innerHTML = purify(`
     <div class="card stat-card">
       <div class="stat-label">Current</div>
       <div class="stat-value">${fmtKg(summary.current_weight_kg)}<span class="unit">kg</span></div>
@@ -160,7 +160,7 @@ function renderSummary(summary) {
       <div class="stat-value" style="font-size:26px;">${summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " kg" : "Not set"}</div>
       <div class="stat-delta neutral">${summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7)} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile")}</div>
     </div>
-  `;
+  `);
 }
 
 function renderChart(series) {
@@ -212,7 +212,7 @@ function renderChart(series) {
 function renderTable(logs) {
   const wrap = document.getElementById("weightTableWrap");
   if (!logs.length) {
-    wrap.innerHTML = `<div class="empty-state"><p>No entries yet.</p></div>`;
+    wrap.innerHTML = purify(`<div class="empty-state"><p>No entries yet.</p></div>`);
     return;
   }
   const rows = [...logs].reverse().map(l => `
@@ -230,12 +230,12 @@ function renderTable(logs) {
       </td>
     </tr>
   `).join("");
-  wrap.innerHTML = `
+  wrap.innerHTML = purify(`
     <table class="data-table">
       <thead><tr><th>Date</th><th>Weight</th><th>Body fat</th><th>Notes</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-  `;
+  `);
 }
 
 async function loadAll() {

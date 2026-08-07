@@ -110,7 +110,7 @@ async function loadDashboard() {
 
       
 
-      content.innerHTML = `
+      content.innerHTML = purify(`
         
         ${etaHtml}
         <div id="wrappedBanner" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.4)';" onclick="window.DashboardPage.showWrapped()">
@@ -145,14 +145,14 @@ async function loadDashboard() {
           <div><strong>Log calories</strong><div class="text-tertiary" style="font-size:12.5px;">Track intake</div></div>
         </a>
       </div>
-    `;
+    `);
 
 
 
     window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
-    content.innerHTML = `<div class="empty-state"><p>Couldn't load your dashboard. Try refreshing.</p></div>`;
+    content.innerHTML = purify(`<div class="empty-state"><p>Couldn't load your dashboard. Try refreshing.</p></div>`);
     window.hideLoading && window.hideLoading();
   }
 }

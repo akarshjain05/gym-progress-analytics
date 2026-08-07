@@ -13,7 +13,7 @@ function chartColors() {
   };
 }
 
-document.getElementById("pageHeaderActions").innerHTML = `
+document.getElementById("pageHeaderActions").innerHTML = purify(`
   <div style="display:flex; align-items:center; gap: 12px;">
     <div style="display:flex; background:var(--surface-50); border-radius:6px; padding:2px; font-size:13px; font-weight:600;">
       <button id="unitBtnCm" class="btn btn-sm" style="background:var(--surface-0); border-radius:4px; border:1px solid var(--border-color); padding:4px 12px; cursor:pointer; color:var(--text-primary);">cm</button>
@@ -24,9 +24,9 @@ document.getElementById("pageHeaderActions").innerHTML = `
       Log measurements
     </button>
   </div>
-`;
+`);
 
-document.getElementById("pageContent").innerHTML = `
+document.getElementById("pageContent").innerHTML = purify(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:550px;">
       <div class="wk-modal-header">
@@ -136,7 +136,7 @@ document.getElementById("pageContent").innerHTML = `
       </table>
     </div>
   </div>
-`;
+`);
 
 let currentLogs = [];
 let displayUnit = localStorage.getItem("ironlog_measurements_unit") || "cm";
@@ -262,7 +262,7 @@ async function loadData() {
 function renderTable(logs) {
   const tbody = document.getElementById("mTableBody");
   if (!logs || logs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;">No measurements logged yet.</td></tr>';
+    tbody.innerHTML = purify('<tr><td colspan="7" style="text-align:center;padding:24px;">No measurements logged yet.</td></tr>');
     return;
   }
   
@@ -287,7 +287,7 @@ function renderTable(logs) {
       </tr>
     `;
   }
-  tbody.innerHTML = html;
+  tbody.innerHTML = purify(html);
 }
 
 window.deleteMeasurement = async function(id) {

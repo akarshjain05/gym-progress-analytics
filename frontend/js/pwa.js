@@ -81,7 +81,7 @@
     banner.id = 'ironlog-install-banner';
     banner.setAttribute('role', 'complementary');
     banner.setAttribute('aria-label', 'Install app');
-    banner.innerHTML = `
+    banner.innerHTML = purify(`
       <div class="pwa-banner-content">
         <img src="/icons/icon-96.png" alt="IRONLOG" class="pwa-banner-icon">
         <div class="pwa-banner-text">
@@ -93,7 +93,7 @@
           <button id="pwa-dismiss-btn" class="pwa-btn-dismiss" aria-label="Dismiss">✕</button>
         </div>
       </div>
-    `;
+    `);
 
     document.body.appendChild(banner);
 
@@ -122,7 +122,7 @@
 
     const hint = document.createElement('div');
     hint.id = 'ironlog-ios-hint';
-    hint.innerHTML = `
+    hint.innerHTML = purify(`
       <div class="pwa-banner-content">
         <img src="/icons/icon-96.png" alt="IRONLOG" class="pwa-banner-icon">
         <div class="pwa-banner-text">
@@ -131,7 +131,7 @@
         </div>
         <button id="pwa-ios-dismiss" class="pwa-btn-dismiss" aria-label="Dismiss">✕</button>
       </div>
-    `;
+    `);
     hint.style.cssText = `
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
       background: var(--surface, #2a2f35);
@@ -152,9 +152,9 @@
     if (!banner) {
       banner = document.createElement('div');
       banner.id = 'ironlog-offline-banner';
-      banner.innerHTML = `
+      banner.innerHTML = purify(`
         <span>⚠️ You're offline — data will sync when you reconnect.</span>
-      `;
+      `);
       banner.style.cssText = `
         position: fixed; top: 0; left: 0; right: 0; z-index: 10000;
         background: #e67e22; color: #fff; text-align: center;
@@ -193,10 +193,10 @@
   function showUpdateBanner() {
     const banner = document.createElement('div');
     banner.id = 'ironlog-update-banner';
-    banner.innerHTML = `
+    banner.innerHTML = purify(`
       <span>🔄 A new version of IRONLOG is available.</span>
       <button id="pwa-update-btn" class="pwa-btn-install" style="margin-left:12px">Update Now</button>
-    `;
+    `);
     banner.style.cssText = `
       position: fixed; top: 0; left: 0; right: 0; z-index: 10000;
       background: var(--plate-blue, #2980b9); color: #fff;

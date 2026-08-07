@@ -2,14 +2,14 @@ renderShell("nutrition", "Nutrition", "Calories vs. your real maintenance, not j
 
 let calorieChart = null;
 
-document.getElementById("pageHeaderActions").innerHTML = `
+document.getElementById("pageHeaderActions").innerHTML = purify(`
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     Log calories
   </button>
-`;
+`);
 
-document.getElementById("pageContent").innerHTML = `
+document.getElementById("pageContent").innerHTML = purify(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:550px;">
       <div class="wk-modal-header">
@@ -53,7 +53,7 @@ document.getElementById("pageContent").innerHTML = `
     <div class="card-title">History</div>
     <div id="calTableWrap"></div>
   </div>
-`;
+`);
 
 const formCard = document.getElementById("formCard");
 document.getElementById("openLogBtn").addEventListener("click", () => {
@@ -123,12 +123,12 @@ function renderStats(summary) {
   const explainer = document.getElementById("tdeeExplainerCard");
 
   if (!summary.has_calorie_data) {
-    el.innerHTML = buildEmptyState(
+    el.innerHTML = purify(buildEmptyState(
       "No calories logged",
       "Log a few days to see your trend and TDEE estimate.",
       "Log calories now",
       "#"
-    );
+    ));
     explainer.style.display = "none";
     setTimeout(() => {
       const btn = el.querySelector('.btn-primary');
@@ -139,7 +139,7 @@ function renderStats(summary) {
 
   explainer.style.display = (summary.formula_tdee_kcal || summary.actual_tdee_estimate_kcal) ? "block" : "none";
 
-  el.innerHTML = `
+  el.innerHTML = purify(`
     <div class="card stat-card">
       <div class="stat-label">Avg (7 days)</div>
       <div class="stat-value">${Math.round(summary.avg_calories_last_7_days)}<span class="unit">kcal</span></div>
@@ -160,7 +160,7 @@ function renderStats(summary) {
       <div class="stat-value">${summary.days_logged}<span class="unit">days</span></div>
       <div class="stat-delta neutral">Total entries</div>
     </div>
-  `;
+  `);
 }
 
 function renderChart(series, formulaTdee, actualTdee) {
@@ -205,7 +205,7 @@ function renderChart(series, formulaTdee, actualTdee) {
 function renderTable(logs) {
   const wrap = document.getElementById("calTableWrap");
   if (!logs.length) {
-    wrap.innerHTML = `<div class="empty-state"><p>No entries yet.</p></div>`;
+    wrap.innerHTML = purify(`<div class="empty-state"><p>No entries yet.</p></div>`);
     return;
   }
   const rows = [...logs].reverse().map(l => `
@@ -225,12 +225,12 @@ function renderTable(logs) {
       </td>
     </tr>
   `).join("");
-  wrap.innerHTML = `
+  wrap.innerHTML = purify(`
     <table class="data-table">
       <thead><tr><th>Date</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fats</th><th>Notes</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-  `;
+  `);
 }
 
 async function loadAll() {

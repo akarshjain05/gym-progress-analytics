@@ -22,7 +22,7 @@ const MUSCLE_GROUP_COLORS = {
   glutes: "#D46BA3", calves: "#7BAE7F", abs: "#B0A458", other: "#6B7480",
 };
 
-document.getElementById("pageContent").innerHTML = `
+document.getElementById("pageContent").innerHTML = purify(`
   <div id="calendarWrapper" class="mb-16"></div>
   <div id="compareWrapper" class="mb-16"></div>
 
@@ -45,7 +45,7 @@ document.getElementById("pageContent").innerHTML = `
       <canvas id="muscleVolumeCanvas"></canvas>
     </div>
   </div>
-`;
+`);
 
 
 
@@ -61,7 +61,7 @@ async function loadWeightTrend() {
   try {
     const summary = await Api.weightSummary();
     if (!summary.has_data) {
-      ctx.parentElement.innerHTML = `<div class="card-title">Weight trend</div><div class="empty-state"><p>No weight logs yet.</p></div>`;
+      ctx.parentElement.innerHTML = purify(`<div class="card-title">Weight trend</div><div class="empty-state"><p>No weight logs yet.</p></div>`);
       return;
     }
     if (weightTrendChart) weightTrendChart.destroy();
@@ -108,7 +108,7 @@ async function loadVolumeChart() {
   try {
     const logs = await Api.listLifts();
     if (!logs.length) {
-      ctx.parentElement.innerHTML = `<div class="card-title">Weekly training volume</div><div class="empty-state"><p>Log some sets to see weekly volume.</p></div>`;
+      ctx.parentElement.innerHTML = purify(`<div class="card-title">Weekly training volume</div><div class="empty-state"><p>Log some sets to see weekly volume.</p></div>`);
       return;
     }
     const byWeek = {};
@@ -149,7 +149,7 @@ async function loadMuscleGroupVolumeChart() {
   try {
     const [logs, exercisesList] = await Promise.all([Api.listLifts(), Api.listExercises()]);
     if (!logs.length) {
-      ctx.parentElement.parentElement.innerHTML = `<div class="card-title">Muscle Balance</div><div class="empty-state"><p>Log some sets to see this breakdown.</p></div>`;
+      ctx.parentElement.parentElement.innerHTML = purify(`<div class="card-title">Muscle Balance</div><div class="empty-state"><p>Log some sets to see this breakdown.</p></div>`);
       return;
     }
 
@@ -230,7 +230,7 @@ window.updateCalendarState = function(offsetMonths) {
   currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offsetMonths);
   const container = document.getElementById("calendarWrapper");
   if (container && calendarHeatmapData) {
-    container.innerHTML = renderCalendar(calendarHeatmapData);
+    container.innerHTML = purify(renderCalendar(calendarHeatmapData));
   }
 };
 
@@ -286,7 +286,7 @@ async function loadCalendar() {
     calendarHeatmapData = dash.heatmap_data;
     const container = document.getElementById("calendarWrapper");
     if (container) {
-      container.innerHTML = renderCalendar(calendarHeatmapData);
+      container.innerHTML = purify(renderCalendar(calendarHeatmapData));
     }
   } catch (err) {
     console.error("Failed to load calendar", err);
@@ -298,7 +298,7 @@ async function loadCompare(days = 90) {
   if (!container) return;
   
   // Render loading state or skeleton
-  container.innerHTML = `
+  container.innerHTML = purify(`
     <div class="card">
       <div class="card-title">Compare to past you</div>
       <div class="compare-toggles mb-12">
@@ -309,13 +309,13 @@ async function loadCompare(days = 90) {
       </div>
       <div class="empty-state"><p>Loading comparison...</p></div>
     </div>
-  `;
+  `);
   
   try {
     const res = await Api.compare(days);
     
     if (!res.delta) {
-      container.innerHTML = `
+      container.innerHTML = purify(`
         <div class="card">
           <div class="card-title">Compare to past you</div>
           <div class="compare-toggles mb-12">
@@ -326,7 +326,7 @@ async function loadCompare(days = 90) {
           </div>
           <div class="empty-state"><p>Not enough history in the past period to compare. Check back later!</p></div>
         </div>
-      `;
+      `);
       return;
     }
     
@@ -347,7 +347,7 @@ async function loadCompare(days = 90) {
     
     const getCls = (val) => (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
     
-    container.innerHTML = `
+    container.innerHTML = purify(`
       <div class="card">
         <div class="card-title">Compare to past you</div>
         <div class="compare-toggles mb-16">
@@ -401,7 +401,7 @@ async function loadCompare(days = 90) {
           </div>
         </div>
       </div>
-    `;
+    `);
     
   } catch (err) {
     console.error("Failed to load comparison", err);

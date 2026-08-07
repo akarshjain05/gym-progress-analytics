@@ -6,7 +6,7 @@
 
   const content = document.getElementById("pageContent");
 
-  content.innerHTML = `
+  content.innerHTML = purify(`
     <div id="coachPage">
 
       <!-- Phase banner -->
@@ -105,7 +105,7 @@
 
       </div>
     </div>
-  `;
+  `);
 
   // ── Load ML analysis with timeout + retry ────────────────────────────────
   let wakeupTimer = null;
@@ -150,7 +150,7 @@
         banner.style.display = "flex";
         if (data.data_phase === 1) {
           banner.className = "phase-banner phase-1";
-          banner.innerHTML = `
+          banner.innerHTML = purify(`
             <span class="phase-icon">🌱</span>
             <div>
               <strong>Getting started — Population Baseline Mode</strong>
@@ -159,16 +159,16 @@
             <div class="phase-progress">
               <div class="phase-progress-bar" style="width:${Math.min(100, (data.days_of_data/14)*100)}%"></div>
             </div>
-          `;
+          `);
         } else {
           banner.className = "phase-banner phase-2";
-          banner.innerHTML = `
+          banner.innerHTML = purify(`
             <span class="phase-icon">🎯</span>
             <div>
               <strong>Personal Model Active — ${data.days_of_data} days of your data</strong>
               <span>Predictions are based on YOUR actual training history.</span>
             </div>
-          `;
+          `);
         }
 
         document.getElementById("mlGrid").style.display = "grid";
@@ -224,7 +224,7 @@
     btn.disabled = true;
     btn.textContent = "Thinking…";
     output.style.display = "block";
-    textEl.innerHTML = '<span class="advice-cursor">▍</span>';
+    textEl.innerHTML = purify('<span class="advice-cursor">▍</span>');
     output.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
     const token = Auth.getToken();
@@ -232,7 +232,7 @@
 
     // Advice timeout
     const adviceTimeout = setTimeout(() => {
-      textEl.innerHTML = '<span style="color:#e05a4a">Request timed out. Backend may be sleeping — try again in 30 seconds.</span>';
+      textEl.innerHTML = purify('<span style="color:#e05a4a">Request timed out. Backend may be sleeping — try again in 30 seconds.</span>');
       btn.disabled = false;
       btn.textContent = "Try Again";
     }, 40000);
@@ -242,7 +242,7 @@
     }).then(function(res) {
       clearTimeout(adviceTimeout);
       if (!res.ok || !res.body) {
-        textEl.innerHTML = '<span style="color:#e05a4a">Could not connect to AI coach. Please try again.</span>';
+        textEl.innerHTML = purify('<span style="color:#e05a4a">Could not connect to AI coach. Please try again.</span>');
         btn.disabled = false;
         btn.textContent = "Try Again";
         return;
@@ -251,12 +251,12 @@
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
       var fullText = "";
-      textEl.innerHTML = "";
+      textEl.innerHTML = purify("");
 
       function read() {
         reader.read().then(function(result) {
           if (result.done) {
-            textEl.innerHTML = renderMarkdown(fullText);
+            textEl.innerHTML = purify(renderMarkdown(fullText));
             btn.disabled = false;
             btn.textContent = "Refresh Advice";
             return;
@@ -272,14 +272,14 @@
               var evt = JSON.parse(raw);
               if (evt.text) {
                 fullText += evt.text;
-                textEl.innerHTML = renderMarkdown(fullText) + '<span class="advice-cursor">▍</span>';
+                textEl.innerHTML = purify(renderMarkdown(fullText) + '<span class="advice-cursor">▍</span>');
               }
             } catch(err) {}
           }
           read();
         }).catch(function() {
           clearTimeout(adviceTimeout);
-          textEl.innerHTML = renderMarkdown(fullText) || '<span style="color:#e05a4a">Connection interrupted.</span>';
+          textEl.innerHTML = purify(renderMarkdown(fullText) || '<span style="color:#e05a4a">Connection interrupted.</span>');
           btn.disabled = false;
           btn.textContent = "Try Again";
         });
@@ -288,7 +288,7 @@
 
     }).catch(function() {
       clearTimeout(adviceTimeout);
-      textEl.innerHTML = '<span style="color:#e05a4a">Connection error. Please try again.</span>';
+      textEl.innerHTML = purify('<span style="color:#e05a4a">Connection error. Please try again.</span>');
       btn.disabled = false;
       btn.textContent = "Try Again";
     });
@@ -389,7 +389,7 @@
         "</div>" +
       "</div>";
     }).join("");
-    document.getElementById("strengthList").innerHTML = html;
+    document.getElementById("strengthList").innerHTML = purify(html);
   }
 
   // ── Render: Volume ────────────────────────────────────────────────────────
@@ -415,7 +415,7 @@
           ' kg <span class="vol-prev">vs ' + Math.round(d.prev_4w_volume).toLocaleString() + " kg prev</span></div>" +
       "</div>";
     }).join("");
-    document.getElementById("volumeList").innerHTML = html;
+    document.getElementById("volumeList").innerHTML = purify(html);
   }
 
   // ── Render: Nutrition ─────────────────────────────────────────────────────

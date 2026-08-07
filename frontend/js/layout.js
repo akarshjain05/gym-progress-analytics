@@ -12,6 +12,22 @@ window.escapeHtml = function(str) {
     .replace(/'/g, "&#039;");
 };
 
+/**
+ * Sanitizes a full HTML string via DOMPurify before innerHTML injection.
+ * Configured to preserve inline event handlers and SVG elements used by the app.
+ * User-provided values should STILL be escaped with escapeHtml() before embedding.
+ */
+window.purify = function(html) {
+  if (typeof DOMPurify === 'undefined' || html === null || html === undefined) return html || '';
+  return DOMPurify.sanitize(html, {
+    ADD_ATTR: ['onclick', 'onchange', 'onmouseover', 'onmouseout', 'oninput',
+               'onkeydown', 'onkeyup', 'onfocus', 'onblur', 'onsubmit',
+               'target', 'aria-label', 'role'],
+    ALLOW_DATA_ATTR: true,
+    ALLOW_UNKNOWN_PROTOCOLS: true
+  });
+};
+
 const ICON_STYLE = 'width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"';
 
 const NAV_ITEMS = [
@@ -285,7 +301,7 @@ function renderShell(activeId, pageTitle, subtitle) {
     `;
   }
 
-  document.body.innerHTML = `
+  document.body.innerHTML = purify(`
     ${buildLoadingOverlay()}
     ${buildMobileDrawer(activeId)}
 
@@ -327,7 +343,7 @@ function renderShell(activeId, pageTitle, subtitle) {
     </div>
 
     ${buildBottomNav(activeId)}
-  `;
+  `);
 
   // Desktop logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -417,7 +433,7 @@ window.showExerciseInfo = async function(exerciseId) {
       ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:var(--bg-tertiary); font-size:12px; margin-left:8px;">${ex.difficulty}</span>` 
       : '';
       
-    modal.innerHTML = `
+    modal.innerHTML = purify(`
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
           <div class="wk-modal-title" style="display:flex; align-items:center;">
@@ -445,7 +461,7 @@ window.showExerciseInfo = async function(exerciseId) {
           <div style="color:var(--text-secondary); font-size:14px; white-space:pre-wrap;">${ex.instructions || 'No instructions available.'}</div>
         </div>
       </div>
-    `;
+    `);
     modal.style.display = 'flex';
   } catch (err) {
     console.error("Failed to load exercise info", err);
@@ -459,7 +475,7 @@ window.showCustomExerciseModal = function(onSuccess) {
     modal.id = 'globalCustomExerciseModal';
     modal.className = 'wk-modal-overlay';
     modal.style.zIndex = '10000';
-    modal.innerHTML = `
+    modal.innerHTML = purify(`
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
           <span class="wk-modal-title">Add custom exercise</span>
@@ -529,7 +545,7 @@ window.showCustomExerciseModal = function(onSuccess) {
           <button class="btn btn-primary" id="submitGlobalCustom">Add exercise</button>
         </div>
       </div>
-    `;
+    `);
     document.body.appendChild(modal);
 
     document.getElementById('closeGlobalCustomModal').addEventListener('click', () => modal.style.display = 'none');

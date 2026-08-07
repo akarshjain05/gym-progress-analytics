@@ -14,7 +14,7 @@
   let activeWorkout = null;    // { template, exercises: [{...}], startTime, timerInterval }
 
   // ── Initial render ────────────────────────────────────────────────────────
-  content.innerHTML = `
+  content.innerHTML = purify(`
     <div id="workoutPage">
 
       <!-- Header actions -->
@@ -153,7 +153,7 @@
         </div>
       </div>
     </div>
-  `;
+  `);
 
   let workoutHistory = [];    // completed workout sessions
 
@@ -219,19 +219,19 @@
        return a.localeCompare(b);
     });
     
-    muscleSel.innerHTML = `<option value="">All Muscles</option>` + muscles.map(m => 
+    muscleSel.innerHTML = purify(`<option value="">All Muscles</option>` + muscles.map(m => 
       `<option value="${escapeHtml(m)}">${escapeHtml(m.charAt(0).toUpperCase() + m.slice(1))}</option>`
-    ).join('');
+    ).join(''));
     
-    exSel.innerHTML = buildGroupedExerciseOptions(exercises);
+    exSel.innerHTML = purify(buildGroupedExerciseOptions(exercises));
     
     muscleSel.addEventListener('change', () => {
        const val = muscleSel.value;
        if (!val) {
-         exSel.innerHTML = buildGroupedExerciseOptions(exercises);
+         exSel.innerHTML = purify(buildGroupedExerciseOptions(exercises));
        } else {
          const filtered = exercises.filter(e => (e.muscle_group || 'other').toLowerCase() === val);
-         exSel.innerHTML = filtered.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+         exSel.innerHTML = purify(filtered.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join(''));
        }
     });
   }
@@ -250,7 +250,7 @@
 
     empty.style.display = 'none';
     grid.style.display = 'grid';
-    grid.innerHTML = templates.map(t => `
+    grid.innerHTML = purify(templates.map(t => `
       <div class="wk-template-card" data-id="${t.id}">
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escapeHtml(t.name)}</div>
@@ -278,7 +278,7 @@
           <button class="btn btn-primary wk-start-btn" data-id="${t.id}">▶ Start</button>
         </div>
       </div>
-    `).join('');
+    `).join(''));
 
     grid.querySelectorAll('.wk-start-btn').forEach(btn => {
       btn.addEventListener('click', () => startWorkout(parseInt(btn.dataset.id)));
@@ -325,7 +325,7 @@
       byDate[s.date].push(s);
     }
 
-    list.innerHTML = Object.keys(byDate).map(date => `
+    list.innerHTML = purify(Object.keys(byDate).map(date => `
       <div class="wk-history-date-group">
         <div class="wk-history-date">${fmtDate(date)}</div>
         ${byDate[date].map(s => `
@@ -346,7 +346,7 @@
           </div>
         `).join('')}
       </div>
-    `).join('');
+    `).join(''));
 
     list.querySelectorAll('.wk-history-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -376,7 +376,7 @@
   async function showHistoryDetailModal(sessionId) {
     const modal = document.getElementById('historyDetailModal');
     const body = document.getElementById('hdBody');
-    body.innerHTML = '<div class="ironlog-spinner" style="margin:40px auto;display:block;"></div>';
+    body.innerHTML = purify('<div class="ironlog-spinner" style="margin:40px auto;display:block;"></div>');
     modal.style.display = 'flex';
 
     try {
@@ -428,7 +428,7 @@
         <button class="btn btn-secondary wk-btn-full" id="historyShareBtn" style="background:#3E7CB1;color:white;border-color:#3E7CB1;width:100%;padding:12px;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;">📸 Share to IG Story</button>
       </div>`;
       
-      body.innerHTML = html;
+      body.innerHTML = purify(html);
 
       const durationStr = data.duration_seconds
         ? Math.floor(data.duration_seconds/60) + 'm ' + (data.duration_seconds%60) + 's'
@@ -444,7 +444,7 @@
       };
 
     } catch (err) {
-      body.innerHTML = `<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`;
+      body.innerHTML = purify(`<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`);
       handleApiError(err);
     }
   }
@@ -490,10 +490,10 @@
   function renderTmplExercises() {
     const container = document.getElementById('tmplExerciseList');
     if (!tmplExercises.length) {
-      container.innerHTML = '<div class="wk-empty-ex">No exercises yet. Add some below.</div>';
+      container.innerHTML = purify('<div class="wk-empty-ex">No exercises yet. Add some below.</div>');
       return;
     }
-    container.innerHTML = tmplExercises.map((e, i) => `
+    container.innerHTML = purify(tmplExercises.map((e, i) => `
       <div class="wk-tmpl-ex-row" data-idx="${i}">
         <div class="wk-tmpl-ex-drag">☰</div>
         <div class="wk-tmpl-ex-info">
@@ -511,7 +511,7 @@
         </div>
         <button class="wk-icon-btn wk-tmpl-remove" data-idx="${i}">✕</button>
       </div>
-    `).join('');
+    `).join(''));
 
     container.querySelectorAll('.tmpl-sets').forEach(inp =>
       inp.addEventListener('change', () => { tmplExercises[inp.dataset.idx].target_sets = parseInt(inp.value) || 3; }));
@@ -700,14 +700,14 @@
 
   function renderAwTabs() {
     const tabs = document.getElementById('awTabs');
-    tabs.innerHTML = awExercises.map((e, i) => {
+    tabs.innerHTML = purify(awExercises.map((e, i) => {
       const done = e.loggedSets.filter(Boolean).length >= e.target_sets;
       return `<button class="wk-tab ${i === awCurrentIdx ? 'active' : ''} ${done ? 'done' : ''}"
         data-idx="${i}">${i + 1}. ${escapeHtml(e.exercise_name.split(' ').slice(0, 2).join(' '))}</button>`;
-    }).join('');
+    }).join(''));
 
     if (awTemplateId === 0 && awIsStarted) {
-      tabs.innerHTML += `<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`;
+      tabs.innerHTML += purify(`<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`);
       document.getElementById('awAddExBtn')?.addEventListener('click', addExerciseToWorkout);
     }
 
@@ -723,7 +723,7 @@
   function addExerciseToWorkout() {
     const overlay = document.createElement('div');
     overlay.className = 'wk-quick-pick';
-    overlay.innerHTML = `
+    overlay.innerHTML = purify(`
       <div class="wk-quick-pick-box">
         <div class="wk-quick-pick-title">Add Exercise</div>
         <div style="display:flex; gap:8px; margin-bottom:8px;">
@@ -732,14 +732,14 @@
         <div style="display:flex; gap:8px; margin-bottom:16px;" id="qpSelectWrapper">
           <select id="qpExSel" class="wk-select" style="flex:1;"></select>
         </div>
-      </div>`;
+      </div>`);
       
     const wrapper = overlay.querySelector('#qpSelectWrapper');
     
     const infoBtn = document.createElement('button');
     infoBtn.className = 'btn btn-secondary';
     infoBtn.style.padding = '0 12px';
-    infoBtn.innerHTML = 'Info';
+    infoBtn.innerHTML = purify('Info');
     infoBtn.onclick = () => {
       const exSel = document.getElementById('qpExSel');
       if(exSel.value) window.showExerciseInfo(parseInt(exSel.value));
@@ -749,7 +749,7 @@
     const customBtn = document.createElement('button');
     customBtn.className = 'btn btn-secondary';
     customBtn.style.padding = '0 12px';
-    customBtn.innerHTML = '+ Custom';
+    customBtn.innerHTML = purify('+ Custom');
     customBtn.onclick = () => {
       if(window.showCustomExerciseModal) {
         window.showCustomExerciseModal(async (newEx) => {
@@ -768,8 +768,8 @@
 
     const btnRow = document.createElement('div');
     btnRow.className = 'wk-modal-footer';
-    btnRow.innerHTML = `<button class="btn btn-secondary" id="qpCancel">Cancel</button>
-                        <button class="btn btn-primary" id="qpAdd">Add</button>`;
+    btnRow.innerHTML = purify(`<button class="btn btn-secondary" id="qpCancel">Cancel</button>
+                        <button class="btn btn-primary" id="qpAdd">Add</button>`);
     overlay.querySelector('.wk-quick-pick-box').appendChild(btnRow);
     document.body.appendChild(overlay);
 
@@ -796,14 +796,14 @@
   function renderAwPanel() {
     const panel = document.getElementById('awPanel');
     if (awExercises.length === 0) {
-      panel.innerHTML = `
+      panel.innerHTML = purify(`
         <div class="wk-empty" style="margin-top:60px;">
           <div class="wk-empty-icon" style="font-size:48px;"></div>
           <h3 style="margin-top:16px;">Ready to train?</h3>
           <p style="color:var(--text-tertiary); margin-bottom: 24px;">${awIsStarted ? 'Add your first exercise to get started.' : 'Click "Start" at the top to begin your workout.'}</p>
           ${awIsStarted ? '<button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>' : ''}
         </div>
-      `;
+      `);
       document.getElementById('awEmptyAddBtn')?.addEventListener('click', addExerciseToWorkout);
       return;
     }
@@ -866,7 +866,7 @@
       `;
     }).join('');
 
-    panel.innerHTML = `
+    panel.innerHTML = purify(`
       <div class="wk-panel-header">
         <div class="wk-panel-title" style="display:flex; align-items:center; justify-content:space-between;">
           <span>${escapeHtml(ex.exercise_name)}</span>
@@ -893,7 +893,7 @@
           : `<button class="btn btn-primary wk-finish-btn-bottom" id="awFinishBtnBottom">Finish Workout 🎉</button>`
         }
       </div>
-    `;
+    `);
 
     panel.querySelector('.aw-info-btn')?.addEventListener('click', (e) => {
       const exId = parseInt(e.currentTarget.dataset.id);
@@ -1118,11 +1118,11 @@
       ? Math.floor(durationSeconds/60) + 'm ' + (durationSeconds%60) + 's'
       : '—';
 
-    document.getElementById('wcStats').innerHTML = `
+    document.getElementById('wcStats').innerHTML = purify(`
       <div class="wk-stat"><div class="wk-stat-val">${result.exercises_saved}</div><div class="wk-stat-lbl">Exercises</div></div>
       <div class="wk-stat"><div class="wk-stat-val">${result.total_sets_saved}</div><div class="wk-stat-lbl">Sets logged</div></div>
       <div class="wk-stat"><div class="wk-stat-val">${durationStr}</div><div class="wk-stat-lbl">Duration</div></div>
-    `;
+    `);
 
     const prsEl = document.getElementById('wcPRs');
     const titleEl = document.querySelector('.wk-complete-title');
@@ -1166,7 +1166,7 @@
           </div>
         `;
       }
-      prsEl.innerHTML = html;
+      prsEl.innerHTML = purify(html);
       
       // Hide standard completion title/emoji to let PR shine
       if (titleEl) titleEl.style.display = 'none';
@@ -1207,7 +1207,7 @@
       // Standard layout
       if (titleEl) titleEl.style.display = 'block';
       if (emojiEl) emojiEl.style.display = 'block';
-      prsEl.innerHTML = '';
+      prsEl.innerHTML = purify('');
     }
 
     modal.style.display = 'flex';
@@ -1254,7 +1254,7 @@
     
     const shareBtn = document.getElementById(btnId);
     const origText = shareBtn.innerHTML;
-    shareBtn.innerHTML = "Generating Image...";
+    shareBtn.innerHTML = purify("Generating Image...");
     shareBtn.disabled = true;
 
     // Create a temporary hidden container for the share image
@@ -1278,7 +1278,7 @@
     card.style.boxSizing = "border-box";
     card.style.backgroundImage = "radial-gradient(circle at 15% 0%, rgba(226,64,45,0.1), transparent 50%), radial-gradient(circle at 85% 100%, rgba(62,124,177,0.1), transparent 50%)";
 
-    card.innerHTML = `
+    card.innerHTML = purify(`
       <div style="font-size: 64px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 24px; color: #E2402D;">Workout Complete</div>
       <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${data.exercises_saved} Exercises • ${data.total_sets_saved} Sets • ${data.durationStr}</div>
       
@@ -1300,7 +1300,7 @@
         <div style="width: 80px; height: 80px; background: #E2402D; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; font-family: 'Oswald', sans-serif;">IL</div>
         <div style="font-size: 36px; font-weight: 700; letter-spacing: 2px;">IRONLOG</div>
       </div>
-    `;
+    `);
     
     shareContainer.appendChild(card);
     document.body.appendChild(shareContainer);
@@ -1348,7 +1348,7 @@
       showToast("Couldn't generate image. Try again.");
     } finally {
       document.body.removeChild(shareContainer);
-      shareBtn.innerHTML = origText;
+      shareBtn.innerHTML = purify(origText);
       shareBtn.disabled = false;
     }
   }

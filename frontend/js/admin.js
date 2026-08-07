@@ -5,11 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Verify admin role first
   const me = Auth.getUser();
   if (!me || me.role !== "admin") {
-    container.innerHTML = `<div class="alert alert-error">Access denied. You do not have admin privileges.</div>`;
+    container.innerHTML = purify(`<div class="alert alert-error">Access denied. You do not have admin privileges.</div>`);
     return;
   }
 
-  container.innerHTML = `
+  container.innerHTML = purify(`
     <!-- Tab bar -->
     <div class="profile-tabs mb-16">
       <button class="profile-tab active" data-tab="users">Users</button>
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     </div>
-  `;
+  `);
 
   // Tab switching logic
   document.querySelectorAll('.profile-tab').forEach(btn => {
@@ -92,10 +92,10 @@ async function loadUsers() {
   try {
     const users = await Api.adminGetUsers();
     if (users.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;">No users found.</td></tr>`;
+      tbody.innerHTML = purify(`<tr><td colspan="6" style="text-align:center;padding:24px;">No users found.</td></tr>`);
       return;
     }
-    tbody.innerHTML = users.map(u => `
+    tbody.innerHTML = purify(users.map(u => `
       <tr>
         <td style="text-align:center; vertical-align:middle;">#${u.id}</td>
         <td style="text-align:center; vertical-align:middle;">${u.username ? escapeHtml(u.username) : '<span class="text-secondary">Not set</span>'}</td>
@@ -107,10 +107,10 @@ async function loadUsers() {
           <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${escapeHtml(u.username || u.email)}')" style="margin-left:4px;">Delete</button>
         </td>
       </tr>
-    `).join("");
+    `).join(""));
   } catch (err) {
     handleApiError(err);
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--error);">Failed to load users.</td></tr>`;
+    tbody.innerHTML = purify(`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--error);">Failed to load users.</td></tr>`);
   }
 }
 
@@ -140,16 +140,16 @@ async function loadStats() {
   const grid = document.getElementById("statsGrid");
   try {
     const stats = await Api.adminGetStats();
-    grid.innerHTML = `
+    grid.innerHTML = purify(`
       <div class="stat-card"><div class="stat-number">${stats.total_users}</div><div class="stat-label">Total Users</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_workouts}</div><div class="stat-label">Workouts Logged</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_goals}</div><div class="stat-label">Goals Set</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_lift_logs}</div><div class="stat-label">Lifts Logged</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_weight_logs}</div><div class="stat-label">Weigh-ins Logged</div></div>
-    `;
+    `);
   } catch(err) {
     handleApiError(err);
-    grid.innerHTML = `<div class="alert alert-error">Failed to load platform stats.</div>`;
+    grid.innerHTML = purify(`<div class="alert alert-error">Failed to load platform stats.</div>`);
   }
 }
 
@@ -160,10 +160,10 @@ async function loadLogs() {
   try {
     const logs = await Api.adminGetLogs();
     if (!logs.length) {
-      wrap.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-secondary)">No activity found.</div>`;
+      wrap.innerHTML = purify(`<div style="text-align:center;padding:24px;color:var(--text-secondary)">No activity found.</div>`);
       return;
     }
-    wrap.innerHTML = logs.map(l => `
+    wrap.innerHTML = purify(logs.map(l => `
       <div class="log-item">
         <div class="log-info">
           <div class="log-desc">${escapeHtml(l.description)}</div>
@@ -177,10 +177,10 @@ async function loadLogs() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2-2L4 6"/></svg>
         </button>
       </div>
-    `).join("");
+    `).join(""));
   } catch(err) {
     handleApiError(err);
-    wrap.innerHTML = `<div class="alert alert-error">Failed to load activity logs.</div>`;
+    wrap.innerHTML = purify(`<div class="alert alert-error">Failed to load activity logs.</div>`);
   }
 }
 
