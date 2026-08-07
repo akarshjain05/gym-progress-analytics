@@ -374,7 +374,7 @@
       }
       return '<div class="strength-row">' +
         '<div class="strength-top">' +
-          '<span class="strength-name">' + (icons[s.trend] || "➡️") + " <strong>" + s.exercise_name + "</strong></span>" +
+          '<span class="strength-name">' + (icons[s.trend] || "➡️") + " <strong>" + escapeHtml(s.exercise_name) + "</strong></span>" +
           '<span class="strength-badge ' + s.trend + '">' + s.trend + "</span>" +
           '<span class="phase-pill ' + (s.phase === 2 ? "p2" : "p1") + '">' + (s.phase === 2 ? "Personal" : "Baseline") + "</span>" +
         "</div>" +
@@ -406,7 +406,7 @@
       var changePctStr = (d.change_pct > 0 ? "+" : "") + d.change_pct + "% " + d.trend;
       return '<div class="vol-row">' +
         '<div class="vol-top">' +
-          '<span class="vol-name">' + group + "</span>" +
+          '<span class="vol-name">' + escapeHtml(group) + "</span>" +
           '<span class="vol-change" style="color:' + barColor + '">' + changePctStr + "</span>" +
         "</div>" +
         '<div class="vol-bar-bg"><div class="vol-bar" style="width:' +
@@ -426,7 +426,7 @@
       '<div class="srow"><span>Avg daily calories</span><strong>' + nc.avg_weekly_calories.toLocaleString() + " kcal</strong></div>" +
       '<div class="srow"><span>Weeks analysed</span><strong>' + nc.weeks_analysed + "</strong></div>" +
       '<div class="srow"><span>Correlation (R²)</span><strong style="color:' + r2color + '">' + nc.correlation_r2 + "</strong></div>" +
-      '<div class="coach-note" style="margin-top:12px">' + nc.insight + "</div>";
+      '<div class="coach-note" style="margin-top:12px">' + escapeHtml(nc.insight) + "</div>";
   }
 
 })();

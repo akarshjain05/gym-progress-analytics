@@ -215,7 +215,7 @@ function renderTable(logs) {
       <td>${l.protein_g ?? "—"}</td>
       <td>${l.carbs_g ?? "—"}</td>
       <td>${l.fats_g ?? "—"}</td>
-      <td class="label-cell text-secondary">${l.notes || ""}</td>
+      <td class="label-cell text-secondary">${l.notes ? escapeHtml(l.notes) : ""}</td>
       <td>
         <div class="row-actions">
           <button class="icon-btn" onclick="deleteCalEntry(${l.id})" title="Delete">

@@ -1,3 +1,17 @@
+/**
+ * Centralized, safe HTML sanitizer that converts special characters to HTML entities.
+ * Prevents XSS vulnerabilities by safely escaping strings before injecting them into the DOM.
+ */
+window.escapeHtml = function(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 const ICON_STYLE = 'width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"';
 
 const NAV_ITEMS = [

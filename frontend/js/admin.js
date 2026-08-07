@@ -98,13 +98,13 @@ async function loadUsers() {
     tbody.innerHTML = users.map(u => `
       <tr>
         <td style="text-align:center; vertical-align:middle;">#${u.id}</td>
-        <td style="text-align:center; vertical-align:middle;">${u.username || '<span class="text-secondary">Not set</span>'}</td>
-        <td style="text-align:center; vertical-align:middle;">${u.email} ${u.email_verified ? '<span style="color:var(--success);font-size:12px;">(Verified)</span>' : ''}</td>
+        <td style="text-align:center; vertical-align:middle;">${u.username ? escapeHtml(u.username) : '<span class="text-secondary">Not set</span>'}</td>
+        <td style="text-align:center; vertical-align:middle;">${escapeHtml(u.email)} ${u.email_verified ? '<span style="color:var(--success);font-size:12px;">(Verified)</span>' : ''}</td>
         <td style="text-align:center; vertical-align:middle;"><span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-neutral'}">${capitalize(u.role)}</span></td>
         <td style="text-align:center; vertical-align:middle;">${fmtDate(u.created_at.split("T")[0])}</td>
         <td style="text-align:center; vertical-align:middle;">
-          <button class="btn btn-secondary btn-sm" onclick="promoteUser(${u.id}, '${u.username || u.email}')" ${u.role === 'admin' ? 'disabled' : ''}>Make Admin</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${u.username || u.email}')" style="margin-left:4px;">Delete</button>
+          <button class="btn btn-secondary btn-sm" onclick="promoteUser(${u.id}, '${escapeHtml(u.username || u.email)}')" ${u.role === 'admin' ? 'disabled' : ''}>Make Admin</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${escapeHtml(u.username || u.email)}')" style="margin-left:4px;">Delete</button>
         </td>
       </tr>
     `).join("");
@@ -194,8 +194,4 @@ window.deleteAdminLog = async function(type, id) {
   } catch(err) { handleApiError(err); }
 };
 
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
+

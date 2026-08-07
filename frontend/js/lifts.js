@@ -321,7 +321,7 @@
     const allGroups = [...orderedGroups, ...extraGroups];
 
     select.innerHTML = allGroups.map(g =>
-      `<option value="${g}">${MUSCLE_LABELS[g] || g} (${groups[g].length})</option>`
+      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
     ).join("");
 
     // Change handler
@@ -353,7 +353,7 @@
   function populateExerciseSelect(groupExercises) {
     const select = document.getElementById("exerciseSelect");
     select.innerHTML = groupExercises.map(ex =>
-      `<option value="${ex.id}">${ex.name}</option>`
+      `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
     ).join("");
     // Trigger load for first exercise in group
     if (groupExercises.length > 0) {
@@ -379,14 +379,14 @@
     const allGroups = [...orderedGroups, ...extraGroups];
 
     selectMuscle.innerHTML = allGroups.map(g =>
-      `<option value="${g}">${MUSCLE_LABELS[g] || g} (${groups[g].length})</option>`
+      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
     ).join("");
 
     selectMuscle.addEventListener("change", () => {
       const g = selectMuscle.value;
       if (groups[g]) {
         selectExercise.innerHTML = groups[g].map(ex =>
-          `<option value="${ex.id}">${ex.name}</option>`
+          `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
         ).join("");
       }
     });
@@ -514,7 +514,7 @@
 
 
     if (!level && reason) {
-      card.innerHTML = `<div style="font-size:13px;color:#a09880;line-height:1.4;">${reason}</div>`;
+      card.innerHTML = `<div style="font-size:13px;color:#a09880;line-height:1.4;">${escapeHtml(reason)}</div>`;
       scaleWrap.style.display = "none";
       return;
     }
@@ -524,7 +524,7 @@
         card.innerHTML = `
           <div class="percentile-card" style="margin-bottom: 0; text-align: left;">
             <div class="pct-header">
-              <span class="pct-title">${data.exercise} Rank</span>
+              <span class="pct-title">${escapeHtml(data.exercise)} Rank</span>
               <span class="pct-badge">Top ${100 - Math.round(data.percentile)}%</span>
             </div>
             <div class="pct-body">
@@ -761,7 +761,7 @@
           <span class="set-weight">${set.weight_kg} kg</span>
           <span class="set-reps">${set.reps} reps</span>
           <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
-          <span class="set-note">${set.notes || ""}</span>
+          <span class="set-note">${escapeHtml(set.notes || "")}</span>
           <div style="position:relative; display:flex; justify-content:flex-end;">
             <button class="set-menu-btn" title="Options" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:18px; padding:4px 8px;">⋮</button>
             <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--bg-elevated-2); border:1px solid var(--border-color); border-radius:8px; padding:4px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.8); min-width:110px;">
@@ -903,7 +903,7 @@
           return `
             <div class="pr-row" data-exid="${pr.exercise_id}" style="cursor:pointer;">
               <div class="pr-exercise">
-                ${pr.exercise}
+                ${escapeHtml(pr.exercise)}
               </div>
               <div class="pr-1rm">${prMetric}</div>
               <div class="pr-achieved">${prAchieved}</div>
@@ -915,7 +915,7 @@
 
         return `
           <div class="pr-group">
-            <div class="pr-group-header">${group.label}</div>
+            <div class="pr-group-header">${escapeHtml(group.label)}</div>
             <div class="pr-group-table-header">
               <span>EXERCISE</span><span>EST. 1RM</span><span>BEST SET</span><span>DATE</span><span>LEVEL</span>
             </div>
@@ -1175,7 +1175,7 @@
       <div style="font-size: 72px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: #E2402D; margin-bottom: 24px; text-shadow: 0 0 40px rgba(226,64,45,0.4); text-align: center; width: 100%;">NEW PERSONAL RECORD</div>
       
       <div style="background: rgba(30, 34, 39, 0.7); border-radius: 40px; padding: 120px 80px; width: 100%; max-width: 900px; text-align: center; border: 2px solid rgba(255,255,255,0.05); margin-top: 160px; margin-bottom: 200px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
-        <div style="font-size: 56px; font-weight: 700; color: #9CA5AC; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">${escHtml(data.exercise)}</div>
+        <div style="font-size: 56px; font-weight: 700; color: #9CA5AC; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">${escapeHtml(data.exercise)}</div>
         <div style="font-size: 140px; color: #D4A33B; font-weight: 900; line-height: 1;">${prValue}</div>
         <div style="font-size: 40px; color: #6B7480; font-weight: 500; margin-top: 24px;">${estText}</div>
         <div style="font-size: 32px; color: #4F9D69; font-weight: 600; margin-top: 60px;">Hit on ${prDateStr}</div>

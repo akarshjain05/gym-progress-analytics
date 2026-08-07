@@ -34,7 +34,7 @@ async function loadDashboard() {
       const sessionsText = nextEta.sessions_away === 1 ? "1 session" : `${nextEta.sessions_away} sessions`;
       etaHtml = `
         <div class="card" style="margin-bottom: 1.5rem; background: var(--bg-secondary); border-left: 4px solid var(--plate-red);">
-          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;">At your current rate, you'll ${nextEta.exercise_name.toLowerCase()} ${nextEta.target_kg}kg in ${sessionsText}</div>
+          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;">At your current rate, you'll ${escapeHtml(nextEta.exercise_name).toLowerCase()} ${nextEta.target_kg}kg in ${sessionsText}</div>
         </div>
       `;
     }
@@ -157,11 +157,7 @@ async function loadDashboard() {
   }
 }
 
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
+
 
 loadDashboard();
 

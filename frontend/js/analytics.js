@@ -47,11 +47,7 @@ document.getElementById("pageContent").innerHTML = `
   </div>
 `;
 
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
+
 
 
 const TIER_BADGE = {

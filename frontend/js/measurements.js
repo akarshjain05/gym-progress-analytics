@@ -279,7 +279,7 @@ function renderTable(logs) {
         <td>${getVal(log, 'arm') ? getVal(log, 'arm') + ' ' + displayUnit : '-'}</td>
         <td>${getVal(log, 'thigh') ? getVal(log, 'thigh') + ' ' + displayUnit : '-'}</td>
         <td class="text-tertiary" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${log.notes || ''}
+          ${log.notes ? escapeHtml(log.notes) : ''}
         </td>
         <td style="text-align:right;">
           <button class="btn btn-ghost btn-sm text-danger" onclick="deleteMeasurement(${log.id})">Delete</button>
