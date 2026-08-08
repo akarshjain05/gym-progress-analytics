@@ -203,34 +203,14 @@ function renderChart(series, formulaTdee, actualTdee) {
 }
 
 function renderTable(logs) {
-  const wrap = document.getElementById("calTableWrap");
-  if (!logs.length) {
-    wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state"><p>No entries yet.</p></div>`);
-    return;
-  }
-  const rows = [...logs].reverse().map(l => `
-    <tr>
-      <td class="label-cell">${escapeHtml(fmtDate(l.date))}</td>
-      <td>${escapeHtml(Math.round(l.calories))} kcal</td>
-      <td>${escapeHtml(l.protein_g ?? "—")}</td>
-      <td>${escapeHtml(l.carbs_g ?? "—")}</td>
-      <td>${escapeHtml(l.fats_g ?? "—")}</td>
-      <td class="label-cell text-secondary">${escapeHtml(l.notes ? escapeHtml(l.notes) : "")}</td>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" onclick="deleteCalEntry(${escapeHtml(l.id)})" title="Delete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
-          </button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-  wrap.innerHTML = DOMPurify.sanitize(`
-    <table class="data-table">
-      <thead><tr><th>Date</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fats</th><th>Notes</th><th></th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `);
+  window.renderDataTable("calTableWrap", logs, [
+    { label: "Date", className: "label-cell", render: l => escapeHtml(fmtDate(l.date)) },
+    { label: "Calories", render: l => `${escapeHtml(Math.round(l.calories))} kcal` },
+    { label: "Protein", render: l => escapeHtml(l.protein_g ?? "—") },
+    { label: "Carbs", render: l => escapeHtml(l.carbs_g ?? "—") },
+    { label: "Fats", render: l => escapeHtml(l.fats_g ?? "—") },
+    { label: "Notes", className: "label-cell text-secondary", render: l => escapeHtml(l.notes ? escapeHtml(l.notes) : "") }
+  ], "deleteCalEntry");
 }
 
 async function loadAll() {

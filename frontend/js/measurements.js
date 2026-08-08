@@ -108,7 +108,7 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
 
   <div class="card">
     <div class="card-title">History</div>
-    <div class="table-wrapper">
+    <div class="table-wrapper" id="measurementsTableWrap">
       <table class="data-table" style="width:100%">
         <thead>
           <tr>
@@ -251,34 +251,14 @@ async function loadData() {
 }
 
 function renderTable(logs) {
-  const tbody = document.getElementById("mTableBody");
-  if (!logs || logs.length === 0) {
-    tbody.innerHTML = DOMPurify.sanitize('<tr><td colspan="7" style="text-align:center;padding:24px;">No measurements logged yet.</td></tr>');
-    return;
-  }
-  
-  // reverse so newest is on top
-  const sorted = [...logs].reverse();
-  
-  let html = "";
-  for (const log of sorted) {
-    html += `
-      <tr>
-        <td><strong>${escapeHtml(fmtDate(log.date))}</strong></td>
-        <td>${escapeHtml(getVal(log, 'chest') ? getVal(log, 'chest') + ' ' + displayUnit : '-')}</td>
-        <td>${escapeHtml(getVal(log, 'waist') ? getVal(log, 'waist') + ' ' + displayUnit : '-')}</td>
-        <td>${escapeHtml(getVal(log, 'arm') ? getVal(log, 'arm') + ' ' + displayUnit : '-')}</td>
-        <td>${escapeHtml(getVal(log, 'thigh') ? getVal(log, 'thigh') + ' ' + displayUnit : '-')}</td>
-        <td class="text-tertiary" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${escapeHtml(log.notes ? escapeHtml(log.notes) : '')}
-        </td>
-        <td style="text-align:right;">
-          <button class="btn btn-ghost btn-sm text-danger" onclick="deleteMeasurement(${escapeHtml(log.id)})">Delete</button>
-        </td>
-      </tr>
-    `;
-  }
-  tbody.innerHTML = DOMPurify.sanitize(html);
+  window.renderDataTable("measurementsTableWrap", logs, [
+    { label: "Date", render: l => `<strong>${escapeHtml(fmtDate(l.date))}</strong>` },
+    { label: "Chest", render: l => escapeHtml(getVal(l, 'chest') ? getVal(l, 'chest') + ' ' + displayUnit : '-') },
+    { label: "Waist", render: l => escapeHtml(getVal(l, 'waist') ? getVal(l, 'waist') + ' ' + displayUnit : '-') },
+    { label: "Arm", render: l => escapeHtml(getVal(l, 'arm') ? getVal(l, 'arm') + ' ' + displayUnit : '-') },
+    { label: "Thigh", render: l => escapeHtml(getVal(l, 'thigh') ? getVal(l, 'thigh') + ' ' + displayUnit : '-') },
+    { label: "Notes", className: "text-tertiary", render: l => escapeHtml(l.notes ? escapeHtml(l.notes) : '') }
+  ], "deleteMeasurement");
 }
 
 window.deleteMeasurement = async function(id) {

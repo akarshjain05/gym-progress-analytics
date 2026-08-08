@@ -27,6 +27,48 @@ window.chartColors = function() {
 };
 
 /**
+ * Generic data table renderer for logs (weight, nutrition, measurements)
+ */
+window.renderDataTable = function(containerId, data, columns, deleteCallback) {
+  const wrap = document.getElementById(containerId);
+  if (!data || !data.length) {
+    wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state"><p>No entries yet.</p></div>`);
+    return;
+  }
+  
+  const headers = columns.map(c => `<th>${c.label}</th>`).join("");
+  const thead = `<thead><tr>${headers}${deleteCallback ? '<th></th>' : ''}</tr></thead>`;
+  
+  const rows = [...data].reverse().map(item => {
+    const tds = columns.map(c => {
+      const cls = c.className ? ` class="${c.className}"` : '';
+      return `<td${cls}>${c.render(item)}</td>`;
+    }).join("");
+    
+    let delTd = "";
+    if (deleteCallback) {
+      delTd = `
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" onclick="${deleteCallback}(${escapeHtml(item.id)})" title="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+            </button>
+          </div>
+        </td>
+      `;
+    }
+    return `<tr>${tds}${delTd}</tr>`;
+  }).join("");
+  
+  wrap.innerHTML = DOMPurify.sanitize(`
+    <table class="data-table">
+      ${thead}
+      <tbody>${rows}</tbody>
+    </table>
+  `);
+};
+
+/**
  * Sanitizes a full HTML string via DOMPurify before innerHTML injection.
  * Configured to preserve inline event handlers and SVG elements used by the app.
  * User-provided values should STILL be escaped with escapeHtml() before embedding.
