@@ -32,10 +32,7 @@ def ist_today() -> date_type:
     return datetime.now(IST).date()
 
 
-def ist_week_start() -> date_type:
-    """Returns Monday of the current IST week."""
-    today = ist_today()
-    return today - timedelta(days=today.weekday())
+
 
 
 def _logging_streak(active_days: set[date_type]) -> dict:
