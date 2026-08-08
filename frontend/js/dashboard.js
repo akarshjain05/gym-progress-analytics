@@ -93,7 +93,7 @@ async function loadDashboard() {
               <div class="stat-value">${escapeHtml(dash.current_weight_kg !== null ? fmtKg(dash.current_weight_kg) : "—")}<span class="unit">kg</span></div>
               <div class="stat-delta ${escapeHtml(weightDelta.cls)}">${escapeHtml(weightDelta.text)} (30d)</div>
             </div>
-            ${escapeHtml(goalCardHtml)}
+            ${goalCardHtml}
             <div class="card stat-card">
               <div class="stat-label">Avg calories (7d)</div>
               <div class="stat-value">${escapeHtml(dash.avg_calories_last_7_days !== null ? Math.round(dash.avg_calories_last_7_days) : "—")}<span class="unit">kcal</span></div>
@@ -112,7 +112,7 @@ async function loadDashboard() {
 
       content.innerHTML = DOMPurify.sanitize(`
         
-        ${escapeHtml(etaHtml)}
+        ${etaHtml}
         <div id="wrappedBanner" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.4)';" onclick="window.DashboardPage.showWrapped()">
           <div style="position: relative; z-index: 2;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.25rem;">
@@ -125,7 +125,7 @@ async function loadDashboard() {
           </div>
         </div>
 
-        ${escapeHtml(statsGridHtml)}
+        ${statsGridHtml}
 
 
 

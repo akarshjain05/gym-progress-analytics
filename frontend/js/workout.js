@@ -880,7 +880,7 @@
       </div>
 
       <div class="wk-sets-container">
-        ${escapeHtml(setsHtml)}
+        ${setsHtml}
         <div style="text-align: center; margin-top: 16px;">
           <button class="btn btn-secondary btn-sm" id="awAddSetBtn">+ Add Set</button>
         </div>

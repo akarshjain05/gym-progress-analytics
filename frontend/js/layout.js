@@ -251,7 +251,7 @@ function buildMobileDrawer(activeId) {
           </div>
         </div>
         <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close menu">
-          ${escapeHtml(CLOSE_ICON)}
+          ${CLOSE_ICON}
         </button>
       </div>
 
@@ -264,7 +264,7 @@ function buildMobileDrawer(activeId) {
           <div class="sidebar-avatar">${escapeHtml(user.username ? user.username.charAt(0).toUpperCase() : 'U')}</div>
         </a>
         <button class="sidebar-logout-btn" id="drawerLogoutBtn" title="Log out">
-          ${escapeHtml(LOGOUT_ICON)}
+          ${LOGOUT_ICON}
           <span>Log out</span>
         </button>
       </div>
@@ -487,7 +487,7 @@ window.showExerciseInfo = async function(exerciseId) {
           <div class="wk-modal-title" style="display:flex; align-items:center;">
             ${escapeHtml(ex.name)} ${escapeHtml(difficultyBadge)}
           </div>
-          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${escapeHtml(CLOSE_ICON)}</button>
+          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${CLOSE_ICON}</button>
         </div>
         <div class="wk-modal-body" style="line-height:1.5;">
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">

@@ -604,7 +604,7 @@
           <div class="scale-marker-label">${escapeHtml(markerLabel)}</div>
         </div>`;
 
-        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${escapeHtml(scaleHtml)}</div>`);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
         labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
 
       } else {
@@ -645,7 +645,7 @@
           <div class="scale-marker-label">${escapeHtml(pr)}kg</div>
         </div>`;
 
-        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${escapeHtml(scaleHtml)}</div>`);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
         labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
       }
     } else {
@@ -782,7 +782,7 @@
               <span class="set-note">NOTES</span>
               <span></span>
             </div>
-            ${escapeHtml(setsHtml)}
+            ${setsHtml}
           </div>
         </div>
       `;
