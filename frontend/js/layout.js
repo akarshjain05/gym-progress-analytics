@@ -80,61 +80,61 @@ const ICON_STYLE = 'width="22" height="22" fill="none" xmlns="http://www.w3.org/
 
 const NAV_ITEMS = [
   { id: "dashboard", href: "dashboard.html", label: "Dashboard",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="14" y="3" width="7" height="11" rx="1.5" fill="currentColor" />
       <rect x="14" y="16" width="7" height="5" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="3" y="12" width="7" height="9" rx="1.5" fill="currentColor" />
     </svg>` },
   { id: "weight", href: "weight.html", label: "Body Weight",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="3" y="5" width="18" height="14" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
       <path d="M9 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "measurements", href: "measurements.html", label: "Measurements",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       <path d="M6 12v-3M10 12v-2M14 12v-3M18 12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "lifts", href: "lifts.html", label: "Lifts",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <path d="M6 5v14M18 5v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       <rect x="2" y="8" width="4" height="8" rx="1" fill="currentColor" />
       <rect x="18" y="8" width="4" height="8" rx="1" fill="currentColor" />
       <path d="M6 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "workout", href: "workout.html", label: "Workouts",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="5" y="4" width="14" height="17" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 2h6v3H9V2Z" fill="currentColor"/>
       <path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "nutrition", href: "nutrition.html", label: "Nutrition",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M12 21a9 9 0 0 0 9-9c0-1.5-.5-3-1.5-4H4.5C3.5 9 3 10.5 3 12a9 9 0 0 0 9 9Z" fill="currentColor"/>
       <path d="M12 3v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "goals", href: "goals.html", label: "Goals",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>` },
   { id: "analytics", href: "analytics.html", label: "Analytics",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="13" width="4" height="7" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="10" y="7" width="4" height="13" rx="1" fill="currentColor" />
       <rect x="16" y="3" width="4" height="17" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
     </svg>` },
   { id: "calculators", href: "calculators.html", label: "Calculators",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M8 8h8v2H8V8z" fill="currentColor"/>
       <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
     </svg>` },
   { id: "coach", href: "coach.html", label: "AI Coach",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="8" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 14h.01M15 14h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
       <path d="M12 8V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -142,12 +142,12 @@ const NAV_ITEMS = [
       <path d="M2 13h2M20 13h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "profile", href: "profile.html", label: "Profile",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <circle cx="12" cy="8" r="4" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M5 20c0-2.5 2-5 7-5s7 2.5 7 5" fill="currentColor" />
     </svg>` },
   { id: "library", href: "library.html", label: "Exercise Library",
-    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
       <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M8 4v16M16 4v16" stroke="currentColor" stroke-width="1.5"/>
       <path d="M4 12h4M16 12h4" stroke="currentColor" stroke-width="1.5"/>
@@ -341,7 +341,7 @@ function renderShell(activeId, pageTitle, subtitle) {
   if (user.role === 'admin') {
     navHtml += `
       <a class="nav-link ${escapeHtml(activeId === 'admin' ? "active" : "")}" href="admin.html">
-        <svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
+        <svg ${ICON_STYLE} viewBox="0 0 24 24">
           <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
           <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg><span>Admin Panel</span>
