@@ -216,9 +216,9 @@ def forgot_password(request: Request, payload: schemas.ForgotPasswordIn, db: Ses
 
     response_data = {"message": "If that email is registered, a password reset link has been sent."}
     
-    # For demo/portfolio purposes: if no email service is configured, return the link
+    # For demo/portfolio purposes: if DEMO_MODE is explicitly enabled, return the link
     # directly in the response so users can test the flow without checking Docker logs.
-    if user and user.password_hash and not settings.brevo_api_key:
+    if user and user.password_hash and settings.demo_mode:
         response_data["reset_link"] = reset_link
 
     return response_data
