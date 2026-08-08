@@ -219,7 +219,7 @@ function buildMobileDrawer(activeId) {
   const user = Auth.getUser() || {};
   let navLinks = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
     <a class="drawer-link ${escapeHtml(item.id === activeId ? 'active' : '')}" href="${escapeHtml(item.href)}">
-      ${escapeHtml(item.icon)}
+      ${item.icon}
       <span>${escapeHtml(item.label)}</span>
     </a>
   `).join('');
@@ -273,7 +273,7 @@ function buildMobileDrawer(activeId) {
     <!-- Mobile top bar (only visible on mobile) -->
     <header class="mobile-topbar">
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
-        ${escapeHtml(HAMBURGER_ICON)}
+        ${HAMBURGER_ICON}
       </button>
       <a href="dashboard.html" class="mobile-topbar-brand">
         <span class="brand-logo-icon" aria-hidden="true">${BARBELL_SVG}</span>
@@ -293,7 +293,7 @@ function buildBottomNav(activeId) {
 
   const links = bottomItems.map(item => `
     <a href="${escapeHtml(item.href)}" class="bottom-nav-link ${escapeHtml(item.id === activeId ? 'active' : '')}" aria-label="${escapeHtml(item.label)}">
-      ${escapeHtml(item.icon)}
+      ${item.icon}
       <span>${escapeHtml(item.label === 'Body Weight' ? 'Weight' : item.label)}</span>
     </a>
   `).join('');
