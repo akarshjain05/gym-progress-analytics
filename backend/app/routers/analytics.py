@@ -23,13 +23,7 @@ from ..worker import generate_insights
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
-# IST = UTC + 5:30
-IST = timezone(timedelta(hours=5, minutes=30))
-
-
-def ist_today() -> date_type:
-    """Returns the current date in Indian Standard Time (UTC+5:30)."""
-    return datetime.now(IST).date()
+from app.time_utils import ist_today
 
 
 

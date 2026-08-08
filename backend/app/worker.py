@@ -28,10 +28,7 @@ from . import models, calculations as calc, push_notifications
 from collections import defaultdict
 from datetime import timedelta, timezone, datetime
 
-IST = timezone(timedelta(hours=5, minutes=30))
-
-def ist_today():
-    return datetime.now(IST).date()
+from app.time_utils import ist_today
 
 
 
