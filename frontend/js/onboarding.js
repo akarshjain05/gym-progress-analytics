@@ -66,7 +66,7 @@
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Welcome to IRONLOG');
 
-    overlay.innerHTML = purify(`
+    overlay.innerHTML = DOMPurify.sanitize(`
       <div class="ob-modal">
 
         <!-- Progress bar -->
@@ -271,7 +271,7 @@
         ...exercises.filter(e => priority.includes(e.name)),
         ...exercises.filter(e => !priority.includes(e.name)).sort((a, b) => a.name.localeCompare(b.name)),
       ];
-      select.innerHTML = purify(sorted.map(e =>
+      select.innerHTML = DOMPurify.sanitize(sorted.map(e =>
         `<option value="${e.id}">${e.name}</option>`
       ).join(''));
     } catch (e) {

@@ -6,7 +6,7 @@
 
   const content = document.getElementById("pageContent");
 
-  content.innerHTML = purify(`
+  content.innerHTML = DOMPurify.sanitize(`
     <div id="coachPage">
 
       <!-- Phase banner -->
@@ -150,7 +150,7 @@
         banner.style.display = "flex";
         if (data.data_phase === 1) {
           banner.className = "phase-banner phase-1";
-          banner.innerHTML = purify(`
+          banner.innerHTML = DOMPurify.sanitize(`
             <span class="phase-icon">🌱</span>
             <div>
               <strong>Getting started — Population Baseline Mode</strong>
@@ -162,7 +162,7 @@
           `);
         } else {
           banner.className = "phase-banner phase-2";
-          banner.innerHTML = purify(`
+          banner.innerHTML = DOMPurify.sanitize(`
             <span class="phase-icon">🎯</span>
             <div>
               <strong>Personal Model Active — ${data.days_of_data} days of your data</strong>
@@ -224,7 +224,7 @@
     btn.disabled = true;
     btn.textContent = "Thinking…";
     output.style.display = "block";
-    textEl.innerHTML = purify('<span class="advice-cursor">▍</span>');
+    textEl.innerHTML = DOMPurify.sanitize('<span class="advice-cursor">▍</span>');
     output.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
     const token = Auth.getToken();
@@ -232,7 +232,7 @@
 
     // Advice timeout
     const adviceTimeout = setTimeout(() => {
-      textEl.innerHTML = purify('<span style="color:#e05a4a">Request timed out. Backend may be sleeping — try again in 30 seconds.</span>');
+      textEl.innerHTML = DOMPurify.sanitize('<span style="color:#e05a4a">Request timed out. Backend may be sleeping — try again in 30 seconds.</span>');
       btn.disabled = false;
       btn.textContent = "Try Again";
     }, 40000);
@@ -242,7 +242,7 @@
     }).then(function(res) {
       clearTimeout(adviceTimeout);
       if (!res.ok || !res.body) {
-        textEl.innerHTML = purify('<span style="color:#e05a4a">Could not connect to AI coach. Please try again.</span>');
+        textEl.innerHTML = DOMPurify.sanitize('<span style="color:#e05a4a">Could not connect to AI coach. Please try again.</span>');
         btn.disabled = false;
         btn.textContent = "Try Again";
         return;
@@ -251,12 +251,12 @@
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
       var fullText = "";
-      textEl.innerHTML = purify("");
+      textEl.innerHTML = DOMPurify.sanitize("");
 
       function read() {
         reader.read().then(function(result) {
           if (result.done) {
-            textEl.innerHTML = purify(renderMarkdown(fullText));
+            textEl.innerHTML = DOMPurify.sanitize(renderMarkdown(fullText));
             btn.disabled = false;
             btn.textContent = "Refresh Advice";
             return;
@@ -272,14 +272,14 @@
               var evt = JSON.parse(raw);
               if (evt.text) {
                 fullText += evt.text;
-                textEl.innerHTML = purify(renderMarkdown(fullText) + '<span class="advice-cursor">▍</span>');
+                textEl.innerHTML = DOMPurify.sanitize(renderMarkdown(fullText) + '<span class="advice-cursor">▍</span>');
               }
             } catch(err) {}
           }
           read();
         }).catch(function() {
           clearTimeout(adviceTimeout);
-          textEl.innerHTML = purify(renderMarkdown(fullText) || '<span style="color:#e05a4a">Connection interrupted.</span>');
+          textEl.innerHTML = DOMPurify.sanitize(renderMarkdown(fullText) || '<span style="color:#e05a4a">Connection interrupted.</span>');
           btn.disabled = false;
           btn.textContent = "Try Again";
         });
@@ -288,7 +288,7 @@
 
     }).catch(function() {
       clearTimeout(adviceTimeout);
-      textEl.innerHTML = purify('<span style="color:#e05a4a">Connection error. Please try again.</span>');
+      textEl.innerHTML = DOMPurify.sanitize('<span style="color:#e05a4a">Connection error. Please try again.</span>');
       btn.disabled = false;
       btn.textContent = "Try Again";
     });
@@ -389,7 +389,7 @@
         "</div>" +
       "</div>";
     }).join("");
-    document.getElementById("strengthList").innerHTML = purify(html);
+    document.getElementById("strengthList").innerHTML = DOMPurify.sanitize(html);
   }
 
   // ── Render: Volume ────────────────────────────────────────────────────────
@@ -415,7 +415,7 @@
           ' kg <span class="vol-prev">vs ' + Math.round(d.prev_4w_volume).toLocaleString() + " kg prev</span></div>" +
       "</div>";
     }).join("");
-    document.getElementById("volumeList").innerHTML = purify(html);
+    document.getElementById("volumeList").innerHTML = DOMPurify.sanitize(html);
   }
 
   // ── Render: Nutrition ─────────────────────────────────────────────────────

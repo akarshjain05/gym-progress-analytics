@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   renderShell("goals", "Goals", "Track your progress across lifts, weight, nutrition, and more.");
   
-  document.getElementById("pageHeaderActions").innerHTML = purify(`
+  document.getElementById("pageHeaderActions").innerHTML = DOMPurify.sanitize(`
     <div class="goals-header-actions">
       <select id="goalFilter" class="select-input" style="padding: 6px 32px 6px 12px !important; font-size: 14px !important; height: 36px !important; border-radius: 8px; width: auto !important;">
         <option value="all">All Goals</option>
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   `);
 
   const container = document.getElementById("pageContent");
-  container.innerHTML = purify(`
+  container.innerHTML = DOMPurify.sanitize(`
     <div id="formCard" class="wk-modal-overlay" style="display:none; z-index: 9999;">
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!filtered.length) {
       wrap.className = "";
       wrap.style.padding = "";
-      wrap.innerHTML = purify(`<div class="empty-state" style="padding: 64px 20px;">
+      wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state" style="padding: 64px 20px;">
         <p style="font-size: 15px; color: var(--text-secondary); margin: 0;">No ${currentTab} goals found.</p>
       </div>`);
       return;
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     wrap.className = "card";
     wrap.style.padding = "0";
-    wrap.innerHTML = purify(filtered.map(g => renderGoalCard(g, g.is_completed)).join(""));
+    wrap.innerHTML = DOMPurify.sanitize(filtered.map(g => renderGoalCard(g, g.is_completed)).join(""));
   }
 });
 
@@ -226,7 +226,7 @@ async function loadGoalExerciseOptions() {
   try {
     const exercises = await Api.listExercises();
     exerciseMap = Object.fromEntries(exercises.map(e => [e.id, e.name]));
-    document.getElementById("gExercise").innerHTML = purify(buildGroupedExerciseOptions(exercises));
+    document.getElementById("gExercise").innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
   } catch (err) {
     console.error("Failed to load exercises", err);
   }

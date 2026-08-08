@@ -229,7 +229,7 @@
         activeSk.id = 'sk-active';
         container.parentNode.insertBefore(activeSk, container);
       }
-      activeSk.innerHTML = purify(template);
+      activeSk.innerHTML = DOMPurify.sanitize(template);
 
 
     },

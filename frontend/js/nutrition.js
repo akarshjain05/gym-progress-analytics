@@ -2,14 +2,14 @@ renderShell("nutrition", "Nutrition", "Calories vs. your real maintenance, not j
 
 let calorieChart = null;
 
-document.getElementById("pageHeaderActions").innerHTML = purify(`
+document.getElementById("pageHeaderActions").innerHTML = DOMPurify.sanitize(`
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     Log calories
   </button>
 `);
 
-document.getElementById("pageContent").innerHTML = purify(`
+document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:550px;">
       <div class="wk-modal-header">
@@ -123,7 +123,7 @@ function renderStats(summary) {
   const explainer = document.getElementById("tdeeExplainerCard");
 
   if (!summary.has_calorie_data) {
-    el.innerHTML = purify(buildEmptyState(
+    el.innerHTML = DOMPurify.sanitize(buildEmptyState(
       "No calories logged",
       "Log a few days to see your trend and TDEE estimate.",
       "Log calories now",
@@ -139,7 +139,7 @@ function renderStats(summary) {
 
   explainer.style.display = (summary.formula_tdee_kcal || summary.actual_tdee_estimate_kcal) ? "block" : "none";
 
-  el.innerHTML = purify(`
+  el.innerHTML = DOMPurify.sanitize(`
     <div class="card stat-card">
       <div class="stat-label">Avg (7 days)</div>
       <div class="stat-value">${Math.round(summary.avg_calories_last_7_days)}<span class="unit">kcal</span></div>
@@ -205,7 +205,7 @@ function renderChart(series, formulaTdee, actualTdee) {
 function renderTable(logs) {
   const wrap = document.getElementById("calTableWrap");
   if (!logs.length) {
-    wrap.innerHTML = purify(`<div class="empty-state"><p>No entries yet.</p></div>`);
+    wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state"><p>No entries yet.</p></div>`);
     return;
   }
   const rows = [...logs].reverse().map(l => `
@@ -225,7 +225,7 @@ function renderTable(logs) {
       </td>
     </tr>
   `).join("");
-  wrap.innerHTML = purify(`
+  wrap.innerHTML = DOMPurify.sanitize(`
     <table class="data-table">
       <thead><tr><th>Date</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fats</th><th>Notes</th><th></th></tr></thead>
       <tbody>${rows}</tbody>

@@ -13,7 +13,7 @@ function chartColors() {
   };
 }
 
-document.getElementById("pageHeaderActions").innerHTML = purify(`
+document.getElementById("pageHeaderActions").innerHTML = DOMPurify.sanitize(`
   <div style="display:flex; align-items:center; gap: 12px;">
     <div style="display:flex; background:var(--surface-50); border-radius:6px; padding:2px; font-size:13px; font-weight:600;">
       <button id="unitBtnCm" class="btn btn-sm" style="background:var(--surface-0); border-radius:4px; border:1px solid var(--border-color); padding:4px 12px; cursor:pointer; color:var(--text-primary);">cm</button>
@@ -26,7 +26,7 @@ document.getElementById("pageHeaderActions").innerHTML = purify(`
   </div>
 `);
 
-document.getElementById("pageContent").innerHTML = purify(`
+document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:550px;">
       <div class="wk-modal-header">
@@ -262,7 +262,7 @@ async function loadData() {
 function renderTable(logs) {
   const tbody = document.getElementById("mTableBody");
   if (!logs || logs.length === 0) {
-    tbody.innerHTML = purify('<tr><td colspan="7" style="text-align:center;padding:24px;">No measurements logged yet.</td></tr>');
+    tbody.innerHTML = DOMPurify.sanitize('<tr><td colspan="7" style="text-align:center;padding:24px;">No measurements logged yet.</td></tr>');
     return;
   }
   
@@ -287,7 +287,7 @@ function renderTable(logs) {
       </tr>
     `;
   }
-  tbody.innerHTML = purify(html);
+  tbody.innerHTML = DOMPurify.sanitize(html);
 }
 
 window.deleteMeasurement = async function(id) {

@@ -14,7 +14,7 @@
   let activeWorkout = null;    // { template, exercises: [{...}], startTime, timerInterval }
 
   // ── Initial render ────────────────────────────────────────────────────────
-  content.innerHTML = purify(`
+  content.innerHTML = DOMPurify.sanitize(`
     <div id="workoutPage">
 
       <!-- Header actions -->
@@ -219,19 +219,19 @@
        return a.localeCompare(b);
     });
     
-    muscleSel.innerHTML = purify(`<option value="">All Muscles</option>` + muscles.map(m => 
+    muscleSel.innerHTML = DOMPurify.sanitize(`<option value="">All Muscles</option>` + muscles.map(m => 
       `<option value="${escapeHtml(m)}">${escapeHtml(m.charAt(0).toUpperCase() + m.slice(1))}</option>`
     ).join(''));
     
-    exSel.innerHTML = purify(buildGroupedExerciseOptions(exercises));
+    exSel.innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
     
     muscleSel.addEventListener('change', () => {
        const val = muscleSel.value;
        if (!val) {
-         exSel.innerHTML = purify(buildGroupedExerciseOptions(exercises));
+         exSel.innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
        } else {
          const filtered = exercises.filter(e => (e.muscle_group || 'other').toLowerCase() === val);
-         exSel.innerHTML = purify(filtered.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join(''));
+         exSel.innerHTML = DOMPurify.sanitize(filtered.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join(''));
        }
     });
   }
@@ -250,7 +250,7 @@
 
     empty.style.display = 'none';
     grid.style.display = 'grid';
-    grid.innerHTML = purify(templates.map(t => `
+    grid.innerHTML = DOMPurify.sanitize(templates.map(t => `
       <div class="wk-template-card" data-id="${t.id}">
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escapeHtml(t.name)}</div>
@@ -325,7 +325,7 @@
       byDate[s.date].push(s);
     }
 
-    list.innerHTML = purify(Object.keys(byDate).map(date => `
+    list.innerHTML = DOMPurify.sanitize(Object.keys(byDate).map(date => `
       <div class="wk-history-date-group">
         <div class="wk-history-date">${fmtDate(date)}</div>
         ${byDate[date].map(s => `
@@ -376,7 +376,7 @@
   async function showHistoryDetailModal(sessionId) {
     const modal = document.getElementById('historyDetailModal');
     const body = document.getElementById('hdBody');
-    body.innerHTML = purify('<div class="ironlog-spinner" style="margin:40px auto;display:block;"></div>');
+    body.innerHTML = DOMPurify.sanitize('<div class="ironlog-spinner" style="margin:40px auto;display:block;"></div>');
     modal.style.display = 'flex';
 
     try {
@@ -428,7 +428,7 @@
         <button class="btn btn-secondary wk-btn-full" id="historyShareBtn" style="background:#3E7CB1;color:white;border-color:#3E7CB1;width:100%;padding:12px;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;">📸 Share to IG Story</button>
       </div>`;
       
-      body.innerHTML = purify(html);
+      body.innerHTML = DOMPurify.sanitize(html);
 
       const durationStr = data.duration_seconds
         ? Math.floor(data.duration_seconds/60) + 'm ' + (data.duration_seconds%60) + 's'
@@ -444,7 +444,7 @@
       };
 
     } catch (err) {
-      body.innerHTML = purify(`<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`);
+      body.innerHTML = DOMPurify.sanitize(`<div style="color:#FC8181; padding:20px;">Failed to load details.</div>`);
       handleApiError(err);
     }
   }
@@ -490,10 +490,10 @@
   function renderTmplExercises() {
     const container = document.getElementById('tmplExerciseList');
     if (!tmplExercises.length) {
-      container.innerHTML = purify('<div class="wk-empty-ex">No exercises yet. Add some below.</div>');
+      container.innerHTML = DOMPurify.sanitize('<div class="wk-empty-ex">No exercises yet. Add some below.</div>');
       return;
     }
-    container.innerHTML = purify(tmplExercises.map((e, i) => `
+    container.innerHTML = DOMPurify.sanitize(tmplExercises.map((e, i) => `
       <div class="wk-tmpl-ex-row" data-idx="${i}">
         <div class="wk-tmpl-ex-drag">☰</div>
         <div class="wk-tmpl-ex-info">
@@ -700,14 +700,14 @@
 
   function renderAwTabs() {
     const tabs = document.getElementById('awTabs');
-    tabs.innerHTML = purify(awExercises.map((e, i) => {
+    tabs.innerHTML = DOMPurify.sanitize(awExercises.map((e, i) => {
       const done = e.loggedSets.filter(Boolean).length >= e.target_sets;
       return `<button class="wk-tab ${i === awCurrentIdx ? 'active' : ''} ${done ? 'done' : ''}"
         data-idx="${i}">${i + 1}. ${escapeHtml(e.exercise_name.split(' ').slice(0, 2).join(' '))}</button>`;
     }).join(''));
 
     if (awTemplateId === 0 && awIsStarted) {
-      tabs.innerHTML += purify(`<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`);
+      tabs.innerHTML += DOMPurify.sanitize(`<button class="wk-tab wk-tab-add" id="awAddExBtn">+</button>`);
       document.getElementById('awAddExBtn')?.addEventListener('click', addExerciseToWorkout);
     }
 
@@ -723,7 +723,7 @@
   function addExerciseToWorkout() {
     const overlay = document.createElement('div');
     overlay.className = 'wk-quick-pick';
-    overlay.innerHTML = purify(`
+    overlay.innerHTML = DOMPurify.sanitize(`
       <div class="wk-quick-pick-box">
         <div class="wk-quick-pick-title">Add Exercise</div>
         <div style="display:flex; gap:8px; margin-bottom:8px;">
@@ -739,7 +739,7 @@
     const infoBtn = document.createElement('button');
     infoBtn.className = 'btn btn-secondary';
     infoBtn.style.padding = '0 12px';
-    infoBtn.innerHTML = purify('Info');
+    infoBtn.innerHTML = DOMPurify.sanitize('Info');
     infoBtn.onclick = () => {
       const exSel = document.getElementById('qpExSel');
       if(exSel.value) window.showExerciseInfo(parseInt(exSel.value));
@@ -749,7 +749,7 @@
     const customBtn = document.createElement('button');
     customBtn.className = 'btn btn-secondary';
     customBtn.style.padding = '0 12px';
-    customBtn.innerHTML = purify('+ Custom');
+    customBtn.innerHTML = DOMPurify.sanitize('+ Custom');
     customBtn.onclick = () => {
       if(window.showCustomExerciseModal) {
         window.showCustomExerciseModal(async (newEx) => {
@@ -768,7 +768,7 @@
 
     const btnRow = document.createElement('div');
     btnRow.className = 'wk-modal-footer';
-    btnRow.innerHTML = purify(`<button class="btn btn-secondary" id="qpCancel">Cancel</button>
+    btnRow.innerHTML = DOMPurify.sanitize(`<button class="btn btn-secondary" id="qpCancel">Cancel</button>
                         <button class="btn btn-primary" id="qpAdd">Add</button>`);
     overlay.querySelector('.wk-quick-pick-box').appendChild(btnRow);
     document.body.appendChild(overlay);
@@ -796,7 +796,7 @@
   function renderAwPanel() {
     const panel = document.getElementById('awPanel');
     if (awExercises.length === 0) {
-      panel.innerHTML = purify(`
+      panel.innerHTML = DOMPurify.sanitize(`
         <div class="wk-empty" style="margin-top:60px;">
           <div class="wk-empty-icon" style="font-size:48px;"></div>
           <h3 style="margin-top:16px;">Ready to train?</h3>
@@ -866,7 +866,7 @@
       `;
     }).join('');
 
-    panel.innerHTML = purify(`
+    panel.innerHTML = DOMPurify.sanitize(`
       <div class="wk-panel-header">
         <div class="wk-panel-title" style="display:flex; align-items:center; justify-content:space-between;">
           <span>${escapeHtml(ex.exercise_name)}</span>
@@ -1118,7 +1118,7 @@
       ? Math.floor(durationSeconds/60) + 'm ' + (durationSeconds%60) + 's'
       : '—';
 
-    document.getElementById('wcStats').innerHTML = purify(`
+    document.getElementById('wcStats').innerHTML = DOMPurify.sanitize(`
       <div class="wk-stat"><div class="wk-stat-val">${result.exercises_saved}</div><div class="wk-stat-lbl">Exercises</div></div>
       <div class="wk-stat"><div class="wk-stat-val">${result.total_sets_saved}</div><div class="wk-stat-lbl">Sets logged</div></div>
       <div class="wk-stat"><div class="wk-stat-val">${durationStr}</div><div class="wk-stat-lbl">Duration</div></div>
@@ -1166,7 +1166,7 @@
           </div>
         `;
       }
-      prsEl.innerHTML = purify(html);
+      prsEl.innerHTML = DOMPurify.sanitize(html);
       
       // Hide standard completion title/emoji to let PR shine
       if (titleEl) titleEl.style.display = 'none';
@@ -1207,7 +1207,7 @@
       // Standard layout
       if (titleEl) titleEl.style.display = 'block';
       if (emojiEl) emojiEl.style.display = 'block';
-      prsEl.innerHTML = purify('');
+      prsEl.innerHTML = DOMPurify.sanitize('');
     }
 
     modal.style.display = 'flex';
@@ -1254,7 +1254,7 @@
     
     const shareBtn = document.getElementById(btnId);
     const origText = shareBtn.innerHTML;
-    shareBtn.innerHTML = purify("Generating Image...");
+    shareBtn.innerHTML = DOMPurify.sanitize("Generating Image...");
     shareBtn.disabled = true;
 
     // Create a temporary hidden container for the share image
@@ -1278,7 +1278,7 @@
     card.style.boxSizing = "border-box";
     card.style.backgroundImage = "radial-gradient(circle at 15% 0%, rgba(226,64,45,0.1), transparent 50%), radial-gradient(circle at 85% 100%, rgba(62,124,177,0.1), transparent 50%)";
 
-    card.innerHTML = purify(`
+    card.innerHTML = DOMPurify.sanitize(`
       <div style="font-size: 64px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 24px; color: #E2402D;">Workout Complete</div>
       <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${data.exercises_saved} Exercises • ${data.total_sets_saved} Sets • ${data.durationStr}</div>
       
@@ -1348,7 +1348,7 @@
       showToast("Couldn't generate image. Try again.");
     } finally {
       document.body.removeChild(shareContainer);
-      shareBtn.innerHTML = purify(origText);
+      shareBtn.innerHTML = DOMPurify.sanitize(origText);
       shareBtn.disabled = false;
     }
   }

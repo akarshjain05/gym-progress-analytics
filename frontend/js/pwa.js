@@ -81,7 +81,7 @@
     banner.id = 'ironlog-install-banner';
     banner.setAttribute('role', 'complementary');
     banner.setAttribute('aria-label', 'Install app');
-    banner.innerHTML = purify(`
+    banner.innerHTML = DOMPurify.sanitize(`
       <div class="pwa-banner-content">
         <img src="/icons/icon-96.png" alt="IRONLOG" class="pwa-banner-icon">
         <div class="pwa-banner-text">
@@ -122,7 +122,7 @@
 
     const hint = document.createElement('div');
     hint.id = 'ironlog-ios-hint';
-    hint.innerHTML = purify(`
+    hint.innerHTML = DOMPurify.sanitize(`
       <div class="pwa-banner-content">
         <img src="/icons/icon-96.png" alt="IRONLOG" class="pwa-banner-icon">
         <div class="pwa-banner-text">
@@ -152,7 +152,7 @@
     if (!banner) {
       banner = document.createElement('div');
       banner.id = 'ironlog-offline-banner';
-      banner.innerHTML = purify(`
+      banner.innerHTML = DOMPurify.sanitize(`
         <span>⚠️ You're offline — data will sync when you reconnect.</span>
       `);
       banner.style.cssText = `
@@ -193,7 +193,7 @@
   function showUpdateBanner() {
     const banner = document.createElement('div');
     banner.id = 'ironlog-update-banner';
-    banner.innerHTML = purify(`
+    banner.innerHTML = DOMPurify.sanitize(`
       <span>🔄 A new version of IRONLOG is available.</span>
       <button id="pwa-update-btn" class="pwa-btn-install" style="margin-left:12px">Update Now</button>
     `);

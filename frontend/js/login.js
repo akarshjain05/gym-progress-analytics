@@ -7,7 +7,7 @@ const authSwitchWrap = document.getElementById("authSwitchWrap");
 const alertSlot = document.getElementById("alertSlot");
 
 function setAlert(message, type = "error") {
-  alertSlot.innerHTML = purify(message ? `<div class="alert alert-${type}">${message}</div>` : "");
+  alertSlot.innerHTML = DOMPurify.sanitize(message ? `<div class="alert alert-${type}">${message}</div>` : "");
 }
 
 document.getElementById("switchToRegister").addEventListener("click", () => {
@@ -36,7 +36,7 @@ loginForm.addEventListener("submit", async (e) => {
     window.location.href = urlParams.get("next") || "dashboard.html";
   } catch (err) {
     if (err.message && err.message.toLowerCase().includes("verify your email")) {
-      alertSlot.innerHTML = purify(`<div class="alert alert-error">${err.message} <br><a href="#" id="resendVerificationLink" style="font-weight:600;margin-top:8px;display:inline-block;">Resend verification email</a></div>`);
+      alertSlot.innerHTML = DOMPurify.sanitize(`<div class="alert alert-error">${err.message} <br><a href="#" id="resendVerificationLink" style="font-weight:600;margin-top:8px;display:inline-block;">Resend verification email</a></div>`);
       document.getElementById("resendVerificationLink").addEventListener("click", async (ev) => {
         ev.preventDefault();
         try {

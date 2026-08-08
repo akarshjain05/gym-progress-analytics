@@ -13,14 +13,14 @@ function chartColors() {
   };
 }
 
-document.getElementById("pageHeaderActions").innerHTML = purify(`
+document.getElementById("pageHeaderActions").innerHTML = DOMPurify.sanitize(`
   <button class="btn btn-primary btn-sm" id="openLogBtn">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     Log weight
   </button>
 `);
 
-document.getElementById("pageContent").innerHTML = purify(`
+document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
   <div id="formCard" class="wk-modal-overlay" style="display:none; z-index:9999;">
     <div class="wk-modal" style="max-width:500px;">
       <div class="wk-modal-header">
@@ -119,7 +119,7 @@ window.deleteEntry = deleteEntry;
 function renderSummary(summary) {
   const el = document.getElementById("summaryStats");
   if (!summary.has_data) {
-    el.innerHTML = purify(buildEmptyState(
+    el.innerHTML = DOMPurify.sanitize(buildEmptyState(
       "No entries yet",
       "Log your first weigh-in to start tracking your trend.",
       "Log weight now",
@@ -139,7 +139,7 @@ function renderSummary(summary) {
   }
   const totalDelta = fmtDelta(summary.total_change_kg, " kg");
   const weeklyDelta = fmtDelta(summary.weekly_rate_kg, " kg/wk");
-  el.innerHTML = purify(`
+  el.innerHTML = DOMPurify.sanitize(`
     <div class="card stat-card">
       <div class="stat-label">Current</div>
       <div class="stat-value">${fmtKg(summary.current_weight_kg)}<span class="unit">kg</span></div>
@@ -212,7 +212,7 @@ function renderChart(series) {
 function renderTable(logs) {
   const wrap = document.getElementById("weightTableWrap");
   if (!logs.length) {
-    wrap.innerHTML = purify(`<div class="empty-state"><p>No entries yet.</p></div>`);
+    wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state"><p>No entries yet.</p></div>`);
     return;
   }
   const rows = [...logs].reverse().map(l => `
@@ -230,7 +230,7 @@ function renderTable(logs) {
       </td>
     </tr>
   `).join("");
-  wrap.innerHTML = purify(`
+  wrap.innerHTML = DOMPurify.sanitize(`
     <table class="data-table">
       <thead><tr><th>Date</th><th>Weight</th><th>Body fat</th><th>Notes</th><th></th></tr></thead>
       <tbody>${rows}</tbody>

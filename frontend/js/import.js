@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('tplCount').textContent = `${templateData.exercise_count} exercises`;
 
   const exContainer = document.getElementById('tplExercises');
-  exContainer.innerHTML = purify(templateData.exercises.map(ex => `
+  exContainer.innerHTML = DOMPurify.sanitize(templateData.exercises.map(ex => `
     <div class="import-ex">
       <div class="import-ex-name">${ex.exercise_name}</div>
       <div class="import-ex-meta">${ex.target_sets} sets × ${ex.target_reps} reps</div>

@@ -353,7 +353,7 @@ window.appAlert = function(title, message) {
       modal.id = 'ironlogAlertModal';
       modal.className = 'wk-modal-overlay';
       modal.style.zIndex = '9999';
-      modal.innerHTML = purify(`
+      modal.innerHTML = DOMPurify.sanitize(`
         <div class="wk-modal" style="max-width:350px; text-align:center; padding:32px 24px 24px;">
           <h2 id="ironlogAlertTitle" style="font-size:22px; font-weight:700; margin:0 0 12px 0;">Alert</h2>
           <div id="ironlogAlertMessage" style="color:#A0AEC0; font-size:15px; line-height:1.5; margin-bottom:32px;"></div>

@@ -220,7 +220,7 @@ window.CalculatorsPage = {
     // Inject HTML into the shell's content area
     const content = document.getElementById("pageContent");
     if (!content) return;
-    content.innerHTML = purify(CALCULATORS_HTML);
+    content.innerHTML = DOMPurify.sanitize(CALCULATORS_HTML);
     
     // Set up plate calculator listeners
     const pt = document.getElementById('plateTarget');
@@ -251,7 +251,7 @@ window.CalculatorsPage = {
     
     if (!target || !bar || target <= bar) {
       document.getElementById('platePerSide').textContent = '0 kg';
-      document.getElementById('plateVisual').innerHTML = purify('');
+      document.getElementById('plateVisual').innerHTML = DOMPurify.sanitize('');
       return;
     }
 
@@ -283,7 +283,7 @@ window.CalculatorsPage = {
       visualHtml += '<div class="bar-end"></div>';
     }
 
-    document.getElementById('plateVisual').innerHTML = purify(visualHtml);
+    document.getElementById('plateVisual').innerHTML = DOMPurify.sanitize(visualHtml);
   },
 
   calcORM() {

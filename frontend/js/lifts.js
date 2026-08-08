@@ -24,10 +24,10 @@
       document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
     }
   });
-  pageHeaderActions.innerHTML = purify(`<button class="btn btn-primary" id="logSessionBtn">+ Log a session</button>`);
+  pageHeaderActions.innerHTML = DOMPurify.sanitize(`<button class="btn btn-primary" id="logSessionBtn">+ Log a session</button>`);
 
   const content = document.getElementById("pageContent");
-  content.innerHTML = purify(`
+  content.innerHTML = DOMPurify.sanitize(`
     <div id="liftsPage">
     <!-- Edit Set Modal -->
     <div id="editSetModal" class="wk-modal-overlay" style="display:none; z-index:9999;">
@@ -320,7 +320,7 @@
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
     const allGroups = [...orderedGroups, ...extraGroups];
 
-    select.innerHTML = purify(allGroups.map(g =>
+    select.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
       `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
     ).join(""));
 
@@ -352,7 +352,7 @@
 
   function populateExerciseSelect(groupExercises) {
     const select = document.getElementById("exerciseSelect");
-    select.innerHTML = purify(groupExercises.map(ex =>
+    select.innerHTML = DOMPurify.sanitize(groupExercises.map(ex =>
       `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
     ).join(""));
     // Trigger load for first exercise in group
@@ -378,14 +378,14 @@
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
     const allGroups = [...orderedGroups, ...extraGroups];
 
-    selectMuscle.innerHTML = purify(allGroups.map(g =>
+    selectMuscle.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
       `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
     ).join(""));
 
     selectMuscle.addEventListener("change", () => {
       const g = selectMuscle.value;
       if (groups[g]) {
-        selectExercise.innerHTML = purify(groups[g].map(ex =>
+        selectExercise.innerHTML = DOMPurify.sanitize(groups[g].map(ex =>
           `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
         ).join(""));
       }
@@ -408,7 +408,7 @@
       if (!data.has_data) {
         document.getElementById("progressSection").style.display = "none";
         const noDataEl = document.getElementById("noDataMsg");
-        noDataEl.innerHTML = purify(buildEmptyState(
+        noDataEl.innerHTML = DOMPurify.sanitize(buildEmptyState(
           "No sessions logged",
           "You haven't logged any data for this exercise yet.",
           "Log your first session",
@@ -514,14 +514,14 @@
 
 
     if (!level && reason) {
-      card.innerHTML = purify(`<div style="font-size:13px;color:#a09880;line-height:1.4;">${escapeHtml(reason)}</div>`);
+      card.innerHTML = DOMPurify.sanitize(`<div style="font-size:13px;color:#a09880;line-height:1.4;">${escapeHtml(reason)}</div>`);
       scaleWrap.style.display = "none";
       return;
     }
 
     if (level) {
       if (data.percentile != null) {
-        card.innerHTML = purify(`
+        card.innerHTML = DOMPurify.sanitize(`
           <div class="percentile-card" style="margin-bottom: 0; text-align: left;">
             <div class="pct-header">
               <span class="pct-title">${escapeHtml(data.exercise)} Rank</span>
@@ -541,7 +541,7 @@
         const subtitle = isBW
           ? `Best: ${bestReps} reps · vs population avg`
           : "vs population avg";
-        card.innerHTML = purify(`
+        card.innerHTML = DOMPurify.sanitize(`
           <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
             <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
           </div>
@@ -553,7 +553,7 @@
     // Visual strength scale
     if (data.percentile != null) {
       scaleWrap.style.display = "block";
-      scaleEl.innerHTML = purify(`
+      scaleEl.innerHTML = DOMPurify.sanitize(`
         <div class="percentile-row" style="border-bottom: none; padding: 0; margin-top: 12px;">
           <div class="percentile-stat" style="margin-bottom:8px; text-align: left;">
             Stronger than <strong>${Math.round(data.percentile)}%</strong> of lifters your bodyweight
@@ -563,7 +563,7 @@
           </div>
         </div>
       `);
-      labelsEl.innerHTML = purify("");
+      labelsEl.innerHTML = DOMPurify.sanitize("");
     } else if (breakpoints) {
       scaleWrap.style.display = "block";
       const tiers = ["beginner", "novice", "intermediate", "advanced", "elite"];
@@ -611,8 +611,8 @@
           <div class="scale-marker-label">${markerLabel}</div>
         </div>`;
 
-        scaleEl.innerHTML = purify(`<div class="scale-track">${scaleHtml}</div>`);
-        labelsEl.innerHTML = purify(labelsHtml);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
+        labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
 
       } else {
         // Weight-based scale — values are kg numbers
@@ -652,8 +652,8 @@
           <div class="scale-marker-label">${pr}kg</div>
         </div>`;
 
-        scaleEl.innerHTML = purify(`<div class="scale-track">${scaleHtml}</div>`);
-        labelsEl.innerHTML = purify(labelsHtml);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
+        labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
       }
     } else {
       scaleWrap.style.display = "none";
@@ -750,7 +750,7 @@
   function renderSessionsGrouped(sessions, exerciseId) {
     const container = document.getElementById("sessionsList");
     if (!sessions || sessions.length === 0) {
-      container.innerHTML = purify('<div class="empty-row">No sessions yet.</div>');
+      container.innerHTML = DOMPurify.sanitize('<div class="empty-row">No sessions yet.</div>');
       return;
     }
 
@@ -795,7 +795,7 @@
       `;
     }).join("");
 
-    container.innerHTML = purify(html);
+    container.innerHTML = DOMPurify.sanitize(html);
 
     // Toggle expand/collapse
     container.querySelectorAll(".session-date-row").forEach(row => {
@@ -924,7 +924,7 @@
         `;
       }).join("");
 
-      container.innerHTML = purify(html);
+      container.innerHTML = DOMPurify.sanitize(html);
 
       // Click PR row to view that exercise
       container.querySelectorAll(".pr-row").forEach(row => {
@@ -953,7 +953,7 @@
 
   function openLogModal() {
     setCount = 0;
-    document.getElementById("setsContainer").innerHTML = purify("");
+    document.getElementById("setsContainer").innerHTML = DOMPurify.sanitize("");
     document.getElementById("modalDate").value = todayIso();
     document.getElementById("modalNotes").value = "";
     addSetRow();
@@ -976,7 +976,7 @@
     setCount++;
     const div = document.createElement("div");
     div.className = "modal-set-row";
-    div.innerHTML = purify(`
+    div.innerHTML = DOMPurify.sanitize(`
       <span class="modal-set-num" style="min-width: 38px;">Set ${setCount}</span>
       <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="0.5" style="width: 76px; padding: 8px 6px; text-align: center;">
       <span style="color:#a09880;font-size:13px; font-weight:700;">×</span>
@@ -1141,7 +1141,7 @@
     
     const shareBtn = document.getElementById(btnId);
     const origText = shareBtn.innerHTML;
-    shareBtn.innerHTML = purify("⏳ Generating...");
+    shareBtn.innerHTML = DOMPurify.sanitize("⏳ Generating...");
     shareBtn.disabled = true;
 
     const shareContainer = document.createElement("div");
@@ -1171,7 +1171,7 @@
     const prDateStr = fmtDate(data.personal_record_date);
     const estText = isBWExercise ? "Max Reps" : "est. 1RM";
     
-    card.innerHTML = purify(`
+    card.innerHTML = DOMPurify.sanitize(`
       <div style="font-size: 72px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: #E2402D; margin-bottom: 24px; text-shadow: 0 0 40px rgba(226,64,45,0.4); text-align: center; width: 100%;">NEW PERSONAL RECORD</div>
       
       <div style="background: rgba(30, 34, 39, 0.7); border-radius: 40px; padding: 120px 80px; width: 100%; max-width: 900px; text-align: center; border: 2px solid rgba(255,255,255,0.05); margin-top: 160px; margin-bottom: 200px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
@@ -1219,14 +1219,14 @@
         }
         
         document.body.removeChild(shareContainer);
-        shareBtn.innerHTML = purify(origText);
+        shareBtn.innerHTML = DOMPurify.sanitize(origText);
         shareBtn.disabled = false;
       }, 'image/png');
     } catch (err) {
       console.error("html2canvas error:", err);
       showToast("Error generating image.");
       document.body.removeChild(shareContainer);
-      shareBtn.innerHTML = purify(origText);
+      shareBtn.innerHTML = DOMPurify.sanitize(origText);
       shareBtn.disabled = false;
     }
   }

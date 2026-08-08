@@ -1,6 +1,6 @@
 renderShell("profile", "Profile", "Your stats power the BMR/TDEE and strength-level calculations.");
 
-document.getElementById("pageContent").innerHTML = purify(`
+document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
   <!-- Tab bar -->
   <div class="profile-tabs">
     <button class="profile-tab active" data-tab="profile">👤 Profile</button>
@@ -161,7 +161,7 @@ async function loadSettingsSection() {
     vapidConfigured = !!(vk && vk.configured);
   } catch(e) {}
 
-  settingsEl.innerHTML = purify(`
+  settingsEl.innerHTML = DOMPurify.sanitize(`
     <div class="card">
       <div class="card-title">Appearance</div>
       <div class="settings-row">

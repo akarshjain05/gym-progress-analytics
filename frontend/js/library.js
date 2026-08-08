@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderShell('library', 'Exercise Library', 'Browse your exercises');
   
   const content = document.getElementById('pageContent');
-  content.innerHTML = purify(`
+  content.innerHTML = DOMPurify.sanitize(`
     <div class="card">
       <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
         <select id="libMuscleSelect" class="lib-search" style="margin-bottom:0; flex:1; min-width:130px;"></select>
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderLibrary(allExercises);
   } catch (err) {
     handleApiError(err);
-    container.innerHTML = purify(buildEmptyState('Failed to load', 'Could not load exercises.'));
+    container.innerHTML = DOMPurify.sanitize(buildEmptyState('Failed to load', 'Could not load exercises.'));
   }
 
   function applyFilters() {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.equipment) equipSet.add(e.equipment.toLowerCase());
     });
     const equipments = [...equipSet].sort();
-    equipmentSelect.innerHTML = purify(`<option value="">All Equipment</option>` + equipments.map(eq => 
+    equipmentSelect.innerHTML = DOMPurify.sanitize(`<option value="">All Equipment</option>` + equipments.map(eq => 
       `<option value="${eq}">${capitalize(eq)}</option>`
     ).join(''));
   }
@@ -90,14 +90,14 @@ document.addEventListener('DOMContentLoaded', async () => {
        if (idxB !== -1) return 1;
        return a.localeCompare(b);
     });
-    muscleSelect.innerHTML = purify(`<option value="">All Muscles</option>` + muscles.map(m => 
+    muscleSelect.innerHTML = DOMPurify.sanitize(`<option value="">All Muscles</option>` + muscles.map(m => 
       `<option value="${m}">${capitalize(m)}</option>`
     ).join(''));
   }
 
   function renderLibrary(exercises) {
     if (exercises.length === 0) {
-      container.innerHTML = purify(`<div class="empty-state"><p>No exercises found.</p></div>`);
+      container.innerHTML = DOMPurify.sanitize(`<div class="empty-state"><p>No exercises found.</p></div>`);
       return;
     }
 
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     });
     
-    container.innerHTML = purify(html);
+    container.innerHTML = DOMPurify.sanitize(html);
   }
   
   function capitalize(s) {

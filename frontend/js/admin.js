@@ -5,11 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Verify admin role first
   const me = Auth.getUser();
   if (!me || me.role !== "admin") {
-    container.innerHTML = purify(`<div class="alert alert-error">Access denied. You do not have admin privileges.</div>`);
+    container.innerHTML = DOMPurify.sanitize(`<div class="alert alert-error">Access denied. You do not have admin privileges.</div>`);
     return;
   }
 
-  container.innerHTML = purify(`
+  container.innerHTML = DOMPurify.sanitize(`
     <!-- Tab bar -->
     <div class="profile-tabs mb-16">
       <button class="profile-tab active" data-tab="users">Users</button>
@@ -92,10 +92,10 @@ async function loadUsers() {
   try {
     const users = await Api.adminGetUsers();
     if (users.length === 0) {
-      tbody.innerHTML = purify(`<tr><td colspan="6" style="text-align:center;padding:24px;">No users found.</td></tr>`);
+      tbody.innerHTML = DOMPurify.sanitize(`<tr><td colspan="6" style="text-align:center;padding:24px;">No users found.</td></tr>`);
       return;
     }
-    tbody.innerHTML = purify(users.map(u => `
+    tbody.innerHTML = DOMPurify.sanitize(users.map(u => `
       <tr>
         <td style="text-align:center; vertical-align:middle;">#${u.id}</td>
         <td style="text-align:center; vertical-align:middle;">${u.username ? escapeHtml(u.username) : '<span class="text-secondary">Not set</span>'}</td>
@@ -110,7 +110,7 @@ async function loadUsers() {
     `).join(""));
   } catch (err) {
     handleApiError(err);
-    tbody.innerHTML = purify(`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--error);">Failed to load users.</td></tr>`);
+    tbody.innerHTML = DOMPurify.sanitize(`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--error);">Failed to load users.</td></tr>`);
   }
 }
 
@@ -140,7 +140,7 @@ async function loadStats() {
   const grid = document.getElementById("statsGrid");
   try {
     const stats = await Api.adminGetStats();
-    grid.innerHTML = purify(`
+    grid.innerHTML = DOMPurify.sanitize(`
       <div class="stat-card"><div class="stat-number">${stats.total_users}</div><div class="stat-label">Total Users</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_workouts}</div><div class="stat-label">Workouts Logged</div></div>
       <div class="stat-card"><div class="stat-number">${stats.total_goals}</div><div class="stat-label">Goals Set</div></div>
@@ -149,7 +149,7 @@ async function loadStats() {
     `);
   } catch(err) {
     handleApiError(err);
-    grid.innerHTML = purify(`<div class="alert alert-error">Failed to load platform stats.</div>`);
+    grid.innerHTML = DOMPurify.sanitize(`<div class="alert alert-error">Failed to load platform stats.</div>`);
   }
 }
 
@@ -160,10 +160,10 @@ async function loadLogs() {
   try {
     const logs = await Api.adminGetLogs();
     if (!logs.length) {
-      wrap.innerHTML = purify(`<div style="text-align:center;padding:24px;color:var(--text-secondary)">No activity found.</div>`);
+      wrap.innerHTML = DOMPurify.sanitize(`<div style="text-align:center;padding:24px;color:var(--text-secondary)">No activity found.</div>`);
       return;
     }
-    wrap.innerHTML = purify(logs.map(l => `
+    wrap.innerHTML = DOMPurify.sanitize(logs.map(l => `
       <div class="log-item">
         <div class="log-info">
           <div class="log-desc">${escapeHtml(l.description)}</div>
@@ -180,7 +180,7 @@ async function loadLogs() {
     `).join(""));
   } catch(err) {
     handleApiError(err);
-    wrap.innerHTML = purify(`<div class="alert alert-error">Failed to load activity logs.</div>`);
+    wrap.innerHTML = DOMPurify.sanitize(`<div class="alert alert-error">Failed to load activity logs.</div>`);
   }
 }
 
