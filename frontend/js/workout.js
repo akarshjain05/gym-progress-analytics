@@ -170,8 +170,8 @@
     if (!sec) return '—';
     const m = Math.floor(sec / 60);
     const s = sec % 60;
-    if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
-    return `${m}m ${s}s`;
+    if (m >= 60) return `${escapeHtml(Math.floor(m/60))}h ${escapeHtml(m%60)}m`;
+    return `${escapeHtml(m)}m ${escapeHtml(s)}s`;
   };
 
   // ── Load data ────────────────────────────────────────────────────────────
@@ -231,7 +231,7 @@
          exSel.innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
        } else {
          const filtered = exercises.filter(e => (e.muscle_group || 'other').toLowerCase() === val);
-         exSel.innerHTML = DOMPurify.sanitize(filtered.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join(''));
+         exSel.innerHTML = DOMPurify.sanitize(filtered.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`).join(''));
        }
     });
   }
@@ -251,15 +251,15 @@
     empty.style.display = 'none';
     grid.style.display = 'grid';
     grid.innerHTML = DOMPurify.sanitize(templates.map(t => `
-      <div class="wk-template-card" data-id="${t.id}">
+      <div class="wk-template-card" data-id="${escapeHtml(t.id)}">
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escapeHtml(t.name)}</div>
           <div class="wk-tc-actions" style="position:relative;">
-            <button class="wk-icon-btn wk-menu-btn" data-id="${t.id}">⋮</button>
-            <div class="wk-dropdown-menu" id="wk-menu-${t.id}" style="display:none; position:absolute; right:0; top:24px; background:#1A1D21; border:1px solid #2D3748; border-radius:8px; overflow:hidden; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.5); min-width:120px;">
-              <button class="wk-dropdown-item wk-share-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px;">Share</button>
-              <button class="wk-dropdown-item wk-edit-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Edit</button>
-              <button class="wk-dropdown-item wk-del-btn" data-id="${t.id}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#FC8181; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Delete</button>
+            <button class="wk-icon-btn wk-menu-btn" data-id="${escapeHtml(t.id)}">⋮</button>
+            <div class="wk-dropdown-menu" id="wk-menu-${escapeHtml(t.id)}" style="display:none; position:absolute; right:0; top:24px; background:#1A1D21; border:1px solid #2D3748; border-radius:8px; overflow:hidden; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.5); min-width:120px;">
+              <button class="wk-dropdown-item wk-share-btn" data-id="${escapeHtml(t.id)}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px;">Share</button>
+              <button class="wk-dropdown-item wk-edit-btn" data-id="${escapeHtml(t.id)}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Edit</button>
+              <button class="wk-dropdown-item wk-del-btn" data-id="${escapeHtml(t.id)}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#FC8181; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Delete</button>
             </div>
           </div>
         </div>
@@ -268,14 +268,14 @@
           ${t.exercises.slice(0, 5).map(e => `
             <div class="wk-tc-ex">
               <span class="wk-tc-ex-name">${escapeHtml(e.exercise_name)}</span>
-              <span class="wk-tc-ex-meta">${e.target_sets}×${e.target_reps}${e.target_weight_kg ? ' @ ' + e.target_weight_kg + 'kg' : ''}</span>
+              <span class="wk-tc-ex-meta">${escapeHtml(e.target_sets)}×${escapeHtml(e.target_reps)}${escapeHtml(e.target_weight_kg ? ' @ ' + e.target_weight_kg + 'kg' : '')}</span>
             </div>
           `).join('')}
           ${t.exercises.length > 5 ? `<div class="wk-tc-more">+${t.exercises.length - 5} more</div>` : ''}
         </div>
         <div class="wk-tc-footer">
-          <span class="wk-tc-count">${t.exercise_count} exercise${t.exercise_count !== 1 ? 's' : ''}</span>
-          <button class="btn btn-primary wk-start-btn" data-id="${t.id}">▶ Start</button>
+          <span class="wk-tc-count">${escapeHtml(t.exercise_count)} exercise${escapeHtml(t.exercise_count !== 1 ? 's' : '')}</span>
+          <button class="btn btn-primary wk-start-btn" data-id="${escapeHtml(t.id)}">▶ Start</button>
         </div>
       </div>
     `).join(''));
@@ -287,7 +287,7 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const id = btn.dataset.id;
-        const menu = document.getElementById(`wk-menu-${id}`);
+        const menu = document.getElementById(`wk-menu-${escapeHtml(id)}`);
         const isVisible = menu.style.display === 'block';
         document.querySelectorAll('.wk-dropdown-menu').forEach(m => m.style.display = 'none');
         if (!isVisible) menu.style.display = 'block';
@@ -327,20 +327,20 @@
 
     list.innerHTML = DOMPurify.sanitize(Object.keys(byDate).map(date => `
       <div class="wk-history-date-group">
-        <div class="wk-history-date">${fmtDate(date)}</div>
+        <div class="wk-history-date">${escapeHtml(fmtDate(date))}</div>
         ${byDate[date].map(s => `
           <div class="wk-history-card" data-id="${s.id}">
             <div class="wk-history-card-top">
               <div class="wk-history-name">
-                <span class="wk-history-icon">${s.template_id ? '📋' : '🏋️'}</span>
+                <span class="wk-history-icon">${escapeHtml(s.template_id ? '📋' : '🏋️')}</span>
                 ${escapeHtml(s.template_name)}
               </div>
-              <button class="wk-icon-btn wk-history-del" data-id="${s.id}" title="Delete" style="font-size: 16px;">✕</button>
+              <button class="wk-icon-btn wk-history-del" data-id="${escapeHtml(s.id)}" title="Delete" style="font-size: 16px;">✕</button>
             </div>
             <div class="wk-history-meta">
-              <span>${fmtDuration(s.duration_seconds)}</span>
-              <span>${s.exercises_count} exercise${s.exercises_count !== 1 ? 's' : ''}</span>
-              <span>${s.sets_count} set${s.sets_count !== 1 ? 's' : ''}</span>
+              <span>${escapeHtml(fmtDuration(s.duration_seconds))}</span>
+              <span>${escapeHtml(s.exercises_count)} exercise${escapeHtml(s.exercises_count !== 1 ? 's' : '')}</span>
+              <span>${escapeHtml(s.sets_count)} set${escapeHtml(s.sets_count !== 1 ? 's' : '')}</span>
             </div>
             ${s.notes ? `<div class="wk-history-notes">${escapeHtml(s.notes)}</div>` : ''}
           </div>
@@ -362,7 +362,7 @@
         const confirmed = await window.appConfirm('Delete Workout', 'Delete this workout record? This will also delete all logged sets from this session.', 'Delete', 'Cancel');
         if (!confirmed) return;
         try {
-          await apiRequest(`/templates/history/${id}`, { method: 'DELETE' });
+          await apiRequest(`/templates/history/${escapeHtml(id)}`, { method: 'DELETE' });
           workoutHistory = workoutHistory.filter(s => s.id !== id);
           renderHistory();
           showToast('Workout record deleted.');
@@ -380,11 +380,11 @@
     modal.style.display = 'flex';
 
     try {
-      const data = await apiRequest(`/templates/history/${sessionId}`);
+      const data = await apiRequest(`/templates/history/${escapeHtml(sessionId)}`);
       
       let html = `<div style="margin-bottom:16px; color:#A0AEC0; font-size:14px;">
-        <div>${fmtDuration(data.duration_seconds)}</div>
-        <div>${fmtDate(data.date)}</div>
+        <div>${escapeHtml(fmtDuration(data.duration_seconds))}</div>
+        <div>${escapeHtml(fmtDate(data.date))}</div>
       </div>`;
 
       if (data.notes) {
@@ -410,9 +410,9 @@
               ${ex.sets.map(s => `
                 <tr style="border-bottom:1px solid #1A1D21;">
                   <td style="padding:8px 0; color:#E2E8F0;">${s.set_number}</td>
-                  <td style="color:#E2E8F0;">${s.weight_kg}</td>
-                  <td style="color:#E2E8F0;">${s.reps}</td>
-                  <td style="color:#A0AEC0;">${s.rpe || '-'}</td>
+                  <td style="color:#E2E8F0;">${escapeHtml(s.weight_kg)}</td>
+                  <td style="color:#E2E8F0;">${escapeHtml(s.reps)}</td>
+                  <td style="color:#A0AEC0;">${escapeHtml(s.rpe || '-')}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -465,7 +465,7 @@
 
   async function openEditTemplate(id) {
     try {
-      const t = await apiRequest(`/templates/${id}`);
+      const t = await apiRequest(`/templates/${escapeHtml(id)}`);
       editingTemplateId = id;
       tmplExercises = t.exercises.map(e => ({
         te_id: e.id,
@@ -494,22 +494,22 @@
       return;
     }
     container.innerHTML = DOMPurify.sanitize(tmplExercises.map((e, i) => `
-      <div class="wk-tmpl-ex-row" data-idx="${i}">
+      <div class="wk-tmpl-ex-row" data-idx="${escapeHtml(i)}">
         <div class="wk-tmpl-ex-drag">☰</div>
         <div class="wk-tmpl-ex-info">
           <div class="wk-tmpl-ex-name">${escapeHtml(e.exercise_name)}</div>
           <div class="wk-tmpl-ex-inputs">
             <label>Sets<input type="number" class="wk-input wk-input-sm tmpl-sets"
-              value="${e.target_sets}" min="1" max="20" data-idx="${i}"></label>
+              value="${escapeHtml(e.target_sets)}" min="1" max="20" data-idx="${escapeHtml(i)}"></label>
             <label>Reps<input type="number" class="wk-input wk-input-sm tmpl-reps"
-              value="${e.target_reps}" min="1" max="100" data-idx="${i}"></label>
+              value="${escapeHtml(e.target_reps)}" min="1" max="100" data-idx="${escapeHtml(i)}"></label>
             <label>Weight(kg)<input type="number" class="wk-input wk-input-sm tmpl-weight"
-              value="${e.target_weight_kg || ''}" min="0" max="600" step="0.5" placeholder="—" data-idx="${i}"></label>
+              value="${escapeHtml(e.target_weight_kg || '')}" min="0" max="600" step="0.5" placeholder="—" data-idx="${escapeHtml(i)}"></label>
             <label>Rest(s)<input type="number" class="wk-input wk-input-sm tmpl-rest"
-              value="${e.rest_seconds}" min="0" max="600" data-idx="${i}"></label>
+              value="${escapeHtml(e.rest_seconds)}" min="0" max="600" data-idx="${escapeHtml(i)}"></label>
           </div>
         </div>
-        <button class="wk-icon-btn wk-tmpl-remove" data-idx="${i}">✕</button>
+        <button class="wk-icon-btn wk-tmpl-remove" data-idx="${escapeHtml(i)}">✕</button>
       </div>
     `).join(''));
 
@@ -566,17 +566,17 @@
 
     try {
       if (editingTemplateId) {
-        await apiRequest(`/templates/${editingTemplateId}`, {
+        await apiRequest(`/templates/${escapeHtml(editingTemplateId)}`, {
           method: 'PUT', body: { name, description: desc || null },
         });
         const existing = templates.find(t => t.id === editingTemplateId);
         if (existing) {
           for (const te of existing.exercises) {
-            await apiRequest(`/templates/${editingTemplateId}/exercises/${te.id}`, { method: 'DELETE' });
+            await apiRequest(`/templates/${escapeHtml(editingTemplateId)}/exercises/${escapeHtml(te.id)}`, { method: 'DELETE' });
           }
         }
         for (const ex of payload.exercises) {
-          await apiRequest(`/templates/${editingTemplateId}/exercises`, { method: 'POST', body: ex });
+          await apiRequest(`/templates/${escapeHtml(editingTemplateId)}/exercises`, { method: 'POST', body: ex });
         }
       } else {
         await apiRequest('/templates', { method: 'POST', body: payload });
@@ -595,10 +595,10 @@
 
   async function deleteTemplate(id) {
     const t = templates.find(x => x.id === id);
-    const confirmed = await window.appConfirm('Delete Template', `Delete "${t?.name || 'this template'}"? This cannot be undone.`, 'Delete', 'Cancel');
+    const confirmed = await window.appConfirm('Delete Template', `Delete "${escapeHtml(t?.name || 'this template')}"? This cannot be undone.`, 'Delete', 'Cancel');
     if (!confirmed) return;
     try {
-      await apiRequest(`/templates/${id}`, { method: 'DELETE' });
+      await apiRequest(`/templates/${escapeHtml(id)}`, { method: 'DELETE' });
       templates = templates.filter(t => t.id !== id);
       renderTemplates();
       showToast('Template deleted.');
@@ -610,7 +610,7 @@
   async function shareTemplate(id) {
     try {
       const res = await Api.shareTemplate(id);
-      const shareUrl = `${window.location.origin}/import.html?share_id=${res.share_id}`;
+      const shareUrl = `${escapeHtml(window.location.origin)}/import.html?share_id=${escapeHtml(res.share_id)}`;
       
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(shareUrl);
@@ -646,7 +646,7 @@
 
   async function startWorkout(templateId) {
     try {
-      const t = templateId ? await apiRequest(`/templates/${templateId}`) : null;
+      const t = templateId ? await apiRequest(`/templates/${escapeHtml(templateId)}`) : null;
       awTemplateId = templateId || 0;
 
       if (t && t.exercises.length === 0) {
@@ -694,7 +694,7 @@
       const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
       const s = (elapsed % 60).toString().padStart(2, '0');
       const el = document.getElementById('awTimer');
-      if (el) el.textContent = `${m}:${s}`;
+      if (el) el.textContent = `${escapeHtml(m)}:${escapeHtml(s)}`;
     }, 1000);
   }
 
@@ -702,8 +702,8 @@
     const tabs = document.getElementById('awTabs');
     tabs.innerHTML = DOMPurify.sanitize(awExercises.map((e, i) => {
       const done = e.loggedSets.filter(Boolean).length >= e.target_sets;
-      return `<button class="wk-tab ${i === awCurrentIdx ? 'active' : ''} ${done ? 'done' : ''}"
-        data-idx="${i}">${i + 1}. ${escapeHtml(e.exercise_name.split(' ').slice(0, 2).join(' '))}</button>`;
+      return `<button class="wk-tab ${escapeHtml(i === awCurrentIdx ? 'active' : '')} ${escapeHtml(done ? 'done' : '')}"
+        data-idx="${escapeHtml(i)}">${escapeHtml(i + 1)}. ${escapeHtml(e.exercise_name.split(' ').slice(0, 2).join(' '))}</button>`;
     }).join(''));
 
     if (awTemplateId === 0 && awIsStarted) {
@@ -800,7 +800,7 @@
         <div class="wk-empty" style="margin-top:60px;">
           <div class="wk-empty-icon" style="font-size:48px;"></div>
           <h3 style="margin-top:16px;">Ready to train?</h3>
-          <p style="color:var(--text-tertiary); margin-bottom: 24px;">${awIsStarted ? 'Add your first exercise to get started.' : 'Click "Start" at the top to begin your workout.'}</p>
+          <p style="color:var(--text-tertiary); margin-bottom: 24px;">${escapeHtml(awIsStarted ? 'Add your first exercise to get started.' : 'Click "Start" at the top to begin your workout.')}</p>
           ${awIsStarted ? '<button class="btn btn-primary" id="awEmptyAddBtn" style="font-size:15px; padding: 10px 24px;">+ Add Exercise</button>' : ''}
         </div>
       `);
@@ -831,36 +831,36 @@
             : (i > 0 && ex.loggedSets[i - 1] ? ex.loggedSets[i - 1].reps : ''));
 
       return `
-        <div class="wk-set-row ${isDone ? 'done' : ''}" data-set="${i}" style="flex-wrap: nowrap; padding: 10px 4px 10px 8px; justify-content: space-between;">
-          <div class="wk-set-num" style="min-width: 34px; padding-left: 2px;">Set ${i + 1}</div>
+        <div class="wk-set-row ${escapeHtml(isDone ? 'done' : '')}" data-set="${escapeHtml(i)}" style="flex-wrap: nowrap; padding: 10px 4px 10px 8px; justify-content: space-between;">
+          <div class="wk-set-num" style="min-width: 34px; padding-left: 2px;">Set ${escapeHtml(i + 1)}</div>
           
           <div style="display:flex; align-items:center; gap:4px; flex:1; justify-content:center;">
             ${isBodyweight ? '' : `
               <input type="number" class="wk-input aw-weight" data-set="${i}"
-                value="${prefillWeight}"
-                placeholder="${ex.target_weight_kg != null && ex.target_weight_kg !== '' ? ex.target_weight_kg : 'kg'}"
+                value="${escapeHtml(prefillWeight)}"
+                placeholder="${escapeHtml(ex.target_weight_kg != null && ex.target_weight_kg !== '' ? ex.target_weight_kg : 'kg')}"
                 min="0.5" max="600" step="0.5" style="width: 68px; padding: 8px 6px; font-size: 16px; font-weight: 700;"
-                ${isDone || !awIsStarted ? 'disabled' : ''}>
+                ${escapeHtml(isDone || !awIsStarted ? 'disabled' : '')}>
               <div style="color:#6b7280; font-weight:700; font-size:14px;">×</div>
             `}
-            <input type="number" class="wk-input aw-reps" data-set="${i}"
-              value="${prefillReps}"
-              placeholder="${ex.target_reps != null && ex.target_reps !== '' ? ex.target_reps : 'reps'}" min="1" max="100"
+            <input type="number" class="wk-input aw-reps" data-set="${escapeHtml(i)}"
+              value="${escapeHtml(prefillReps)}"
+              placeholder="${escapeHtml(ex.target_reps != null && ex.target_reps !== '' ? ex.target_reps : 'reps')}" min="1" max="100"
               style="width: 62px; padding: 8px 6px; font-size: 16px; font-weight: 700;"
-              ${isDone || !awIsStarted ? 'disabled' : ''}>
+              ${escapeHtml(isDone || !awIsStarted ? 'disabled' : '')}>
               
-            <input type="number" class="wk-input aw-rpe" data-set="${i}"
-              value="${logged ? (logged.rpe || '') : ''}"
+            <input type="number" class="wk-input aw-rpe" data-set="${escapeHtml(i)}"
+              value="${escapeHtml(logged ? (logged.rpe || '') : '')}"
               placeholder="RPE" min="1" max="10" step="0.5"
               style="width: 58px; padding: 8px 4px; font-size: 16px; font-weight: 700;"
-              ${isDone || !awIsStarted ? 'disabled' : ''}>
+              ${escapeHtml(isDone || !awIsStarted ? 'disabled' : '')}>
           </div>
           
           <div style="display:flex; align-items:center; gap:2px; margin-left:auto; margin-right: -4px;">
-            <button class="wk-log-set-btn ${isDone ? 'done' : ''}" data-set="${i}" style="min-width:38px; height:38px; display:flex; justify-content:center; align-items:center; padding:0;" ${isDone || !awIsStarted ? 'disabled' : ''} title="Log Set">
+            <button class="wk-log-set-btn ${escapeHtml(isDone ? 'done' : '')}" data-set="${escapeHtml(i)}" style="min-width:38px; height:38px; display:flex; justify-content:center; align-items:center; padding:0;" ${escapeHtml(isDone || !awIsStarted ? 'disabled' : '')} title="Log Set">
               ✓
             </button>
-            <button class="wk-delete-set-btn" data-set="${i}" style="background:none; border:none; color:#6b7280; font-size:20px; padding:8px 4px; cursor:pointer;" title="Delete Set">✕</button>
+            <button class="wk-delete-set-btn" data-set="${escapeHtml(i)}" style="background:none; border:none; color:#6b7280; font-size:20px; padding:8px 4px; cursor:pointer;" title="Delete Set">✕</button>
           </div>
         </div>
       `;
@@ -870,17 +870,17 @@
       <div class="wk-panel-header">
         <div class="wk-panel-title" style="display:flex; align-items:center; justify-content:space-between;">
           <span>${escapeHtml(ex.exercise_name)}</span>
-          <button class="btn btn-secondary btn-sm aw-info-btn" title="Exercise Info" data-id="${ex.exercise_id}">Info</button>
+          <button class="btn btn-secondary btn-sm aw-info-btn" title="Exercise Info" data-id="${escapeHtml(ex.exercise_id)}">Info</button>
         </div>
-        ${ex.is_adhoc ? '' : `<div class="wk-panel-target">${ex.target_sets} sets × ${ex.target_reps} reps${ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : ''}</div>`}
+        ${ex.is_adhoc ? '' : `<div class="wk-panel-target">${ex.target_sets} sets × ${escapeHtml(ex.target_reps)} reps${escapeHtml(ex.target_weight_kg ? ' @ ' + ex.target_weight_kg + 'kg' : '')}</div>`}
         <div class="wk-panel-progress">
-          <div class="wk-panel-progress-bar" style="width:${Math.min(100,(ex.loggedSets.filter(Boolean).length/ex.target_sets)*100)}%"></div>
+          <div class="wk-panel-progress-bar" style="width:${escapeHtml(Math.min(100,(ex.loggedSets.filter(Boolean).length/ex.target_sets)*100))}%"></div>
         </div>
-        <div class="wk-panel-progress-txt">${ex.loggedSets.filter(Boolean).length}/${ex.target_sets} sets done</div>
+        <div class="wk-panel-progress-txt">${escapeHtml(ex.loggedSets.filter(Boolean).length)}/${escapeHtml(ex.target_sets)} sets done</div>
       </div>
 
       <div class="wk-sets-container">
-        ${setsHtml}
+        ${escapeHtml(setsHtml)}
         <div style="text-align: center; margin-top: 16px;">
           <button class="btn btn-secondary btn-sm" id="awAddSetBtn">+ Add Set</button>
         </div>
@@ -1119,9 +1119,9 @@
       : '—';
 
     document.getElementById('wcStats').innerHTML = DOMPurify.sanitize(`
-      <div class="wk-stat"><div class="wk-stat-val">${result.exercises_saved}</div><div class="wk-stat-lbl">Exercises</div></div>
-      <div class="wk-stat"><div class="wk-stat-val">${result.total_sets_saved}</div><div class="wk-stat-lbl">Sets logged</div></div>
-      <div class="wk-stat"><div class="wk-stat-val">${durationStr}</div><div class="wk-stat-lbl">Duration</div></div>
+      <div class="wk-stat"><div class="wk-stat-val">${escapeHtml(result.exercises_saved)}</div><div class="wk-stat-lbl">Exercises</div></div>
+      <div class="wk-stat"><div class="wk-stat-val">${escapeHtml(result.total_sets_saved)}</div><div class="wk-stat-lbl">Sets logged</div></div>
+      <div class="wk-stat"><div class="wk-stat-val">${escapeHtml(durationStr)}</div><div class="wk-stat-lbl">Duration</div></div>
     `);
 
     const prsEl = document.getElementById('wcPRs');
@@ -1138,12 +1138,12 @@
       
       const topPr = sortedPrs[0];
       const delta = Math.round((topPr.new_1rm_kg - (topPr.old_1rm_kg || 0)) * 10) / 10;
-      const deltaText = topPr.old_1rm_kg > 0 ? `+${delta}kg` : 'First log!';
+      const deltaText = topPr.old_1rm_kg > 0 ? `+${escapeHtml(delta)}kg` : 'First log!';
       
       let html = `
         <div class="pr-celebration-container">
           <div class="pr-fire-icon">🔥</div>
-          <div class="pr-massive-number">${topPr.new_1rm_kg}kg</div>
+          <div class="pr-massive-number">${escapeHtml(topPr.new_1rm_kg)}kg</div>
           <div class="pr-subtitle">NEW PR: <span>${escapeHtml(topPr.exercise)}</span> — your biggest jump yet.</div>
         </div>
       `;
@@ -1158,8 +1158,8 @@
               return `
                 <div class="wk-pr-item">
                   <strong>${escapeHtml(pr.exercise)}</strong>
-                  <span>${pr.new_1rm_kg}kg est. 1RM</span>
-                  <span class="wk-pr-delta">${dt}</span>
+                  <span>${escapeHtml(pr.new_1rm_kg)}kg est. 1RM</span>
+                  <span class="wk-pr-delta">${escapeHtml(dt)}</span>
                 </div>
               `;
             }).join('')}
@@ -1280,15 +1280,15 @@
 
     card.innerHTML = DOMPurify.sanitize(`
       <div style="font-size: 64px; font-weight: 800; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 24px; color: #E2402D;">Workout Complete</div>
-      <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${data.exercises_saved} Exercises • ${data.total_sets_saved} Sets • ${data.durationStr}</div>
+      <div style="font-size: 32px; color: #9CA5AC; margin-bottom: 80px;">${escapeHtml(data.exercises_saved)} Exercises • ${escapeHtml(data.total_sets_saved)} Sets • ${escapeHtml(data.durationStr)}</div>
       
       <div style="width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-bottom: auto;">
         ${data.new_prs && data.new_prs.length > 0 ? 
           data.new_prs.slice(0, 4).map(pr => `
             <div style="background: #1E2227; border-radius: 20px; padding: 40px; border: 2px solid rgba(242, 240, 234, 0.1);">
               <div style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">${escapeHtml(pr.exercise)}</div>
-              <div style="font-size: 48px; color: #D4A33B; font-weight: 800;">${pr.new_1rm_kg}kg <span style="font-size: 24px; color: #9CA5AC; font-weight: 400;">est. 1RM</span></div>
-              <div style="color: #4F9D69; font-size: 28px; font-weight: 600; margin-top: 16px;">+${Math.round((pr.new_1rm_kg - (pr.old_1rm_kg||0))*10)/10}kg PR 🏆</div>
+              <div style="font-size: 48px; color: #D4A33B; font-weight: 800;">${escapeHtml(pr.new_1rm_kg)}kg <span style="font-size: 24px; color: #9CA5AC; font-weight: 400;">est. 1RM</span></div>
+              <div style="color: #4F9D69; font-size: 28px; font-weight: 600; margin-top: 16px;">+${escapeHtml(Math.round((pr.new_1rm_kg - (pr.old_1rm_kg||0))*10)/10)}kg PR 🏆</div>
             </div>
           `).join('')
         : 

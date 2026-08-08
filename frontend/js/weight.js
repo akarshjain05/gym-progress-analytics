@@ -142,23 +142,23 @@ function renderSummary(summary) {
   el.innerHTML = DOMPurify.sanitize(`
     <div class="card stat-card">
       <div class="stat-label">Current</div>
-      <div class="stat-value">${fmtKg(summary.current_weight_kg)}<span class="unit">kg</span></div>
-      <div class="stat-delta neutral">Started at ${fmtKg(summary.starting_weight_kg)} kg</div>
+      <div class="stat-value">${escapeHtml(fmtKg(summary.current_weight_kg))}<span class="unit">kg</span></div>
+      <div class="stat-delta neutral">Started at ${escapeHtml(fmtKg(summary.starting_weight_kg))} kg</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Total change</div>
-      <div class="stat-value" style="font-size:26px;">${totalDelta.text}</div>
-      <div class="stat-delta ${totalDelta.cls}">${summary.total_change_pct !== null ? summary.total_change_pct + "%" : ""}</div>
+      <div class="stat-value" style="font-size:26px;">${escapeHtml(totalDelta.text)}</div>
+      <div class="stat-delta ${escapeHtml(totalDelta.cls)}">${escapeHtml(summary.total_change_pct !== null ? summary.total_change_pct + "%" : "")}</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Weekly rate <span class="text-tertiary" style="font-weight:400;">(28d)</span></div>
-      <div class="stat-value" style="font-size:26px;">${weeklyDelta.text}</div>
-      <div class="stat-delta neutral">${summary.weekly_rate_kg === null ? "Need more recent data" : "based on trend, not last point"}</div>
+      <div class="stat-value" style="font-size:26px;">${escapeHtml(weeklyDelta.text)}</div>
+      <div class="stat-delta neutral">${escapeHtml(summary.weekly_rate_kg === null ? "Need more recent data" : "based on trend, not last point")}</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Goal</div>
-      <div class="stat-value" style="font-size:26px;">${summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " kg" : "Not set"}</div>
-      <div class="stat-delta neutral">${summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7)} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile")}</div>
+      <div class="stat-value" style="font-size:26px;">${escapeHtml(summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " kg" : "Not set")}</div>
+      <div class="stat-delta neutral">${escapeHtml(summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7))} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile")}</div>
     </div>
   `);
 }
@@ -217,13 +217,13 @@ function renderTable(logs) {
   }
   const rows = [...logs].reverse().map(l => `
     <tr>
-      <td class="label-cell">${fmtDate(l.date)}</td>
-      <td>${fmtKg(l.weight_kg)} kg</td>
-      <td>${l.body_fat_pct !== null && l.body_fat_pct !== undefined ? l.body_fat_pct + "%" : "—"}</td>
-      <td class="label-cell text-secondary">${l.notes || ""}</td>
+      <td class="label-cell">${escapeHtml(fmtDate(l.date))}</td>
+      <td>${escapeHtml(fmtKg(l.weight_kg))} kg</td>
+      <td>${escapeHtml(l.body_fat_pct !== null && l.body_fat_pct !== undefined ? l.body_fat_pct + "%" : "—")}</td>
+      <td class="label-cell text-secondary">${escapeHtml(l.notes || "")}</td>
       <td>
         <div class="row-actions">
-          <button class="icon-btn" onclick="deleteEntry(${l.id})" title="Delete">
+          <button class="icon-btn" onclick="deleteEntry(${escapeHtml(l.id)})" title="Delete">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
           </button>
         </div>

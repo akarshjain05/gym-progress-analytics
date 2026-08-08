@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('tplName').textContent = templateData.name;
   document.getElementById('tplDesc').textContent = templateData.description || '';
-  document.getElementById('tplCreator').textContent = `Created by @${templateData.creator_username}`;
-  document.getElementById('tplCount').textContent = `${templateData.exercise_count} exercises`;
+  document.getElementById('tplCreator').textContent = `Created by @${escapeHtml(templateData.creator_username)}`;
+  document.getElementById('tplCount').textContent = `${escapeHtml(templateData.exercise_count)} exercises`;
 
   const exContainer = document.getElementById('tplExercises');
   exContainer.innerHTML = DOMPurify.sanitize(templateData.exercises.map(ex => `
     <div class="import-ex">
-      <div class="import-ex-name">${ex.exercise_name}</div>
-      <div class="import-ex-meta">${ex.target_sets} sets × ${ex.target_reps} reps</div>
+      <div class="import-ex-name">${escapeHtml(ex.exercise_name)}</div>
+      <div class="import-ex-meta">${escapeHtml(ex.target_sets)} sets × ${escapeHtml(ex.target_reps)} reps</div>
     </div>
   `).join(''));
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   importBtn.addEventListener('click', async () => {
     if (!Auth.isLoggedIn()) {
       sessionStorage.setItem('pending_import', shareId);
-      window.location.href = `login.html?next=import.html?share_id=${shareId}`;
+      window.location.href = `login.html?next=import.html?share_id=${escapeHtml(shareId)}`;
       return;
     }
 

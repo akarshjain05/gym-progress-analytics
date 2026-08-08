@@ -272,7 +272,7 @@
         ...exercises.filter(e => !priority.includes(e.name)).sort((a, b) => a.name.localeCompare(b.name)),
       ];
       select.innerHTML = DOMPurify.sanitize(sorted.map(e =>
-        `<option value="${e.id}">${e.name}</option>`
+        `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`
       ).join(''));
     } catch (e) {
       // Non-fatal — step 3 can still be skipped
@@ -282,29 +282,29 @@
   // ── Step navigation ───────────────────────────────────────────────────────
   function goToStep(n) {
     [1, 2, 3].forEach(i => {
-      document.getElementById(`obStep${i}`)?.style && (document.getElementById(`obStep${i}`).style.display = i === n ? 'block' : 'none');
-      const dot = document.getElementById(`obStep${i}Dot`);
+      document.getElementById(`obStep${escapeHtml(i)}`)?.style && (document.getElementById(`obStep${escapeHtml(i)}`).style.display = i === n ? 'block' : 'none');
+      const dot = document.getElementById(`obStep${escapeHtml(i)}Dot`);
       if (dot) {
         dot.classList.toggle('active', i === n);
         dot.classList.toggle('done', i < n);
       }
     });
     document.getElementById('obDone').style.display = 'none';
-    document.getElementById('obProgressBar').style.width = `${Math.round((n / 3) * 100)}%`;
+    document.getElementById('obProgressBar').style.width = `${escapeHtml(Math.round((n / 3) * 100))}%`;
   }
 
   function goToDone() {
     [1, 2, 3].forEach(i => {
-      document.getElementById(`obStep${i}`).style.display = 'none';
-      document.getElementById(`obStep${i}Dot`).classList.add('done');
-      document.getElementById(`obStep${i}Dot`).classList.remove('active');
+      document.getElementById(`obStep${escapeHtml(i)}`).style.display = 'none';
+      document.getElementById(`obStep${escapeHtml(i)}Dot`).classList.add('done');
+      document.getElementById(`obStep${escapeHtml(i)}Dot`).classList.remove('active');
     });
     document.getElementById('obDone').style.display = 'block';
     document.getElementById('obProgressBar').style.width = '100%';
   }
 
   function setError(stepN, msg) {
-    const el = document.getElementById(`obStep${stepN}Error`);
+    const el = document.getElementById(`obStep${escapeHtml(stepN)}Error`);
     if (el) el.textContent = msg || '';
   }
 

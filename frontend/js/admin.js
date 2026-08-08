@@ -97,14 +97,14 @@ async function loadUsers() {
     }
     tbody.innerHTML = DOMPurify.sanitize(users.map(u => `
       <tr>
-        <td style="text-align:center; vertical-align:middle;">#${u.id}</td>
+        <td style="text-align:center; vertical-align:middle;">#${escapeHtml(u.id)}</td>
         <td style="text-align:center; vertical-align:middle;">${u.username ? escapeHtml(u.username) : '<span class="text-secondary">Not set</span>'}</td>
         <td style="text-align:center; vertical-align:middle;">${escapeHtml(u.email)} ${u.email_verified ? '<span style="color:var(--success);font-size:12px;">(Verified)</span>' : ''}</td>
-        <td style="text-align:center; vertical-align:middle;"><span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-neutral'}">${capitalize(u.role)}</span></td>
-        <td style="text-align:center; vertical-align:middle;">${fmtDate(u.created_at.split("T")[0])}</td>
+        <td style="text-align:center; vertical-align:middle;"><span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-neutral'}">${escapeHtml(capitalize(u.role))}</span></td>
+        <td style="text-align:center; vertical-align:middle;">${escapeHtml(fmtDate(u.created_at.split("T")[0]))}</td>
         <td style="text-align:center; vertical-align:middle;">
-          <button class="btn btn-secondary btn-sm" onclick="promoteUser(${u.id}, '${escapeHtml(u.username || u.email)}')" ${u.role === 'admin' ? 'disabled' : ''}>Make Admin</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${escapeHtml(u.username || u.email)}')" style="margin-left:4px;">Delete</button>
+          <button class="btn btn-secondary btn-sm" onclick="promoteUser(${escapeHtml(u.id)}, '${escapeHtml(u.username || u.email)}')" ${escapeHtml(u.role === 'admin' ? 'disabled' : '')}>Make Admin</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser(${escapeHtml(u.id)}, '${escapeHtml(u.username || u.email)}')" style="margin-left:4px;">Delete</button>
         </td>
       </tr>
     `).join(""));
@@ -115,7 +115,7 @@ async function loadUsers() {
 }
 
 window.promoteUser = async function(id, name) {
-  const ok = await window.appConfirm("Promote User", `Are you sure you want to promote ${name} to admin?`, "Promote", "Cancel");
+  const ok = await window.appConfirm("Promote User", `Are you sure you want to promote ${escapeHtml(name)} to admin?`, "Promote", "Cancel");
   if (!ok) return;
   try {
     const res = await Api.adminPromoteUser(id);
@@ -125,7 +125,7 @@ window.promoteUser = async function(id, name) {
 };
 
 window.deleteUser = async function(id, name) {
-  const ok = await window.appConfirm("Delete User", `Are you sure you want to delete ${name}? This action cannot be undone.`, "Delete", "Cancel");
+  const ok = await window.appConfirm("Delete User", `Are you sure you want to delete ${escapeHtml(name)}? This action cannot be undone.`, "Delete", "Cancel");
   if (!ok) return;
   try {
     const res = await Api.adminDeleteUser(id);
@@ -141,11 +141,11 @@ async function loadStats() {
   try {
     const stats = await Api.adminGetStats();
     grid.innerHTML = DOMPurify.sanitize(`
-      <div class="stat-card"><div class="stat-number">${stats.total_users}</div><div class="stat-label">Total Users</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.total_workouts}</div><div class="stat-label">Workouts Logged</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.total_goals}</div><div class="stat-label">Goals Set</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.total_lift_logs}</div><div class="stat-label">Lifts Logged</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.total_weight_logs}</div><div class="stat-label">Weigh-ins Logged</div></div>
+      <div class="stat-card"><div class="stat-number">${escapeHtml(stats.total_users)}</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-card"><div class="stat-number">${escapeHtml(stats.total_workouts)}</div><div class="stat-label">Workouts Logged</div></div>
+      <div class="stat-card"><div class="stat-number">${escapeHtml(stats.total_goals)}</div><div class="stat-label">Goals Set</div></div>
+      <div class="stat-card"><div class="stat-number">${escapeHtml(stats.total_lift_logs)}</div><div class="stat-label">Lifts Logged</div></div>
+      <div class="stat-card"><div class="stat-number">${escapeHtml(stats.total_weight_logs)}</div><div class="stat-label">Weigh-ins Logged</div></div>
     `);
   } catch(err) {
     handleApiError(err);
@@ -168,12 +168,12 @@ async function loadLogs() {
         <div class="log-info">
           <div class="log-desc">${escapeHtml(l.description)}</div>
           <div class="log-meta">
-            <span class="badge-log badge-log-${l.log_type}">${l.log_type}</span>
+            <span class="badge-log badge-log-${escapeHtml(l.log_type)}">${escapeHtml(l.log_type)}</span>
             <span>By <strong>${escapeHtml(l.username || l.email)}</strong></span>
-            <span>• ${fmtDate(l.date)}</span>
+            <span>• ${escapeHtml(fmtDate(l.date))}</span>
           </div>
         </div>
-        <button class="icon-btn icon-btn-danger" onclick="deleteAdminLog('${l.log_type}', ${l.log_id})" title="Delete Log">
+        <button class="icon-btn icon-btn-danger" onclick="deleteAdminLog('${escapeHtml(l.log_type)}', ${escapeHtml(l.log_id)})" title="Delete Log">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2-2L4 6"/></svg>
         </button>
       </div>
@@ -185,7 +185,7 @@ async function loadLogs() {
 }
 
 window.deleteAdminLog = async function(type, id) {
-  const ok = await window.appConfirm("Delete Log", `Delete this ${type} log? This action cannot be undone.`, "Delete", "Cancel");
+  const ok = await window.appConfirm("Delete Log", `Delete this ${escapeHtml(type)} log? This action cannot be undone.`, "Delete", "Cancel");
   if (!ok) return;
   try {
     await Api.adminDeleteLog(type, id);

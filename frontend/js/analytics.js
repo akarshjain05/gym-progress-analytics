@@ -206,7 +206,7 @@ async function loadMuscleGroupVolumeChart() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString()} kg×reps` } } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${escapeHtml(ctx.raw.toLocaleString())} kg×reps` } } },
         scales: {
           r: {
             angleLines: { color: gridColor },
@@ -248,8 +248,8 @@ function renderCalendar(heatmapData) {
   let html = `<div class="card cal-card">
     <div class="cal-header">
       <button class="cal-nav-btn" onclick="updateCalendarState(-1)">&#10094;</button>
-      <div class="cal-title">${monthName}</div>
-      <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${nextDisabled}>&#10095;</button>
+      <div class="cal-title">${escapeHtml(monthName)}</div>
+      <button class="cal-nav-btn" onclick="updateCalendarState(1)" ${escapeHtml(nextDisabled)}>&#10095;</button>
     </div>
     <div class="cal-grid">
       <div class="cal-day-name">S</div>
@@ -267,13 +267,13 @@ function renderCalendar(heatmapData) {
     const yyyy = loopDate.getFullYear();
     const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
     const dd = String(loopDate.getDate()).padStart(2, '0');
-    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const dateStr = `${escapeHtml(yyyy)}-${escapeHtml(mm)}-${escapeHtml(dd)}`;
     const sets = heatmapData[dateStr] || 0;
     if (sets > 0) {
-      const tooltipText = `${sets} sets on ${monthName.split(' ')[0]} ${d}`;
-      html += `<div class="cal-cell cal-cell-active">${d}<span class="cal-tooltip">${tooltipText}</span></div>`;
+      const tooltipText = `${escapeHtml(sets)} sets on ${escapeHtml(monthName.split(' ')[0])} ${escapeHtml(d)}`;
+      html += `<div class="cal-cell cal-cell-active">${escapeHtml(d)}<span class="cal-tooltip">${escapeHtml(tooltipText)}</span></div>`;
     } else {
-      html += `<div class="cal-cell">${d}</div>`;
+      html += `<div class="cal-cell">${escapeHtml(d)}</div>`;
     }
   }
   html += `</div></div>`;
@@ -302,10 +302,10 @@ async function loadCompare(days = 90) {
     <div class="card">
       <div class="card-title">Compare to past you</div>
       <div class="compare-toggles mb-12">
-        <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
-        <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
-        <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
-        <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+        <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
+        <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
+        <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
+        <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
       </div>
       <div class="empty-state"><p>Loading comparison...</p></div>
     </div>
@@ -319,10 +319,10 @@ async function loadCompare(days = 90) {
         <div class="card">
           <div class="card-title">Compare to past you</div>
           <div class="compare-toggles mb-12">
-            <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
-            <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
-            <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
-            <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+            <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
+            <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
+            <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
+            <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
           </div>
           <div class="empty-state"><p>Not enough history in the past period to compare. Check back later!</p></div>
         </div>
@@ -351,53 +351,53 @@ async function loadCompare(days = 90) {
       <div class="card">
         <div class="card-title">Compare to past you</div>
         <div class="compare-toggles mb-16">
-          <button class="btn ${days === 7 ? 'active' : ''}" onclick="loadCompare(7)">7 Days</button>
-          <button class="btn ${days === 30 ? 'active' : ''}" onclick="loadCompare(30)">30 Days</button>
-          <button class="btn ${days === 90 ? 'active' : ''}" onclick="loadCompare(90)">90 Days</button>
-          <button class="btn ${days === 365 ? 'active' : ''}" onclick="loadCompare(365)">1 Year</button>
+          <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
+          <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
+          <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
+          <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
         </div>
         
         <!-- Volume -->
         <div class="compare-grid mb-16">
           <div class="compare-col past">
-            <div class="compare-label">Past ${days}</div>
-            <div class="compare-value">${Math.round(res.past.total_volume_kg).toLocaleString()} kg</div>
+            <div class="compare-label">Past ${escapeHtml(days)}</div>
+            <div class="compare-value">${escapeHtml(Math.round(res.past.total_volume_kg).toLocaleString())} kg</div>
           </div>
-          <div class="compare-delta ${getCls(dVol)}">
-            ${fmtPct(dVol)}
+          <div class="compare-delta ${escapeHtml(getCls(dVol))}">
+            ${escapeHtml(fmtPct(dVol))}
             <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">Volume</div>
           </div>
           <div class="compare-col">
-            <div class="compare-label">Last ${days}</div>
-            <div class="compare-value">${Math.round(res.current.total_volume_kg).toLocaleString()} kg</div>
+            <div class="compare-label">Last ${escapeHtml(days)}</div>
+            <div class="compare-value">${escapeHtml(Math.round(res.current.total_volume_kg).toLocaleString())} kg</div>
           </div>
         </div>
         
         <!-- PRs -->
         <div class="compare-grid mb-16">
           <div class="compare-col past">
-            <div class="compare-value">${res.past.pr_count}</div>
+            <div class="compare-value">${escapeHtml(res.past.pr_count)}</div>
           </div>
-          <div class="compare-delta ${getCls(dPr)}">
-            ${fmtDiff(dPr)}
+          <div class="compare-delta ${escapeHtml(getCls(dPr))}">
+            ${escapeHtml(fmtDiff(dPr))}
             <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">PRs Hit</div>
           </div>
           <div class="compare-col">
-            <div class="compare-value">${res.current.pr_count}</div>
+            <div class="compare-value">${escapeHtml(res.current.pr_count)}</div>
           </div>
         </div>
         
         <!-- Consistency -->
         <div class="compare-grid">
           <div class="compare-col past">
-            <div class="compare-value">${res.past.sessions_per_week} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
+            <div class="compare-value">${escapeHtml(res.past.sessions_per_week)} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
           </div>
-          <div class="compare-delta ${getCls(dSes)}">
-            ${fmtDiff(dSes)}
+          <div class="compare-delta ${escapeHtml(getCls(dSes))}">
+            ${escapeHtml(fmtDiff(dSes))}
             <div style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary);">Consistency</div>
           </div>
           <div class="compare-col">
-            <div class="compare-value">${res.current.sessions_per_week} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
+            <div class="compare-value">${escapeHtml(res.current.sessions_per_week)} <span style="font-size:0.8rem;font-weight:normal;">/wk</span></div>
           </div>
         </div>
       </div>

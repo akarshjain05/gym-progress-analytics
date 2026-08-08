@@ -321,7 +321,7 @@
     const allGroups = [...orderedGroups, ...extraGroups];
 
     select.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
-      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
+      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${escapeHtml(groups[g].length)})</option>`
     ).join(""));
 
     // Change handler
@@ -353,7 +353,7 @@
   function populateExerciseSelect(groupExercises) {
     const select = document.getElementById("exerciseSelect");
     select.innerHTML = DOMPurify.sanitize(groupExercises.map(ex =>
-      `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
+      `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)}</option>`
     ).join(""));
     // Trigger load for first exercise in group
     if (groupExercises.length > 0) {
@@ -379,14 +379,14 @@
     const allGroups = [...orderedGroups, ...extraGroups];
 
     selectMuscle.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
-      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${groups[g].length})</option>`
+      `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${escapeHtml(groups[g].length)})</option>`
     ).join(""));
 
     selectMuscle.addEventListener("change", () => {
       const g = selectMuscle.value;
       if (groups[g]) {
         selectExercise.innerHTML = DOMPurify.sanitize(groups[g].map(ex =>
-          `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
+          `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)}</option>`
         ).join(""));
       }
     });
@@ -403,7 +403,7 @@
     currentExerciseId = exerciseId;
 
     try {
-      const data = await apiRequest(`/lifts/progress/${exerciseId}`);
+      const data = await apiRequest(`/lifts/progress/${escapeHtml(exerciseId)}`);
 
       if (!data.has_data) {
         document.getElementById("progressSection").style.display = "none";
@@ -525,27 +525,27 @@
           <div class="percentile-card" style="margin-bottom: 0; text-align: left;">
             <div class="pct-header">
               <span class="pct-title">${escapeHtml(data.exercise)} Rank</span>
-              <span class="pct-badge">Top ${100 - Math.round(data.percentile)}%</span>
+              <span class="pct-badge">Top ${escapeHtml(100 - Math.round(data.percentile))}%</span>
             </div>
             <div class="pct-body">
               <div class="pct-circle">
-                <span class="pct-num">${Math.round(data.percentile)}</span>
+                <span class="pct-num">${escapeHtml(Math.round(data.percentile))}</span>
                 <span class="pct-sym">%</span>
               </div>
-              <div class="pct-text">You are stronger than ${Math.round(data.percentile)}% of lifters your bodyweight.</div>
+              <div class="pct-text">You are stronger than ${escapeHtml(Math.round(data.percentile))}% of lifters your bodyweight.</div>
             </div>
           </div>
         `);
       } else {
         const color = levelColors[level] || "#a09880";
         const subtitle = isBW
-          ? `Best: ${bestReps} reps · vs population avg`
+          ? `Best: ${escapeHtml(bestReps)} reps · vs population avg`
           : "vs population avg";
         card.innerHTML = DOMPurify.sanitize(`
-          <div class="strength-level-badge" style="background:${color}20;border:1px solid ${color}40;">
-            <span style="color:${color};font-size:16px;font-weight:700;text-transform:capitalize;">${level}</span>
+          <div class="strength-level-badge" style="background:${escapeHtml(color)}20;border:1px solid ${escapeHtml(color)}40;">
+            <span style="color:${escapeHtml(color)};font-size:16px;font-weight:700;text-transform:capitalize;">${escapeHtml(level)}</span>
           </div>
-          <div style="font-size:11px;color:#a09880;margin-top:4px;">${subtitle}</div>
+          <div style="font-size:11px;color:#a09880;margin-top:4px;">${escapeHtml(subtitle)}</div>
         `);
       }
     }
@@ -556,10 +556,10 @@
       scaleEl.innerHTML = DOMPurify.sanitize(`
         <div class="percentile-row" style="border-bottom: none; padding: 0; margin-top: 12px;">
           <div class="percentile-stat" style="margin-bottom:8px; text-align: left;">
-            Stronger than <strong>${Math.round(data.percentile)}%</strong> of lifters your bodyweight
+            Stronger than <strong>${escapeHtml(Math.round(data.percentile))}%</strong> of lifters your bodyweight
           </div>
           <div class="percentile-track">
-            <div class="percentile-marker" style="left:${data.percentile}%;"></div>
+            <div class="percentile-marker" style="left:${escapeHtml(data.percentile)}%;"></div>
           </div>
         </div>
       `);
@@ -585,33 +585,33 @@
         // Grey pre-beginner segment (0 → beginner reps)
         const preBegReps = (repValues[0] / maxReps * 100).toFixed(1);
         scaleHtml += `<div class="scale-seg"
-          style="width:${preBegReps}%;background:#374151;opacity:0.4;"
+          style="width:${escapeHtml(preBegReps)}%;background:#374151;opacity:0.4;"
           title="Below beginner"></div>`;
-        labelsHtml += `<div class="scale-label" style="width:${preBegReps}%;"></div>`;
+        labelsHtml += `<div class="scale-label" style="width:${escapeHtml(preBegReps)}%;"></div>`;
 
         tiers.forEach((tier, i) => {
           const val = repValues[i];
           const nextVal = i < tiers.length - 1 ? repValues[i + 1] : maxReps;
           const segWidth = ((nextVal - val) / maxReps * 100).toFixed(1);
           const isActive = level === tier;
-          scaleHtml += `<div class="scale-seg ${isActive ? "active" : ""}"
-            style="width:${segWidth}%;background:${tierColors[i]};opacity:${isActive ? 1 : 0.35};"
-            title="${tier}: ${val} ${unit}"></div>`;
-          labelsHtml += `<div class="scale-label" style="width:${segWidth}%;color:${tierColors[i]};">
-            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${tier}</div>
-            <div style="font-size:9px;">${val} ${unit}</div>
+          scaleHtml += `<div class="scale-seg ${escapeHtml(isActive ? "active" : "")}"
+            style="width:${escapeHtml(segWidth)}%;background:${escapeHtml(tierColors[i])};opacity:${escapeHtml(isActive ? 1 : 0.35)};"
+            title="${escapeHtml(tier)}: ${escapeHtml(val)} ${escapeHtml(unit)}"></div>`;
+          labelsHtml += `<div class="scale-label" style="width:${escapeHtml(segWidth)}%;color:${escapeHtml(tierColors[i])};">
+            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${escapeHtml(tier)}</div>
+            <div style="font-size:9px;">${escapeHtml(val)} ${escapeHtml(unit)}</div>
           </div>`;
         });
 
         // User marker: position = bestReps / maxReps * 100 (aligns with 0→maxReps scale)
         const userPct = Math.min(97, (bestReps / maxReps * 100)).toFixed(1);
-        const markerLabel = bestReps > 0 ? `${bestReps} ${unit}` : "0";
-        scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your best: ${markerLabel}">
+        const markerLabel = bestReps > 0 ? `${escapeHtml(bestReps)} ${escapeHtml(unit)}` : "0";
+        scaleHtml += `<div class="scale-marker" style="left:${escapeHtml(userPct)}%" title="Your best: ${escapeHtml(markerLabel)}">
           <div class="scale-marker-arrow"></div>
-          <div class="scale-marker-label">${markerLabel}</div>
+          <div class="scale-marker-label">${escapeHtml(markerLabel)}</div>
         </div>`;
 
-        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${escapeHtml(scaleHtml)}</div>`);
         labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
 
       } else {
@@ -626,33 +626,33 @@
         // Grey pre-beginner segment (0 → beginner breakpoint)
         const preBegWidth = (breakpoints.beginner / maxVal * 100).toFixed(1);
         scaleHtml += `<div class="scale-seg"
-          style="width:${preBegWidth}%;background:#374151;opacity:0.4;"
+          style="width:${escapeHtml(preBegWidth)}%;background:#374151;opacity:0.4;"
           title="Below beginner"></div>`;
         // Empty label spacer for pre-beginner
-        labelsHtml += `<div class="scale-label" style="width:${preBegWidth}%;"></div>`;
+        labelsHtml += `<div class="scale-label" style="width:${escapeHtml(preBegWidth)}%;"></div>`;
 
         tiers.forEach((tier, i) => {
           const val = breakpoints[tier];
           const nextVal = i < tiers.length - 1 ? breakpoints[tiers[i + 1]] : maxVal;
           const segWidth = ((nextVal - val) / maxVal * 100).toFixed(1);
           const isActive = level === tier;
-          scaleHtml += `<div class="scale-seg ${isActive ? "active" : ""}"
-            style="width:${segWidth}%;background:${tierColors[i]};opacity:${isActive ? 1 : 0.35};"
-            title="${tier}: ${val}kg"></div>`;
-          labelsHtml += `<div class="scale-label" style="width:${segWidth}%;color:${tierColors[i]};">
-            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${tier}</div>
-            <div style="font-size:9px;">${val}kg</div>
+          scaleHtml += `<div class="scale-seg ${escapeHtml(isActive ? "active" : "")}"
+            style="width:${escapeHtml(segWidth)}%;background:${escapeHtml(tierColors[i])};opacity:${escapeHtml(isActive ? 1 : 0.35)};"
+            title="${escapeHtml(tier)}: ${escapeHtml(val)}kg"></div>`;
+          labelsHtml += `<div class="scale-label" style="width:${escapeHtml(segWidth)}%;color:${escapeHtml(tierColors[i])};">
+            <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${escapeHtml(tier)}</div>
+            <div style="font-size:9px;">${escapeHtml(val)}kg</div>
           </div>`;
         });
 
         // User marker: position = pr / maxVal * 100 (correct since scale spans 0→maxVal)
         const userPct = Math.min(97, (pr / maxVal * 100)).toFixed(1);
-        scaleHtml += `<div class="scale-marker" style="left:${userPct}%" title="Your PR: ${pr}kg">
+        scaleHtml += `<div class="scale-marker" style="left:${escapeHtml(userPct)}%" title="Your PR: ${escapeHtml(pr)}kg">
           <div class="scale-marker-arrow"></div>
-          <div class="scale-marker-label">${pr}kg</div>
+          <div class="scale-marker-label">${escapeHtml(pr)}kg</div>
         </div>`;
 
-        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
+        scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${escapeHtml(scaleHtml)}</div>`);
         labelsEl.innerHTML = DOMPurify.sanitize(labelsHtml);
       }
     } else {
@@ -676,7 +676,7 @@
       chartData = chronological.map(s => Math.max(...s.sets.map(set => set.reps)));
       const labels = chronological.map(s => fmtDate(s.date));
       chartLabel = "Best Reps";
-      tooltipLabel = ctx => `Best reps: ${ctx.parsed.y}`;
+      tooltipLabel = ctx => `Best reps: ${escapeHtml(ctx.parsed.y)}`;
       yLabel = "Reps";
 
       liftChart = new Chart(ctx, {
@@ -734,7 +734,7 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              callbacks: { label: ctx => `Est. 1RM: ${ctx.parsed.y} kg` }
+              callbacks: { label: ctx => `Est. 1RM: ${escapeHtml(ctx.parsed.y)} kg` }
             }
           },
           scales: {
@@ -756,17 +756,17 @@
 
     const html = sessions.map((session, idx) => {
       const setsHtml = session.sets.map((set, setIdx) => `
-        <div class="set-row" data-id="${set.id}">
-          <span class="set-num">#${setIdx + 1}</span>
-          <span class="set-weight">${set.weight_kg} kg</span>
-          <span class="set-reps">${set.reps} reps</span>
-          <span class="set-rpe">${set.rpe != null ? "RPE " + set.rpe : "—"}</span>
+        <div class="set-row" data-id="${escapeHtml(set.id)}">
+          <span class="set-num">#${escapeHtml(setIdx + 1)}</span>
+          <span class="set-weight">${escapeHtml(set.weight_kg)} kg</span>
+          <span class="set-reps">${escapeHtml(set.reps)} reps</span>
+          <span class="set-rpe">${escapeHtml(set.rpe != null ? "RPE " + set.rpe : "—")}</span>
           <span class="set-note">${escapeHtml(set.notes || "")}</span>
           <div style="position:relative; display:flex; justify-content:flex-end;">
             <button class="set-menu-btn" title="Options" style="background:none; border:none; color:#a09880; cursor:pointer; font-size:18px; padding:4px 8px;">⋮</button>
             <div class="set-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--bg-elevated-2); border:1px solid var(--border-color); border-radius:8px; padding:4px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.8); min-width:110px;">
-              <button class="set-edit-btn" data-log='${JSON.stringify(set).replace(/'/g, "&apos;")}' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Edit</button>
-              <button class="set-delete-btn" data-logid="${set.id}" style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--plate-red); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Delete</button>
+              <button class="set-edit-btn" data-log='${escapeHtml(JSON.stringify(set).replace(/'/g, "&apos;"))}' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Edit</button>
+              <button class="set-delete-btn" data-logid="${escapeHtml(set.id)}" style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none; color:var(--plate-red); cursor:pointer; font-size:14px; padding:8px 12px; border-radius:4px;">Delete</button>
             </div>
           </div>
         </div>
@@ -775,12 +775,12 @@
       const isFirst = idx === 0; // expand latest session by default
       return `
         <div class="session-group" style="overflow: visible !important;">
-          <div class="session-date-row" data-idx="${idx}">
-            <span class="session-date-label">${formatFullDate(session.date)}</span>
-            <span class="session-meta">${session.set_count} sets · ${session.volume_kg} kg vol · Best 1RM: ${session.best_1rm_kg} kg</span>
-            <span class="session-chevron" id="chevron-${idx}">${isFirst ? "▲" : "▼"}</span>
+          <div class="session-date-row" data-idx="${escapeHtml(idx)}">
+            <span class="session-date-label">${escapeHtml(formatFullDate(session.date))}</span>
+            <span class="session-meta">${escapeHtml(session.set_count)} sets · ${escapeHtml(session.volume_kg)} kg vol · Best 1RM: ${escapeHtml(session.best_1rm_kg)} kg</span>
+            <span class="session-chevron" id="chevron-${escapeHtml(idx)}">${escapeHtml(isFirst ? "▲" : "▼")}</span>
           </div>
-          <div class="session-sets" id="sets-${idx}" style="${isFirst ? "" : "display:none;"}">
+          <div class="session-sets" id="sets-${escapeHtml(idx)}" style="${escapeHtml(isFirst ? "" : "display:none;")}">
             <div class="set-row set-row-header">
               <span class="set-num">SET</span>
               <span class="set-weight">WEIGHT</span>
@@ -789,7 +789,7 @@
               <span class="set-note">NOTES</span>
               <span></span>
             </div>
-            ${setsHtml}
+            ${escapeHtml(setsHtml)}
           </div>
         </div>
       `;
@@ -836,7 +836,7 @@
         const confirmed = await window.appConfirm('Delete Set', 'Delete this set?', 'Delete', 'Cancel');
         if (!confirmed) return;
         try {
-          await apiRequest(`/lifts/${logId}`, { method: "DELETE" });
+          await apiRequest(`/lifts/${escapeHtml(logId)}`, { method: "DELETE" });
           loadProgress(currentExerciseId);
           loadPersonalRecords();
         } catch (err) {
@@ -889,26 +889,26 @@
         const rows = group.records.map(pr => {
           const levelColor = pr.strength_level ? (levelColors[pr.strength_level] || "#a09880") : "#a09880";
           const levelBadge = pr.strength_level
-            ? `<span class="pr-level-badge" style="background:${levelColor}20;color:${levelColor};border:1px solid ${levelColor}40;">${pr.strength_level}</span>`
+            ? `<span class="pr-level-badge" style="background:${escapeHtml(levelColor)}20;color:${escapeHtml(levelColor)};border:1px solid ${escapeHtml(levelColor)}40;">${escapeHtml(pr.strength_level)}</span>`
             : `<span class="pr-level-badge" style="color:#6b7280;background:#1e232720;">—</span>`;
 
           const isBW = pr.is_bodyweight;
           const prMetric = isBW
-            ? `${pr.best_reps} reps`
-            : `${fmtKg(pr.estimated_1rm_kg)} <span class="pr-unit">kg</span>`;
+            ? `${escapeHtml(pr.best_reps)} reps`
+            : `${escapeHtml(fmtKg(pr.estimated_1rm_kg))} <span class="pr-unit">kg</span>`;
           const prAchieved = isBW
-            ? `Best set: ${pr.achieved_with.reps} reps`
-            : `${pr.achieved_with.weight_kg}kg × ${pr.achieved_with.reps}`;
+            ? `Best set: ${escapeHtml(pr.achieved_with.reps)} reps`
+            : `${escapeHtml(pr.achieved_with.weight_kg)}kg × ${escapeHtml(pr.achieved_with.reps)}`;
 
           return `
-            <div class="pr-row" data-exid="${pr.exercise_id}" style="cursor:pointer;">
+            <div class="pr-row" data-exid="${escapeHtml(pr.exercise_id)}" style="cursor:pointer;">
               <div class="pr-exercise">
                 ${escapeHtml(pr.exercise)}
               </div>
-              <div class="pr-1rm">${prMetric}</div>
-              <div class="pr-achieved">${prAchieved}</div>
-              <div class="pr-date">${fmtDate(pr.date)}</div>
-              <div class="pr-level">${levelBadge}</div>
+              <div class="pr-1rm">${escapeHtml(prMetric)}</div>
+              <div class="pr-achieved">${escapeHtml(prAchieved)}</div>
+              <div class="pr-date">${escapeHtml(fmtDate(pr.date))}</div>
+              <div class="pr-level">${escapeHtml(levelBadge)}</div>
             </div>
           `;
         }).join("");
@@ -977,7 +977,7 @@
     const div = document.createElement("div");
     div.className = "modal-set-row";
     div.innerHTML = DOMPurify.sanitize(`
-      <span class="modal-set-num" style="min-width: 38px;">Set ${setCount}</span>
+      <span class="modal-set-num" style="min-width: 38px;">Set ${escapeHtml(setCount)}</span>
       <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="0.5" style="width: 76px; padding: 8px 6px; text-align: center;">
       <span style="color:#a09880;font-size:13px; font-weight:700;">×</span>
       <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" max="100" style="width: 72px; padding: 8px 6px; text-align: center;">
@@ -1116,7 +1116,7 @@
     btn.disabled = true;
     btn.textContent = "Saving...";
     try {
-      await apiRequest(`/lifts/${logId}`, { method: "PUT", body: payload });
+      await apiRequest(`/lifts/${escapeHtml(logId)}`, { method: "PUT", body: payload });
       document.getElementById("editSetModal").style.display = "none";
       loadProgress(currentExerciseId);
       loadPersonalRecords();
@@ -1176,9 +1176,9 @@
       
       <div style="background: rgba(30, 34, 39, 0.7); border-radius: 40px; padding: 120px 80px; width: 100%; max-width: 900px; text-align: center; border: 2px solid rgba(255,255,255,0.05); margin-top: 160px; margin-bottom: 200px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
         <div style="font-size: 56px; font-weight: 700; color: #9CA5AC; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">${escapeHtml(data.exercise)}</div>
-        <div style="font-size: 140px; color: #D4A33B; font-weight: 900; line-height: 1;">${prValue}</div>
-        <div style="font-size: 40px; color: #6B7480; font-weight: 500; margin-top: 24px;">${estText}</div>
-        <div style="font-size: 32px; color: #4F9D69; font-weight: 600; margin-top: 60px;">Hit on ${prDateStr}</div>
+        <div style="font-size: 140px; color: #D4A33B; font-weight: 900; line-height: 1;">${escapeHtml(prValue)}</div>
+        <div style="font-size: 40px; color: #6B7480; font-weight: 500; margin-top: 24px;">${escapeHtml(estText)}</div>
+        <div style="font-size: 32px; color: #4F9D69; font-weight: 600; margin-top: 60px;">Hit on ${escapeHtml(prDateStr)}</div>
       </div>
       
       <div style="position: absolute; bottom: 120px; display: flex; align-items: center; justify-content: center; gap: 32px; width: 100%;">
@@ -1208,7 +1208,7 @@
             await navigator.share({
               files: [file],
               title: 'New PR on IRONLOG',
-              text: `Just hit a new PR on ${data.exercise}: ${prValue}!`
+              text: `Just hit a new PR on ${escapeHtml(data.exercise)}: ${escapeHtml(prValue)}!`
             });
           } catch (err) {
             console.error("Share failed", err);

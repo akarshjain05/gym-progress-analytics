@@ -157,7 +157,7 @@
               <span>Predictions use fitness science averages. Log for 14+ days to switch to your personal model.</span>
             </div>
             <div class="phase-progress">
-              <div class="phase-progress-bar" style="width:${Math.min(100, (data.days_of_data/14)*100)}%"></div>
+              <div class="phase-progress-bar" style="width:${escapeHtml(Math.min(100, (data.days_of_data/14)*100))}%"></div>
             </div>
           `);
         } else {
@@ -165,7 +165,7 @@
           banner.innerHTML = DOMPurify.sanitize(`
             <span class="phase-icon">🎯</span>
             <div>
-              <strong>Personal Model Active — ${data.days_of_data} days of your data</strong>
+              <strong>Personal Model Active — ${escapeHtml(data.days_of_data)} days of your data</strong>
               <span>Predictions are based on YOUR actual training history.</span>
             </div>
           `);

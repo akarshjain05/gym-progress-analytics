@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Bind type switching for the form
   document.getElementById("gType").addEventListener("change", (e) => {
     document.querySelectorAll(".goal-type-fields").forEach(el => el.style.display = "none");
-    document.getElementById(`fields-${e.target.value}`).style.display = "block";
+    document.getElementById(`fields-${escapeHtml(e.target.value)}`).style.display = "block";
   });
 
   await loadGoalExerciseOptions();
@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       wrap.className = "";
       wrap.style.padding = "";
       wrap.innerHTML = DOMPurify.sanitize(`<div class="empty-state" style="padding: 64px 20px;">
-        <p style="font-size: 15px; color: var(--text-secondary); margin: 0;">No ${currentTab} goals found.</p>
+        <p style="font-size: 15px; color: var(--text-secondary); margin: 0;">No ${escapeHtml(currentTab)} goals found.</p>
       </div>`);
       return;
     }
@@ -234,31 +234,31 @@ async function loadGoalExerciseOptions() {
 
 function renderGoalCard(g, isCompleted) {
   let title = "";
-  let badge = `<span class="badge-goal badge-${g.goal_type}">${g.goal_type}</span>`;
-  let subtitleHTML = g.target_date ? `${badge} &bull; Target: ${fmtDate(g.target_date)}` : badge;
+  let badge = `<span class="badge-goal badge-${escapeHtml(g.goal_type)}">${escapeHtml(g.goal_type)}</span>`;
+  let subtitleHTML = g.target_date ? `${escapeHtml(badge)} &bull; Target: ${escapeHtml(fmtDate(g.target_date))}` : badge;
   
   if (g.goal_type === "lift") {
-    title = `${exerciseMap[g.exercise_id] || "Unknown Lift"}: ${fmtKg(g.target_weight_kg)} kg × ${g.target_reps}`;
+    title = `${escapeHtml(exerciseMap[g.exercise_id] || "Unknown Lift")}: ${escapeHtml(fmtKg(g.target_weight_kg))} kg × ${escapeHtml(g.target_reps)}`;
   } else if (g.goal_type === "weight") {
-    title = `Target Weight: ${fmtKg(g.target_body_weight_kg)} kg`;
+    title = `Target Weight: ${escapeHtml(fmtKg(g.target_body_weight_kg))} kg`;
   } else if (g.goal_type === "nutrition") {
     let parts = [];
-    if (g.target_calories) parts.push(`${g.target_calories} kcal`);
-    if (g.target_protein_g) parts.push(`${g.target_protein_g}g protein`);
+    if (g.target_calories) parts.push(`${escapeHtml(g.target_calories)} kcal`);
+    if (g.target_protein_g) parts.push(`${escapeHtml(g.target_protein_g)}g protein`);
     title = parts.join(" / ");
   } else if (g.goal_type === "frequency") {
-    title = `${g.target_workouts_per_week} workouts per week`;
+    title = `${escapeHtml(g.target_workouts_per_week)} workouts per week`;
   }
 
   return `
-    <div class="goal-card ${isCompleted ? 'goal-card-completed' : ''}">
-      <input type="checkbox" class="goal-checkbox" onchange="toggleGoal(${g.id})" ${isCompleted ? 'checked' : ''}>
+    <div class="goal-card ${escapeHtml(isCompleted ? 'goal-card-completed' : '')}">
+      <input type="checkbox" class="goal-checkbox" onchange="toggleGoal(${escapeHtml(g.id)})" ${escapeHtml(isCompleted ? 'checked' : '')}>
       <div class="goal-details">
         <div class="goal-title">${escapeHtml(title)}</div>
-        <div class="goal-subtitle">${subtitleHTML}</div>
+        <div class="goal-subtitle">${escapeHtml(subtitleHTML)}</div>
       </div>
       <div class="goal-actions">
-        <button class="icon-btn icon-btn-danger" onclick="deleteGoal(${g.id})" title="Delete Goal">
+        <button class="icon-btn icon-btn-danger" onclick="deleteGoal(${escapeHtml(g.id)})" title="Delete Goal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2-2L4 6"/></svg>
         </button>
       </div>

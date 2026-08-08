@@ -37,61 +37,61 @@ const ICON_STYLE = 'width="22" height="22" fill="none" xmlns="http://www.w3.org/
 
 const NAV_ITEMS = [
   { id: "dashboard", href: "dashboard.html", label: "Dashboard",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="14" y="3" width="7" height="11" rx="1.5" fill="currentColor" />
       <rect x="14" y="16" width="7" height="5" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="3" y="12" width="7" height="9" rx="1.5" fill="currentColor" />
     </svg>` },
   { id: "weight", href: "weight.html", label: "Body Weight",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="3" y="5" width="18" height="14" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
       <path d="M9 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "measurements", href: "measurements.html", label: "Measurements",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       <path d="M6 12v-3M10 12v-2M14 12v-3M18 12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "lifts", href: "lifts.html", label: "Lifts",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <path d="M6 5v14M18 5v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       <rect x="2" y="8" width="4" height="8" rx="1" fill="currentColor" />
       <rect x="18" y="8" width="4" height="8" rx="1" fill="currentColor" />
       <path d="M6 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "workout", href: "workout.html", label: "Workouts",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="5" y="4" width="14" height="17" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 2h6v3H9V2Z" fill="currentColor"/>
       <path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "nutrition", href: "nutrition.html", label: "Nutrition",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M12 21a9 9 0 0 0 9-9c0-1.5-.5-3-1.5-4H4.5C3.5 9 3 10.5 3 12a9 9 0 0 0 9 9Z" fill="currentColor"/>
       <path d="M12 3v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "goals", href: "goals.html", label: "Goals",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>` },
   { id: "analytics", href: "analytics.html", label: "Analytics",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="4" y="13" width="4" height="7" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <rect x="10" y="7" width="4" height="13" rx="1" fill="currentColor" />
       <rect x="16" y="3" width="4" height="17" rx="1" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
     </svg>` },
   { id: "calculators", href: "calculators.html", label: "Calculators",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M8 8h8v2H8V8z" fill="currentColor"/>
       <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
     </svg>` },
   { id: "coach", href: "coach.html", label: "AI Coach",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="4" y="8" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M9 14h.01M15 14h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
       <path d="M12 8V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -99,12 +99,12 @@ const NAV_ITEMS = [
       <path d="M2 13h2M20 13h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>` },
   { id: "profile", href: "profile.html", label: "Profile",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <circle cx="12" cy="8" r="4" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M5 20c0-2.5 2-5 7-5s7 2.5 7 5" fill="currentColor" />
     </svg>` },
   { id: "library", href: "library.html", label: "Exercise Library",
-    icon: `<svg ${ICON_STYLE} viewBox="0 0 24 24">
+    icon: `<svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
       <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
       <path d="M8 4v16M16 4v16" stroke="currentColor" stroke-width="1.5"/>
       <path d="M4 12h4M16 12h4" stroke="currentColor" stroke-width="1.5"/>
@@ -139,9 +139,9 @@ function buildEmptyState(title, message, ctaText, ctaHref) {
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
         </svg>
       </div>
-      <h3>${title}</h3>
-      <p>${message}</p>
-      ${ctaText ? `<a href="${ctaHref}" class="btn btn-primary">${ctaText}</a>` : ''}
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(message)}</p>
+      ${ctaText ? `<a href="${ctaHref}" class="btn btn-primary">${escapeHtml(ctaText)}</a>` : ''}
     </div>
   `;
 }
@@ -175,15 +175,15 @@ function setupLoadingAutoHide() {
 function buildMobileDrawer(activeId) {
   const user = Auth.getUser() || {};
   let navLinks = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
-    <a class="drawer-link ${item.id === activeId ? 'active' : ''}" href="${item.href}">
-      ${item.icon}
-      <span>${item.label}</span>
+    <a class="drawer-link ${escapeHtml(item.id === activeId ? 'active' : '')}" href="${escapeHtml(item.href)}">
+      ${escapeHtml(item.icon)}
+      <span>${escapeHtml(item.label)}</span>
     </a>
   `).join('');
 
   if (user.role === 'admin') {
     navLinks += `
-      <a class="drawer-link ${activeId === 'admin' ? 'active' : ''}" href="admin.html">
+      <a class="drawer-link ${escapeHtml(activeId === 'admin' ? 'active' : '')}" href="admin.html">
         <svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
           <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -208,20 +208,20 @@ function buildMobileDrawer(activeId) {
           </div>
         </div>
         <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close menu">
-          ${CLOSE_ICON}
+          ${escapeHtml(CLOSE_ICON)}
         </button>
       </div>
 
       <nav class="drawer-nav">
-        ${navLinks}
+        ${escapeHtml(navLinks)}
       </nav>
 
       <div class="drawer-footer sidebar-footer" style="padding: 16px 20px; padding-bottom: calc(16px + var(--safe-bottom)); border-top: 1px solid rgba(255,255,255,0.07); margin-top: 0;">
         <a href="profile.html" class="sidebar-profile-link" title="Profile">
-          <div class="sidebar-avatar">${user.username ? user.username.charAt(0).toUpperCase() : 'U'}</div>
+          <div class="sidebar-avatar">${escapeHtml(user.username ? user.username.charAt(0).toUpperCase() : 'U')}</div>
         </a>
         <button class="sidebar-logout-btn" id="drawerLogoutBtn" title="Log out">
-          ${LOGOUT_ICON}
+          ${escapeHtml(LOGOUT_ICON)}
           <span>Log out</span>
         </button>
       </div>
@@ -230,7 +230,7 @@ function buildMobileDrawer(activeId) {
     <!-- Mobile top bar (only visible on mobile) -->
     <header class="mobile-topbar">
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
-        ${HAMBURGER_ICON}
+        ${escapeHtml(HAMBURGER_ICON)}
       </button>
       <a href="dashboard.html" class="mobile-topbar-brand">
         <span class="brand-logo-icon" aria-hidden="true">${BARBELL_SVG}</span>
@@ -249,13 +249,13 @@ function buildBottomNav(activeId) {
 
 
   const links = bottomItems.map(item => `
-    <a href="${item.href}" class="bottom-nav-link ${item.id === activeId ? 'active' : ''}" aria-label="${item.label}">
-      ${item.icon}
-      <span>${item.label === 'Body Weight' ? 'Weight' : item.label}</span>
+    <a href="${escapeHtml(item.href)}" class="bottom-nav-link ${escapeHtml(item.id === activeId ? 'active' : '')}" aria-label="${escapeHtml(item.label)}">
+      ${escapeHtml(item.icon)}
+      <span>${escapeHtml(item.label === 'Body Weight' ? 'Weight' : item.label)}</span>
     </a>
   `).join('');
 
-  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${links}</nav>`;
+  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${escapeHtml(links)}</nav>`;
 }
 
 function openDrawer() {
@@ -290,15 +290,15 @@ function renderShell(activeId, pageTitle, subtitle) {
   const isCollapsed = user.sidebar_collapsed ? "sidebar-collapsed" : "";
 
   let navHtml = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
-    <a class="nav-link ${item.id === activeId ? "active" : ""}" href="${item.href}">
-      ${item.icon}<span>${item.label}</span>
+    <a class="nav-link ${escapeHtml(item.id === activeId ? "active" : "")}" href="${escapeHtml(item.href)}">
+      ${escapeHtml(item.icon)}<span>${escapeHtml(item.label)}</span>
     </a>
   `).join("");
 
   if (user.role === 'admin') {
     navHtml += `
-      <a class="nav-link ${activeId === 'admin' ? "active" : ""}" href="admin.html">
-        <svg ${ICON_STYLE} viewBox="0 0 24 24">
+      <a class="nav-link ${escapeHtml(activeId === 'admin' ? "active" : "")}" href="admin.html">
+        <svg ${escapeHtml(ICON_STYLE)} viewBox="0 0 24 24">
           <path d="M12 4L4 8l8 4 8-4-8-4z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>
           <path d="M4 12l8 4 8-4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg><span>Admin Panel</span>
@@ -307,10 +307,10 @@ function renderShell(activeId, pageTitle, subtitle) {
   }
 
   document.body.innerHTML = DOMPurify.sanitize(`
-    ${buildLoadingOverlay()}
-    ${buildMobileDrawer(activeId)}
+    ${escapeHtml(buildLoadingOverlay())}
+    ${escapeHtml(buildMobileDrawer(activeId))}
 
-    <div class="app-shell ${isCollapsed}">
+    <div class="app-shell ${escapeHtml(isCollapsed)}">
       <aside class="sidebar">
         <div class="brand">
           <a href="dashboard.html" class="brand-with-logo" aria-label="IRONLOG home">
@@ -326,10 +326,10 @@ function renderShell(activeId, pageTitle, subtitle) {
         </ul>
         <div class="sidebar-footer">
           <a href="profile.html" class="sidebar-profile-link" title="Profile">
-            <div class="sidebar-avatar">${user.username ? user.username.charAt(0).toUpperCase() : 'U'}</div>
+            <div class="sidebar-avatar">${escapeHtml(user.username ? user.username.charAt(0).toUpperCase() : 'U')}</div>
           </a>
           <button class="sidebar-logout-btn" id="logoutBtn" title="Log out">
-            ${LOGOUT_ICON}
+            ${escapeHtml(LOGOUT_ICON)}
             <span>Log out</span>
           </button>
         </div>
@@ -338,8 +338,8 @@ function renderShell(activeId, pageTitle, subtitle) {
       <main class="main-content">
         <div class="page-header">
           <div>
-            <h1>${pageTitle}</h1>
-            <div class="subtitle" id="pageSubtitle" style="${subtitle ? "" : "display:none;"}">${subtitle || ""}</div>
+            <h1>${escapeHtml(pageTitle)}</h1>
+            <div class="subtitle" id="pageSubtitle" style="${escapeHtml(subtitle ? "" : "display:none;")}">${escapeHtml(subtitle || "")}</div>
           </div>
           <div id="pageHeaderActions"></div>
         </div>
@@ -347,7 +347,7 @@ function renderShell(activeId, pageTitle, subtitle) {
       </main>
     </div>
 
-    ${buildBottomNav(activeId)}
+    ${escapeHtml(buildBottomNav(activeId))}
   `);
 
   // Desktop logout
@@ -435,35 +435,35 @@ window.showExerciseInfo = async function(exerciseId) {
     }
     
     const difficultyBadge = ex.difficulty 
-      ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:var(--bg-tertiary); font-size:12px; margin-left:8px;">${ex.difficulty}</span>` 
+      ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:var(--bg-tertiary); font-size:12px; margin-left:8px;">${escapeHtml(ex.difficulty)}</span>` 
       : '';
       
     modal.innerHTML = DOMPurify.sanitize(`
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
           <div class="wk-modal-title" style="display:flex; align-items:center;">
-            ${ex.name} ${difficultyBadge}
+            ${escapeHtml(ex.name)} ${escapeHtml(difficultyBadge)}
           </div>
-          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${CLOSE_ICON}</button>
+          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${escapeHtml(CLOSE_ICON)}</button>
         </div>
         <div class="wk-modal-body" style="line-height:1.5;">
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
             <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
-              <strong style="color:var(--text-secondary);">Category:</strong><br>${ex.category || '—'}
+              <strong style="color:var(--text-secondary);">Category:</strong><br>${escapeHtml(ex.category || '—')}
             </div>
             <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
-              <strong style="color:var(--text-secondary);">Primary Muscle:</strong><br>${ex.muscle_group || '—'}
+              <strong style="color:var(--text-secondary);">Primary Muscle:</strong><br>${escapeHtml(ex.muscle_group || '—')}
             </div>
             <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
-              <strong style="color:var(--text-secondary);">Secondary Muscle:</strong><br>${ex.secondary_muscle || '—'}
+              <strong style="color:var(--text-secondary);">Secondary Muscle:</strong><br>${escapeHtml(ex.secondary_muscle || '—')}
             </div>
             <div style="background:var(--bg-tertiary); padding:6px 12px; border-radius:6px; font-size:13px;">
-              <strong style="color:var(--text-secondary);">Equipment:</strong><br>${ex.equipment || '—'}
+              <strong style="color:var(--text-secondary);">Equipment:</strong><br>${escapeHtml(ex.equipment || '—')}
             </div>
           </div>
           
           <h4 style="margin:0 0 8px 0; color:var(--text-primary);">Instructions</h4>
-          <div style="color:var(--text-secondary); font-size:14px; white-space:pre-wrap;">${ex.instructions || 'No instructions available.'}</div>
+          <div style="color:var(--text-secondary); font-size:14px; white-space:pre-wrap;">${escapeHtml(ex.instructions || 'No instructions available.')}</div>
         </div>
       </div>
     `);

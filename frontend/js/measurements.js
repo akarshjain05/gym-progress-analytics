@@ -273,16 +273,16 @@ function renderTable(logs) {
   for (const log of sorted) {
     html += `
       <tr>
-        <td><strong>${fmtDate(log.date)}</strong></td>
-        <td>${getVal(log, 'chest') ? getVal(log, 'chest') + ' ' + displayUnit : '-'}</td>
-        <td>${getVal(log, 'waist') ? getVal(log, 'waist') + ' ' + displayUnit : '-'}</td>
-        <td>${getVal(log, 'arm') ? getVal(log, 'arm') + ' ' + displayUnit : '-'}</td>
-        <td>${getVal(log, 'thigh') ? getVal(log, 'thigh') + ' ' + displayUnit : '-'}</td>
+        <td><strong>${escapeHtml(fmtDate(log.date))}</strong></td>
+        <td>${escapeHtml(getVal(log, 'chest') ? getVal(log, 'chest') + ' ' + displayUnit : '-')}</td>
+        <td>${escapeHtml(getVal(log, 'waist') ? getVal(log, 'waist') + ' ' + displayUnit : '-')}</td>
+        <td>${escapeHtml(getVal(log, 'arm') ? getVal(log, 'arm') + ' ' + displayUnit : '-')}</td>
+        <td>${escapeHtml(getVal(log, 'thigh') ? getVal(log, 'thigh') + ' ' + displayUnit : '-')}</td>
         <td class="text-tertiary" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${log.notes ? escapeHtml(log.notes) : ''}
+          ${escapeHtml(log.notes ? escapeHtml(log.notes) : '')}
         </td>
         <td style="text-align:right;">
-          <button class="btn btn-ghost btn-sm text-danger" onclick="deleteMeasurement(${log.id})">Delete</button>
+          <button class="btn btn-ghost btn-sm text-danger" onclick="deleteMeasurement(${escapeHtml(log.id)})">Delete</button>
         </td>
       </tr>
     `;

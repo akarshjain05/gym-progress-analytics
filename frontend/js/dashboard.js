@@ -17,7 +17,7 @@ async function loadDashboard() {
     dashboardData = dash;
 
     const subtitleEl = document.getElementById("pageSubtitle");
-    subtitleEl.textContent = `Welcome back, ${dash.username}.`;
+    subtitleEl.textContent = `Welcome back, ${escapeHtml(dash.username)}.`;
     subtitleEl.style.display = "block";
 
     // Show wrapped banner if we have logged anything this month
@@ -31,10 +31,10 @@ async function loadDashboard() {
 
     let etaHtml = "";
     if (nextEta) {
-      const sessionsText = nextEta.sessions_away === 1 ? "1 session" : `${nextEta.sessions_away} sessions`;
+      const sessionsText = nextEta.sessions_away === 1 ? "1 session" : `${escapeHtml(nextEta.sessions_away)} sessions`;
       etaHtml = `
         <div class="card" style="margin-bottom: 1.5rem; background: var(--bg-secondary); border-left: 4px solid var(--plate-red);">
-          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;">At your current rate, you'll ${escapeHtml(nextEta.exercise_name).toLowerCase()} ${nextEta.target_kg}kg in ${sessionsText}</div>
+          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;">At your current rate, you'll ${escapeHtml(nextEta.exercise_name).toLowerCase()} ${escapeHtml(nextEta.target_kg)}kg in ${escapeHtml(sessionsText)}</div>
         </div>
       `;
     }
@@ -56,17 +56,17 @@ async function loadDashboard() {
         pct = 100;
       }
       const etaText = weightSummary.estimated_days_to_goal
-        ? `~${Math.round(weightSummary.estimated_days_to_goal / 7)} weeks left at current pace`
+        ? `~${escapeHtml(Math.round(weightSummary.estimated_days_to_goal / 7))} weeks left at current pace`
         : "Log consistently to get an ETA";
       goalCardHtml = `
         <div class="card stat-card">
           <div class="stat-label">Goal progress</div>
-          <div class="stat-value">${pct.toFixed(0)}<span class="unit">%</span></div>
+          <div class="stat-value">${escapeHtml(pct.toFixed(0))}<span class="unit">%</span></div>
           <div class="plate-progress mt-8">
-            <div class="plate-rack"><div class="plate-rack-fill" style="width:${pct}%"></div></div>
-            <div class="pct">${fmtKg(current)}/${fmtKg(goal)}</div>
+            <div class="plate-rack"><div class="plate-rack-fill" style="width:${escapeHtml(pct)}%"></div></div>
+            <div class="pct">${escapeHtml(fmtKg(current))}/${escapeHtml(fmtKg(goal))}</div>
           </div>
-          <div class="stat-delta neutral mt-8">${etaText}</div>
+          <div class="stat-delta neutral mt-8">${escapeHtml(etaText)}</div>
         </div>`;
     } else {
       goalCardHtml = `
@@ -90,13 +90,13 @@ async function loadDashboard() {
           <div class="grid grid-stats">
             <div class="card stat-card">
               <div class="stat-label">Current weight</div>
-              <div class="stat-value">${dash.current_weight_kg !== null ? fmtKg(dash.current_weight_kg) : "—"}<span class="unit">kg</span></div>
-              <div class="stat-delta ${weightDelta.cls}">${weightDelta.text} (30d)</div>
+              <div class="stat-value">${escapeHtml(dash.current_weight_kg !== null ? fmtKg(dash.current_weight_kg) : "—")}<span class="unit">kg</span></div>
+              <div class="stat-delta ${escapeHtml(weightDelta.cls)}">${escapeHtml(weightDelta.text)} (30d)</div>
             </div>
-            ${goalCardHtml}
+            ${escapeHtml(goalCardHtml)}
             <div class="card stat-card">
               <div class="stat-label">Avg calories (7d)</div>
-              <div class="stat-value">${dash.avg_calories_last_7_days !== null ? Math.round(dash.avg_calories_last_7_days) : "—"}<span class="unit">kcal</span></div>
+              <div class="stat-value">${escapeHtml(dash.avg_calories_last_7_days !== null ? Math.round(dash.avg_calories_last_7_days) : "—")}<span class="unit">kcal</span></div>
               <div class="stat-delta neutral">${dash.total_calorie_entries} days logged total</div>
             </div>
             <div class="card stat-card">
@@ -112,7 +112,7 @@ async function loadDashboard() {
 
       content.innerHTML = DOMPurify.sanitize(`
         
-        ${etaHtml}
+        ${escapeHtml(etaHtml)}
         <div id="wrappedBanner" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.4)';" onclick="window.DashboardPage.showWrapped()">
           <div style="position: relative; z-index: 2;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.25rem;">
@@ -125,7 +125,7 @@ async function loadDashboard() {
           </div>
         </div>
 
-        ${statsGridHtml}
+        ${escapeHtml(statsGridHtml)}
 
 
 

@@ -167,10 +167,10 @@ async function loadSettingsSection() {
       <div class="settings-row">
         <div class="settings-info">
           <div class="settings-label">Theme</div>
-          <div class="settings-sub">${isDark ? 'Dark mode is active' : 'Light mode is active'}</div>
+          <div class="settings-sub">${escapeHtml(isDark ? 'Dark mode is active' : 'Light mode is active')}</div>
         </div>
         <button class="settings-btn" id="themeToggleBtn" data-theme-toggle>
-          ${isDark ? '☀️ Switch to Light' : '🌙 Switch to Dark'}
+          ${escapeHtml(isDark ? '☀️ Switch to Light' : '🌙 Switch to Dark')}
         </button>
       </div>
     </div>
@@ -206,8 +206,8 @@ async function loadSettingsSection() {
                 : 'Get notified when you hit a new PR or have not trained in 3 days.'}
             </div>
           </div>
-          <button class="settings-btn ${pushSubscribed ? 'settings-btn-active' : ''}" id="pushToggleBtn">
-            ${pushSubscribed ? '🔔 Enabled' : '🔕 Enable'}
+          <button class="settings-btn ${escapeHtml(pushSubscribed ? 'settings-btn-active' : '')}" id="pushToggleBtn">
+            ${escapeHtml(pushSubscribed ? '🔔 Enabled' : '🔕 Enable')}
           </button>
         </div>
         ${pushSubscribed ? `

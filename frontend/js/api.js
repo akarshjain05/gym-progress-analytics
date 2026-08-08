@@ -70,10 +70,10 @@ const OfflineSync = {
       request.onsuccess = async () => {
         const items = request.result;
         if (items.length === 0) return resolve();
-        console.log(`[OfflineSync] Flushing ${items.length} items to server...`);
+        console.log(`[OfflineSync] Flushing ${escapeHtml(items.length)} items to server...`);
         for (const item of items) {
           try {
-            await fetch(`${API_BASE_URL}${item.path}`, {
+            await fetch(`${escapeHtml(API_BASE_URL)}${escapeHtml(item.path)}`, {
               method: item.method,
               headers: item.headers,
               body: item.body === undefined ? undefined : (item.form ? item.body : JSON.stringify(item.body)),
@@ -85,7 +85,7 @@ const OfflineSync = {
               delTx.oncomplete = res;
             });
           } catch (err) {
-            console.warn(`[OfflineSync] Failed to sync item ${item.id}`, err);
+            console.warn(`[OfflineSync] Failed to sync item ${escapeHtml(item.id)}`, err);
             // Stop flushing if we hit a network error again
             break;
           }
@@ -115,12 +115,12 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
       window.location.href = "index.html";
       throw new ApiError("Not authenticated", 401);
     }
-    headers["Authorization"] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${escapeHtml(token)}`;
   }
 
   let resp;
   try {
-    resp = await fetch(`${API_BASE_URL}${path}`, {
+    resp = await fetch(`${escapeHtml(API_BASE_URL)}${escapeHtml(path)}`, {
       method,
       headers,
       body: body === undefined ? undefined : (form ? body : JSON.stringify(body)),
@@ -150,7 +150,7 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
   }
 
   if (!resp.ok) {
-    const message = (data && data.detail) ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)) : `Request failed (${resp.status})`;
+    const message = (data && data.detail) ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)) : `Request failed (${escapeHtml(resp.status)})`;
     throw new ApiError(message, resp.status);
   }
 
@@ -225,52 +225,52 @@ const Api = {
 
   // --- weight ---
   logWeight(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
-  listWeight(params = {}) { return apiRequest(`/weight${qs(params)}`); },
-  deleteWeight(id) { return apiRequest(`/weight/${id}`, { method: "DELETE" }); },
+  listWeight(params = {}) { return apiRequest(`/weight${escapeHtml(qs(params))}`); },
+  deleteWeight(id) { return apiRequest(`/weight/${escapeHtml(id)}`, { method: "DELETE" }); },
   weightGet(start, end) {
     let url = "/weight";
-    if (start && end) url += `?start=${start}&end=${end}`;
+    if (start && end) url += `?start=${escapeHtml(start)}&end=${escapeHtml(end)}`;
     return apiRequest(url);
   },
   weightSummary() { return apiRequest("/weight/summary"); },
   strengthPercentiles() { return apiRequest("/analytics/strength-percentiles"); },
   weightAdd(payload) { return apiRequest("/weight", { method: "POST", body: payload }); },
-  weightDelete(id) { return apiRequest(`/weight/${id}`, { method: "DELETE" }); },
+  weightDelete(id) { return apiRequest(`/weight/${escapeHtml(id)}`, { method: "DELETE" }); },
 
   // --- measurements ---
   measurementsGet(start, end) {
     let url = "/measurements";
-    if (start && end) url += `?start=${start}&end=${end}`;
+    if (start && end) url += `?start=${escapeHtml(start)}&end=${escapeHtml(end)}`;
     return apiRequest(url);
   },
   measurementsAdd(payload) { return apiRequest("/measurements", { method: "POST", body: payload }); },
-  measurementsDelete(id) { return apiRequest(`/measurements/${id}`, { method: "DELETE" }); },
+  measurementsDelete(id) { return apiRequest(`/measurements/${escapeHtml(id)}`, { method: "DELETE" }); },
 
   // --- exercises ---
   listExercises() { return apiRequest("/exercises"); },
   createExercise(payload) { return apiRequest("/exercises", { method: "POST", body: payload }); },
-  deleteExercise(id) { return apiRequest(`/exercises/${id}`, { method: "DELETE" }); },
+  deleteExercise(id) { return apiRequest(`/exercises/${escapeHtml(id)}`, { method: "DELETE" }); },
 
   // --- lifts ---
   logLift(payload) { return apiRequest("/lifts", { method: "POST", body: payload }); },
   logLiftSession(payload) { return apiRequest("/lifts/session", { method: "POST", body: payload }); },
-  listLifts(params = {}) { return apiRequest(`/lifts${qs(params)}`); },
-  updateLift(id, payload) { return apiRequest(`/lifts/${id}`, { method: "PUT", body: payload }); },
-  deleteLift(id) { return apiRequest(`/lifts/${id}`, { method: "DELETE" }); },
-  liftProgress(exerciseId) { return apiRequest(`/lifts/progress/${exerciseId}`); },
+  listLifts(params = {}) { return apiRequest(`/lifts${escapeHtml(qs(params))}`); },
+  updateLift(id, payload) { return apiRequest(`/lifts/${escapeHtml(id)}`, { method: "PUT", body: payload }); },
+  deleteLift(id) { return apiRequest(`/lifts/${escapeHtml(id)}`, { method: "DELETE" }); },
+  liftProgress(exerciseId) { return apiRequest(`/lifts/progress/${escapeHtml(exerciseId)}`); },
   personalRecords() { return apiRequest("/lifts/personal-records"); },
 
   // --- nutrition ---
   logCalories(payload) { return apiRequest("/nutrition", { method: "POST", body: payload }); },
-  listCalories(params = {}) { return apiRequest(`/nutrition${qs(params)}`); },
-  deleteCalorieLog(id) { return apiRequest(`/nutrition/${id}`, { method: "DELETE" }); },
+  listCalories(params = {}) { return apiRequest(`/nutrition${escapeHtml(qs(params))}`); },
+  deleteCalorieLog(id) { return apiRequest(`/nutrition/${escapeHtml(id)}`, { method: "DELETE" }); },
   nutritionSummary() { return apiRequest("/nutrition/summary"); },
 
   // --- goals ---
   setGoal(payload) { return apiRequest("/goals", { method: "POST", body: payload }); },
   listGoals() { return apiRequest("/goals"); },
-  deleteGoal(id) { return apiRequest(`/goals/${id}`, { method: "DELETE" }); },
-  toggleGoalCompletion(id) { return apiRequest(`/goals/${id}/toggle-completion`, { method: "POST" }); },
+  deleteGoal(id) { return apiRequest(`/goals/${escapeHtml(id)}`, { method: "DELETE" }); },
+  toggleGoalCompletion(id) { return apiRequest(`/goals/${escapeHtml(id)}/toggle-completion`, { method: "POST" }); },
 
   // --- analytics ---
   dashboard() { return apiRequest("/analytics/dashboard"); },
@@ -280,24 +280,24 @@ const Api = {
     const q = new URLSearchParams();
     if (year) q.append("year", year);
     if (month) q.append("month", month);
-    return apiRequest(`/analytics/wrapped?${q.toString()}`);
+    return apiRequest(`/analytics/wrapped?${escapeHtml(q.toString())}`);
   },
-  compare(days) { return apiRequest(`/analytics/compare?days=${days}`); },
+  compare(days) { return apiRequest(`/analytics/compare?days=${escapeHtml(days)}`); },
 
   // --- workout templates ---
   listTemplates() { return apiRequest("/templates"); },
-  getTemplate(id) { return apiRequest(`/templates/${id}`); },
+  getTemplate(id) { return apiRequest(`/templates/${escapeHtml(id)}`); },
   createTemplate(payload) { return apiRequest("/templates", { method: "POST", body: payload }); },
-  updateTemplate(id, payload) { return apiRequest(`/templates/${id}`, { method: "PUT", body: payload }); },
-  deleteTemplate(id) { return apiRequest(`/templates/${id}`, { method: "DELETE" }); },
-  addTemplateExercise(templateId, payload) { return apiRequest(`/templates/${templateId}/exercises`, { method: "POST", body: payload }); },
-  updateTemplateExercise(templateId, exerciseId, payload) { return apiRequest(`/templates/${templateId}/exercises/${exerciseId}`, { method: "PUT", body: payload }); },
-  deleteTemplateExercise(templateId, exerciseId) { return apiRequest(`/templates/${templateId}/exercises/${exerciseId}`, { method: "DELETE" }); },
-  reorderTemplateExercises(templateId, payload) { return apiRequest(`/templates/${templateId}/reorder`, { method: "POST", body: payload }); },
-  finishWorkout(templateId, payload) { return apiRequest(`/templates/${templateId}/finish`, { method: "POST", body: payload }); },
-  shareTemplate(id) { return apiRequest(`/templates/${id}/share`, { method: "POST" }); },
-  getSharedTemplate(shareId) { return apiRequest(`/templates/shared/${shareId}`); },
-  importSharedTemplate(shareId) { return apiRequest(`/templates/shared/${shareId}/import`, { method: "POST" }); },
+  updateTemplate(id, payload) { return apiRequest(`/templates/${escapeHtml(id)}`, { method: "PUT", body: payload }); },
+  deleteTemplate(id) { return apiRequest(`/templates/${escapeHtml(id)}`, { method: "DELETE" }); },
+  addTemplateExercise(templateId, payload) { return apiRequest(`/templates/${escapeHtml(templateId)}/exercises`, { method: "POST", body: payload }); },
+  updateTemplateExercise(templateId, exerciseId, payload) { return apiRequest(`/templates/${escapeHtml(templateId)}/exercises/${escapeHtml(exerciseId)}`, { method: "PUT", body: payload }); },
+  deleteTemplateExercise(templateId, exerciseId) { return apiRequest(`/templates/${escapeHtml(templateId)}/exercises/${escapeHtml(exerciseId)}`, { method: "DELETE" }); },
+  reorderTemplateExercises(templateId, payload) { return apiRequest(`/templates/${escapeHtml(templateId)}/reorder`, { method: "POST", body: payload }); },
+  finishWorkout(templateId, payload) { return apiRequest(`/templates/${escapeHtml(templateId)}/finish`, { method: "POST", body: payload }); },
+  shareTemplate(id) { return apiRequest(`/templates/${escapeHtml(id)}/share`, { method: "POST" }); },
+  getSharedTemplate(shareId) { return apiRequest(`/templates/shared/${escapeHtml(shareId)}`); },
+  importSharedTemplate(shareId) { return apiRequest(`/templates/shared/${escapeHtml(shareId)}/import`, { method: "POST" }); },
 
   // --- coach ---
   getCoachAnalysis() { return apiRequest("/coach/analysis"); },
@@ -305,11 +305,11 @@ const Api = {
 
   // --- admin ---
   adminGetUsers() { return apiRequest("/admin/users"); },
-  adminDeleteUser(id) { return apiRequest(`/admin/users/${id}`, { method: "DELETE" }); },
-  adminPromoteUser(id) { return apiRequest(`/admin/promote/${id}`, { method: "POST" }); },
+  adminDeleteUser(id) { return apiRequest(`/admin/users/${escapeHtml(id)}`, { method: "DELETE" }); },
+  adminPromoteUser(id) { return apiRequest(`/admin/promote/${escapeHtml(id)}`, { method: "POST" }); },
   adminGetStats() { return apiRequest("/admin/stats"); },
   adminGetLogs() { return apiRequest("/admin/logs"); },
-  adminDeleteLog(type, id) { return apiRequest(`/admin/logs/${type}/${id}`, { method: "DELETE" }); },
+  adminDeleteLog(type, id) { return apiRequest(`/admin/logs/${escapeHtml(type)}/${escapeHtml(id)}`, { method: "DELETE" }); },
 
   Calculators: {
     getBodyMetrics(payload) { return apiRequest("/calculators/body-metrics", { method: "POST", body: payload }); },
@@ -420,7 +420,7 @@ function fmtDelta(v, suffix = "") {
   if (v === null || v === undefined) return { text: "No trend yet", cls: "neutral" };
   const sign = v > 0 ? "+" : "";
   const cls = v > 0 ? "positive" : v < 0 ? "negative" : "neutral";
-  return { text: `${sign}${v}${suffix}`, cls };
+  return { text: `${escapeHtml(sign)}${escapeHtml(v)}${escapeHtml(suffix)}`, cls };
 }
 
 function fmtDate(isoDate) {
@@ -457,8 +457,8 @@ function groupExercisesByMuscle(exercises) {
 // Builds <optgroup> HTML grouped by muscle group, for any exercise <select>.
 function buildGroupedExerciseOptions(exercises) {
   return groupExercisesByMuscle(exercises).map(g => `
-    <optgroup label="${g.label}">
-      ${g.items.map(e => `<option value="${e.id}">${e.name.replace(/</g, "&lt;")}</option>`).join("")}
+    <optgroup label="${escapeHtml(g.label)}">
+      ${g.items.map(e => `<option value="${e.id}">${escapeHtml(e.name.replace(/</g, "&lt;"))}</option>`).join("")}
     </optgroup>
   `).join("");
 }

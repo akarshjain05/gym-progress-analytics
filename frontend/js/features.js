@@ -193,15 +193,15 @@ const IronlogExport = (function () {
     const token = Auth.getToken();
     if (!token) { showToast('Please log in to export data.', 'error'); return; }
 
-    const url = `${window.IRONLOG_API_BASE}/export/${format}`;
-    showToast(`Preparing your ${format.toUpperCase()} export…`);
+    const url = `${escapeHtml(window.IRONLOG_API_BASE)}/export/${escapeHtml(format)}`;
+    showToast(`Preparing your ${escapeHtml(format.toUpperCase())} export…`);
 
-    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(url, { headers: { Authorization: `Bearer ${escapeHtml(token)}` } })
       .then(res => {
-        if (!res.ok) throw new Error(`Export failed (${res.status})`);
+        if (!res.ok) throw new Error(`Export failed (${escapeHtml(res.status)})`);
         const disposition = res.headers.get('Content-Disposition') || '';
         const match = disposition.match(/filename="([^"]+)"/);
-        const filename = match ? match[1] : `ironlog_export.${format}`;
+        const filename = match ? match[1] : `ironlog_export.${escapeHtml(format)}`;
         return res.blob().then(blob => ({ blob, filename }));
       })
       .then(({ blob, filename }) => {
@@ -211,7 +211,7 @@ const IronlogExport = (function () {
         document.body.appendChild(a);
         a.click();
         setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-        showToast(`Downloaded ${filename}`);
+        showToast(`Downloaded ${escapeHtml(filename)}`);
       })
       .catch(err => {
         console.error('[export]', err);
