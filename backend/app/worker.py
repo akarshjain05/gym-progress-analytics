@@ -33,9 +33,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 def ist_today():
     return datetime.now(IST).date()
 
-def ist_week_start():
-    today = ist_today()
-    return today - timedelta(days=today.weekday())
+
 
 @celery_app.task(name="run_inactivity_check")
 def run_inactivity_check():

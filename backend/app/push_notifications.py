@@ -184,22 +184,7 @@ def get_vapid_public_key():
 # Notification triggers — called from other routers
 # ---------------------------------------------------------------------------
 
-def notify_new_pr(db: Session, user_id: int, exercise_name: str, new_1rm_kg: float):
-    """Send a PR notification. Called from workout_templates finish endpoint."""
-    sub = db.query(PushSubscription).filter(
-        PushSubscription.user_id == user_id
-    ).first()
-    if not sub:
-        return
-    ok, reason = _send_push(
-        sub,
-        title="New PR!",
-        body=f"Congratulations on your new {exercise_name} 1RM: {new_1rm_kg}kg!",
-        url="/lifts.html",
-    )
-    if not ok and reason == "410_GONE":
-        db.delete(sub)
-        db.commit()
+
 
 
 def notify_inactivity_check(db: Session):

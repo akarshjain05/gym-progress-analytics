@@ -423,26 +423,7 @@ def get_workout_session_details(
         "created_at": session.created_at.isoformat() if session.created_at else None,
         "exercises": list(exercises_map.values())
     }
-def update_session_notes(
-    session_id: int,
-    payload: SessionNotesIn,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    """Update the notes for a completed workout session."""
-    session = (
-        db.query(models.WorkoutSession)
-        .filter(
-            models.WorkoutSession.id == session_id,
-            models.WorkoutSession.user_id == current_user.id,
-        )
-        .first()
-    )
-    if not session:
-        raise HTTPException(status_code=404, detail="Workout session not found")
-    session.notes = payload.notes.strip() or None
-    db.commit()
-    return {"status": "updated", "notes": session.notes}
+
 
 
 @router.delete("/history/{session_id}", status_code=204)
