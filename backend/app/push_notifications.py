@@ -22,7 +22,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import Session, relationship
 
 from .database import Base, get_db
-from .security import get_current_user
+from .security import get_current_user, get_current_admin_user
 from . import models
 
 router = APIRouter(prefix="/push", tags=["push"])
@@ -218,7 +218,7 @@ def notify_inactivity_check(db: Session):
 @router.post("/check-inactivity")
 def check_inactivity(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_admin_user),
 ):
     """Manual trigger for inactivity check (admin/testing use)."""
     notify_inactivity_check(db)
