@@ -747,7 +747,8 @@ Be direct and specific. Use their actual numbers. Sound like a real coach. Max 3
 
     # Gemini API call
     async def gemini_stream():
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key={api_key}"
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:streamGenerateContent?alt=sse&key={api_key}"
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
