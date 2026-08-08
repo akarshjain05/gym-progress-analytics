@@ -334,7 +334,7 @@ function renderShell(activeId, pageTitle, subtitle) {
 
   let navHtml = NAV_ITEMS.filter(item => item.id !== 'profile').map(item => `
     <a class="nav-link ${escapeHtml(item.id === activeId ? "active" : "")}" href="${escapeHtml(item.href)}">
-      ${escapeHtml(item.icon)}<span>${escapeHtml(item.label)}</span>
+      ${item.icon}<span>${escapeHtml(item.label)}</span>
     </a>
   `).join("");
 
@@ -350,8 +350,8 @@ function renderShell(activeId, pageTitle, subtitle) {
   }
 
   document.body.innerHTML = DOMPurify.sanitize(`
-    ${escapeHtml(buildLoadingOverlay())}
-    ${escapeHtml(buildMobileDrawer(activeId))}
+    ${buildLoadingOverlay()}
+    ${buildMobileDrawer(activeId)}
 
     <div class="app-shell ${escapeHtml(isCollapsed)}">
       <aside class="sidebar">
@@ -372,7 +372,7 @@ function renderShell(activeId, pageTitle, subtitle) {
             <div class="sidebar-avatar">${escapeHtml(user.username ? user.username.charAt(0).toUpperCase() : 'U')}</div>
           </a>
           <button class="sidebar-logout-btn" id="logoutBtn" title="Log out">
-            ${escapeHtml(LOGOUT_ICON)}
+            ${LOGOUT_ICON}
             <span>Log out</span>
           </button>
         </div>
@@ -390,7 +390,7 @@ function renderShell(activeId, pageTitle, subtitle) {
       </main>
     </div>
 
-    ${escapeHtml(buildBottomNav(activeId))}
+    ${buildBottomNav(activeId)}
   `);
 
   // Desktop logout
