@@ -20,14 +20,14 @@
       <div class="sk-page">
         <!-- Stats row: 4 cards -->
         <div class="sk-grid-4">
-          ${escapeHtml(repeat(4, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>'))}
+          ${repeat(4, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>')}
         </div>
 
         <!-- Quick log -->
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
           <div class="sk-grid-3 sk-mt12">
-            ${escapeHtml(repeat(3, '<div class="sk-card-inner"><div class="sk-circle"></div><div class="sk-line sk-line-md sk-mt8"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>'))}
+            ${repeat(3, '<div class="sk-card-inner"><div class="sk-circle"></div><div class="sk-line sk-line-md sk-mt8"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
           </div>
         </div>
       </div>`,
@@ -36,7 +36,7 @@
       <div class="sk-page">
         <!-- Stats row -->
         <div class="sk-grid-3">
-          ${escapeHtml(repeat(3, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>'))}
+          ${repeat(3, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>')}
         </div>
         <!-- Chart -->
         <div class="sk-card sk-mt16">
@@ -55,7 +55,7 @@
         <!-- History -->
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
-          ${escapeHtml(repeat(5, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-sm"></div></div>'))}
+          ${repeat(5, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-sm"></div></div>')}
         </div>
       </div>`,
 
@@ -68,7 +68,7 @@
         </div>
         <!-- Stats row -->
         <div class="sk-grid-3 sk-mt16">
-          ${escapeHtml(repeat(3, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>'))}
+          ${repeat(3, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div><div class="sk-line sk-line-md sk-mt6"></div></div>')}
         </div>
         <!-- Strength scale -->
         <div class="sk-card sk-mt16">
@@ -94,7 +94,7 @@
       <div class="sk-page">
         <!-- Stats row -->
         <div class="sk-grid-4">
-          ${escapeHtml(repeat(4, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div></div>'))}
+          ${repeat(4, '<div class="sk-card"><div class="sk-line sk-line-sm"></div><div class="sk-line sk-line-xl sk-mt8"></div></div>')}
         </div>
         <!-- Chart -->
         <div class="sk-card sk-mt16">
@@ -105,7 +105,7 @@
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
           <div class="sk-grid-2 sk-mt12">
-            ${escapeHtml(repeat(4, '<div class="sk-input"></div>'))}
+            ${repeat(4, '<div class="sk-input"></div>')}
           </div>
           <div class="sk-btn sk-mt12"></div>
         </div>
@@ -118,12 +118,12 @@
           <div class="sk-card">
             <div class="sk-line sk-line-sm"></div>
             <div class="sk-ring sk-mt16"></div>
-            ${escapeHtml(repeat(4, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>'))}
+            ${repeat(4, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>')}
           </div>
           <div class="sk-card">
             <div class="sk-line sk-line-sm"></div>
             <div class="sk-grid-3 sk-mt12">
-              ${escapeHtml(repeat(3, '<div class="sk-card-inner"><div class="sk-line sk-line-xl"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>'))}
+              ${repeat(3, '<div class="sk-card-inner"><div class="sk-line sk-line-xl"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
             </div>
           </div>
         </div>
@@ -158,13 +158,13 @@
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
           <div class="sk-grid-2 sk-mt12">
-            ${escapeHtml(repeat(8, '<div class="sk-card-inner"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>'))}
+            ${repeat(8, '<div class="sk-card-inner"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm sk-mt4"></div></div>')}
           </div>
         </div>
         <!-- History -->
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
-          ${escapeHtml(repeat(10, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>'))}
+          ${repeat(10, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-md"></div><div class="sk-line sk-line-sm"></div></div>')}
         </div>
       </div>`,
 
@@ -194,7 +194,7 @@
         </div>
         <div class="sk-card sk-mt16">
           <div class="sk-line sk-line-sm"></div>
-          ${escapeHtml(repeat(12, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm"></div></div>'))}
+          ${repeat(12, '<div class="sk-row sk-mt10"><div class="sk-line sk-line-lg"></div><div class="sk-line sk-line-sm"></div></div>')}
         </div>
       </div>`,
   };
