@@ -6,14 +6,7 @@
 
 (function () {
 
-  function chartColors() {
-    const isDark = !document.documentElement.getAttribute('data-theme') ||
-                    document.documentElement.getAttribute('data-theme') === 'dark';
-    return {
-      tick:  isDark ? '#6b7280' : '#78716c',
-      grid:  isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
-    };
-  }
+
   renderShell("lifts", "Lifts", "Estimated 1RM, PRs, and strength trend per exercise.");
 
   const pageHeaderActions = document.getElementById("pageHeaderActions");

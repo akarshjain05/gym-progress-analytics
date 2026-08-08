@@ -2,17 +2,6 @@ renderShell("analytics", "Analytics", "The full picture, pulled together.");
 
 let changeChart = null, volumeChart = null, weightTrendChart = null, muscleVolumeChart = null;
 
-// Theme-aware chart colors
-function chartColors() {
-  const isDark = !document.documentElement.getAttribute('data-theme') ||
-                  document.documentElement.getAttribute('data-theme') === 'dark';
-  return {
-    tick:     isDark ? '#6b7280' : '#78716c',
-    tickY:    isDark ? '#9ca5ac' : '#57534e',
-    grid:     isDark ? 'rgba(242,240,234,0.05)' : 'rgba(0,0,0,0.06)',
-    legend:   isDark ? '#9ca5ac' : '#57534e',
-  };
-}
 
 // One color per muscle group keeps the bars visually distinguishable rather
 // than all-one-color, without needing a full design pass per group.

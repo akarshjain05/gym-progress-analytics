@@ -13,6 +13,20 @@ window.escapeHtml = function(str) {
 };
 
 /**
+ * Returns theme-aware colors for Chart.js instances across the application.
+ */
+window.chartColors = function() {
+  const isDark = !document.documentElement.getAttribute('data-theme') ||
+                  document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    tick:   isDark ? '#6b7280' : '#78716c',
+    tickY:  isDark ? '#9ca5ac' : '#57534e',
+    grid:   isDark ? 'rgba(242,240,234,0.05)' : 'rgba(0,0,0,0.06)',
+    legend: isDark ? '#9ca5ac' : '#57534e',
+  };
+};
+
+/**
  * Sanitizes a full HTML string via DOMPurify before innerHTML injection.
  * Configured to preserve inline event handlers and SVG elements used by the app.
  * User-provided values should STILL be escaped with escapeHtml() before embedding.
@@ -606,4 +620,15 @@ window.showCustomExerciseModal = function(onSuccess) {
   });
 
   modal.style.display = 'flex';
+};
+
+window.chartColors = function() {
+  const isDark = !document.documentElement.getAttribute("data-theme") ||
+                  document.documentElement.getAttribute("data-theme") === "dark";
+  return {
+    tick:   isDark ? "#6b7280" : "#78716c",
+    tickY:  isDark ? "#9ca5ac" : "#57534e",
+    grid:   isDark ? "rgba(242,240,234,0.05)" : "rgba(0,0,0,0.06)",
+    legend: isDark ? "#9ca5ac" : "#57534e",
+  };
 };
