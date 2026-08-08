@@ -149,7 +149,7 @@ function renderSummary(summary) {
     <div class="card stat-card">
       <div class="stat-label">Goal</div>
       <div class="stat-value" style="font-size:26px;">${escapeHtml(summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " kg" : "Not set")}</div>
-      <div class="stat-delta neutral">${escapeHtml(summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7))} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile")}</div>
+      <div class="stat-delta neutral">${escapeHtml(summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7)} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile"))}</div>
     </div>
   `);
 }
