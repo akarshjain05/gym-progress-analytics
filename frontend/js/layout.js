@@ -1,16 +1,3 @@
-/**
- * Centralized, safe HTML sanitizer that converts special characters to HTML entities.
- * Prevents XSS vulnerabilities by safely escaping strings before injecting them into the DOM.
- */
-window.escapeHtml = function(str) {
-  if (str === null || str === undefined) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-};
 
 /**
  * Returns theme-aware colors for Chart.js instances across the application.

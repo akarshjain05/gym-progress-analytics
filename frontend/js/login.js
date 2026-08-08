@@ -6,9 +6,7 @@ const completeGoogleForm = document.getElementById("completeGoogleForm");
 const authSwitchWrap = document.getElementById("authSwitchWrap");
 const alertSlot = document.getElementById("alertSlot");
 
-function setAlert(message, type = "error") {
-  alertSlot.innerHTML = DOMPurify.sanitize(message ? `<div class="alert alert-${escapeHtml(type)}">${escapeHtml(message)}</div>` : "");
-}
+
 
 document.getElementById("switchToRegister").addEventListener("click", () => {
   loginForm.style.display = "none";

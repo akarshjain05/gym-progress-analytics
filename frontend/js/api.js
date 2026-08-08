@@ -7,6 +7,26 @@
 
 const API_BASE_URL = (window.IRONLOG_API_BASE || "http://127.0.0.1:8000");
 
+window.escapeHtml = function(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+window.setAlert = function(message, type = "error") {
+  const alertSlot = document.getElementById("alertSlot");
+  if (!alertSlot) return;
+  const html = message ? `<div class="alert alert-${window.escapeHtml(type)}">${window.escapeHtml(message)}</div>` : "";
+  if (typeof DOMPurify !== 'undefined') {
+    alertSlot.innerHTML = DOMPurify.sanitize(html);
+  } else {
+    alertSlot.innerHTML = html;
+  }
+};
 const Auth = {
   getToken() { return localStorage.getItem("ironlog_token"); },
   setToken(token) { localStorage.setItem("ironlog_token", token); },
