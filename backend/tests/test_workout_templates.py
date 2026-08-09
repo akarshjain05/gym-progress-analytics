@@ -138,10 +138,57 @@ def test_reorder_exercises(client, auth_headers):
     assert exercises[2]["position"] == 2
 
 def test_share_and_import_template(client, auth_headers):
-    # This route might not exist, but let's check if the user wanted it
-    pass
-    # Share/import is not in the router endpoints described (only GET history, PATCH history)
-    # The prompt mentioned share/import, let me check if it's there.
+    headers = auth_headers(client)
+    
+    # 1. Create a template as user 1
+    resp = client.post("/templates", json={
+        "name": "Sharable Routine",
+        "description": "A routine to share"
+    }, headers=headers)
+    assert resp.status_code == 201
+    template_id = resp.json()["id"]
+    
+    # 2. Share the template
+    resp = client.post(f"/templates/{template_id}/share", headers=headers)
+    assert resp.status_code == 200
+    share_id = resp.json()["share_id"]
+    assert share_id is not None
+    
+    # 3. Preview shared template (public endpoint, but we test it anyway)
+    resp = client.get(f"/templates/shared/{share_id}")
+    assert resp.status_code == 200
+    assert resp.json()["name"] == "Sharable Routine"
+    
+    # 4. Create user 2
+    client.post("/auth/register", json={
+        "username": "user2_import",
+        "email": "user2@import.com",
+        "password": "password123"
+    })
+    
+    # Manually verify user2 so they can login
+    from app.models import User
+    db = client.TestingSessionLocal()
+    user2 = db.query(User).filter(User.username == "user2_import").first()
+    user2.email_verified = True
+    db.commit()
+    db.close()
+    
+    login_resp = client.post("/auth/login", data={"username": "user2_import", "password": "password123"})
+    user2_token = login_resp.json()["access_token"]
+    user2_headers = {"Authorization": f"Bearer {user2_token}"}
+    
+    # 5. Import the template as user 2
+    resp = client.post(f"/templates/shared/{share_id}/import", headers=user2_headers)
+    assert resp.status_code == 200
+    imported_template = resp.json()
+    assert imported_template["name"].startswith("Sharable Routine")
+    assert imported_template["id"] != template_id
+    
+    # 6. Verify user 2 has the template
+    resp = client.get("/templates", headers=user2_headers)
+    assert resp.status_code == 200
+    assert any(t["id"] == imported_template["id"] for t in resp.json())
 
 def test_finish_workout_basic(client, auth_headers):
     headers = auth_headers(client, "testuser", "password")
