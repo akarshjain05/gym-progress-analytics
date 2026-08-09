@@ -113,9 +113,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 function isApiRequest(url) {
-  // Match your Render backend domain — adjust if your backend URL differs
   return (
-    url.hostname.includes('onrender.com') ||
     url.hostname === '127.0.0.1' ||
     url.hostname === 'localhost' ||
     url.pathname.startsWith('/api/')
