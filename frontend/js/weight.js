@@ -92,7 +92,7 @@ weightForm.addEventListener("submit", async (e) => {
   }
 });
 
-async function deleteEntry(id) {
+window.deleteEntry = async function(id) {
   const ok = await window.appConfirm("Delete Entry", "Delete this entry?", "Delete", "Cancel");
   if (!ok) return;
   try {
@@ -105,7 +105,7 @@ async function deleteEntry(id) {
     window.hideLoading && window.hideLoading();
   }
 }
-window.deleteEntry = deleteEntry;
+
 
 function renderSummary(summary) {
   const el = document.getElementById("summaryStats");

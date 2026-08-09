@@ -103,7 +103,7 @@ document.getElementById("calForm").addEventListener("submit", async (e) => {
   }
 });
 
-async function deleteCalEntry(id) {
+window.deleteCalEntry = async function(id) {
   const ok = await window.appConfirm("Delete Entry", "Delete this entry?", "Delete", "Cancel");
   if (!ok) return;
   try {
@@ -116,7 +116,7 @@ async function deleteCalEntry(id) {
     window.hideLoading && window.hideLoading();
   }
 }
-window.deleteCalEntry = deleteCalEntry;
+
 
 function renderStats(summary) {
   const el = document.getElementById("nutritionStats");

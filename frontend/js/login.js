@@ -69,7 +69,7 @@ registerForm.addEventListener("submit", async (e) => {
 
 let pendingSetupToken = null;
 
-async function handleGoogleCredentialResponse(response) {
+window.handleGoogleCredentialResponse = async function(response) {
   setAlert("");
   try {
     const result = await Api.googleLogin(response.credential);
@@ -92,7 +92,7 @@ async function handleGoogleCredentialResponse(response) {
     setAlert(err.message || "Google sign-in failed.");
   }
 }
-window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
+
 
 completeGoogleForm.addEventListener("submit", async (e) => {
   e.preventDefault();
