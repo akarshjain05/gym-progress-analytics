@@ -59,3 +59,49 @@ def test_email_verification(client):
         
         resp = client.post("/auth/verify-email", json={"token": token})
         assert resp.status_code == 200
+
+@patch("app.routers.auth.send_verification_email")
+def test_resend_verification_email(mock_send, client):
+    # Register user
+    client.post("/auth/register", json={
+        "username": "resenduser",
+        "email": "resend@test.com",
+        "password": "password123"
+    })
+    
+    # Check that register sent an email
+    assert mock_send.call_count == 1
+    
+    # Resend verification
+    resp = client.post("/auth/resend-verification", json={"email": "resend@test.com"})
+    assert resp.status_code == 200
+    assert "has been sent" in resp.json()["message"]
+    
+    # Should have sent 2 emails now
+    assert mock_send.call_count == 2
+    
+def test_account_lockout(client):
+    # Register user
+    client.post("/auth/register", json={
+        "username": "lockeduser",
+        "email": "locked@test.com",
+        "password": "password123"
+    })
+    
+    # Verify so they can actually log in (if they get password right)
+    from app.models import User
+    db = client.TestingSessionLocal()
+    u = db.query(User).filter(User.username == "lockeduser").first()
+    u.email_verified = True
+    db.commit()
+    db.close()
+    
+    # 1. Fail 5 times
+    for _ in range(5):
+        resp = client.post("/auth/login", data={"username": "lockeduser", "password": "wrongpassword"})
+        assert resp.status_code == 401
+    
+    # 2. 6th attempt with correct password should still fail because of lockout
+    resp = client.post("/auth/login", data={"username": "lockeduser", "password": "password123"})
+    assert resp.status_code == 401
+    assert "Account is locked" in resp.json()["detail"]
