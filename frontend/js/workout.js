@@ -1356,7 +1356,7 @@
   document.getElementById('startFreeBtn').addEventListener('click', () => startWorkout(0));
 
   // ── Utility ───────────────────────────────────────────────────────────────
-  )();
+  })();
 
 document.addEventListener('click', () => {
   document.querySelectorAll('.wk-dropdown-menu').forEach(m => m.style.display = 'none');
