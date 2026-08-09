@@ -11,7 +11,10 @@ GDPR compliance: users can download everything we store about them.
 import csv
 import io
 import json
+import logging
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -117,7 +120,7 @@ def _get_all_user_data(db: Session, user: models.User) -> dict:
                 for s in sessions
             ]
     except Exception:
-        pass
+        logger.exception(f"Failed to fetch workout sessions for user {user.id} during export")
 
     return {
         "exported_at": datetime.now(timezone.utc).isoformat(),
