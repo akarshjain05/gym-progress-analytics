@@ -148,12 +148,12 @@ function renderStats(summary) {
     <div class="card stat-card">
       <div class="stat-label">Formula TDEE</div>
       <div class="stat-value">${escapeHtml(summary.formula_tdee_kcal ? Math.round(summary.formula_tdee_kcal) : "—")}<span class="unit">kcal</span></div>
-      <div class="stat-delta neutral">${escapeHtml(summary.formula_tdee_kcal ? `BMR ${Math.round(summary.formula_bmr_kcal))}` : "Add age/height/gender in Profile"}</div>
+      <div class="stat-delta neutral">${escapeHtml(summary.formula_tdee_kcal ? `BMR ${Math.round(summary.formula_bmr_kcal)}` : "Add age/height/gender in Profile")}</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Your actual maintenance</div>
       <div class="stat-value">${escapeHtml(summary.actual_tdee_estimate_kcal ? Math.round(summary.actual_tdee_estimate_kcal) : "—")}<span class="unit">kcal</span></div>
-      <div class="stat-delta neutral">${escapeHtml(summary.actual_tdee_estimate_kcal ? "from your real data" : `Needs 10+ days of overlapping logs (${summary.days_logged)} so far)`}</div>
+      <div class="stat-delta neutral">${escapeHtml(summary.actual_tdee_estimate_kcal ? "from your real data" : `Needs 10+ days of overlapping logs (${summary.days_logged} so far)`)}</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Days logged</div>
