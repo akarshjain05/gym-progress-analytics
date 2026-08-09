@@ -40,7 +40,6 @@ def run_inactivity_check():
     finally:
         db.close()
 
-@celery_app.task(name="generate_insights")
 def generate_insights(user_id: int, db: Session = None):
     own_session = False
     if db is None:

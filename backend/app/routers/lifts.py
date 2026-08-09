@@ -13,8 +13,10 @@ router = APIRouter(prefix="/lifts", tags=["lifts"])
 
 # Muscle group display order for PRs
 MUSCLE_GROUP_ORDER = [
-    "chest", "back", "shoulders", "legs", "quads",
-    "hamstrings", "glutes", "biceps", "triceps", "core", "calves", "other"
+    "chest", "back", "shoulders", "quads", "hamstrings",
+    "glutes", "adductors", "legs", "biceps", "triceps",
+    "abs", "calves", "forearms", "neck", "hip flexors",
+    "full body", "other"
 ]
 
 

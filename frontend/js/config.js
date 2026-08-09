@@ -1,6 +1,5 @@
-// Points at the Render backend service defined in render.yaml (name: gym-progress-api).
-// If Render had to rename your service (e.g. the name was taken), update this
-// to match your actual backend URL from the Render dashboard, then redeploy.
+// Points at the backend service defined in .env
+// Update this to match your actual backend URL from your environment, then redeploy.
 window.IRONLOG_API_BASE = "/api";
 
 // For local development, comment the line above and uncomment this one:

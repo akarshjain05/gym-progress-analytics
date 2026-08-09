@@ -14,7 +14,7 @@ Phase 2 (>= 14 days personal data):
 
 AI ADVICE: Google Gemini API (free tier)
   - 15 requests/minute, 1M tokens/day, completely free
-  - Set GEMINI_API_KEY in Render environment variables
+  - Set GEMINI_API_KEY in your environment variables
   - Without key: rule-based advice still generated automatically
 """
 
@@ -823,10 +823,7 @@ def get_next_eta(db: Session = Depends(get_db), current_user: models.User = Depe
     # Return the closest ETA
     best_eta = valid_etas[0]
     
-    # Need to enrich with exercise name
-    # Wait, the ETA returned by _predict_strength_hybrid already has the ETA object.
-    # We can inject exercise_name from the result directly!
-    # Let's find the result that matched the best ETA
+    # Enrich ETA object with exercise name
     best_result = next(r for r in strength_results if r.get("eta") is best_eta)
     best_eta["exercise_name"] = best_result["exercise_name"]
     

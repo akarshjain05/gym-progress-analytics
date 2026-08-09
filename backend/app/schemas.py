@@ -336,3 +336,65 @@ class ETAOut(BaseModel):
     date: str
     days_away: int
     sessions_away: int
+
+
+# ---------- Workout Templates ----------
+
+class TemplateExerciseIn(BaseModel):
+    exercise_id: int
+    position: int = 0
+    target_sets: int = Field(default=3, ge=1, le=20)
+    target_reps: int = Field(default=10, ge=1, le=100)
+    target_weight_kg: Optional[float] = Field(default=None, ge=0, le=600)
+    rest_seconds: int = Field(default=90, ge=0, le=600)
+    notes: Optional[str] = None
+
+
+class TemplateExerciseUpdate(BaseModel):
+    position: Optional[int] = None
+    target_sets: Optional[int] = Field(default=None, ge=1, le=20)
+    target_reps: Optional[int] = Field(default=None, ge=1, le=100)
+    target_weight_kg: Optional[float] = Field(default=None, ge=0, le=600)
+    rest_seconds: Optional[int] = Field(default=None, ge=0, le=600)
+    notes: Optional[str] = None
+
+
+class TemplateIn(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+    description: Optional[str] = None
+    exercises: list[TemplateExerciseIn] = []
+
+
+class TemplateUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=60)
+    description: Optional[str] = None
+
+
+class ReorderIn(BaseModel):
+    # List of template_exercise IDs in the new desired order
+    ordered_ids: list[int]
+
+
+# Logged set submitted when finishing a workout
+class LoggedSet(BaseModel):
+    weight_kg: float = Field(ge=0, le=600)
+    reps: int = Field(ge=1, le=100)
+    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    completed: bool = True   # False = user skipped this set
+
+
+class LoggedExercise(BaseModel):
+    exercise_id: int
+    sets: list[LoggedSet]
+    notes: Optional[str] = None
+
+
+class FinishWorkoutIn(BaseModel):
+    date: date
+    duration_seconds: Optional[int] = None   # total workout duration
+    exercises: list[LoggedExercise]
+    notes: Optional[str] = None
+
+
+class SessionNotesIn(BaseModel):
+    notes: str = ""

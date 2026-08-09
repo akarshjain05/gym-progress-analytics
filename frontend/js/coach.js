@@ -33,7 +33,7 @@
         <div>
           <div id="mlLoadingText">Running ML models on your data…</div>
           <div id="mlLoadingSub" style="font-size:12px;color:#6b7280;margin-top:6px;display:none;line-height:1.4;">
-            Backend is waking up (Render free tier sleeps after inactivity).<br>Usually takes 20–30 seconds…
+            Initialising analysis engine…<br>Usually takes 20–30 seconds.
           </div>
         </div>
       </div>
@@ -41,8 +41,8 @@
       <!-- Error / Retry -->
       <div id="mlError" style="display:none;" class="coach-card coach-empty">
         <div style="font-size:2.5rem;">⏱️</div>
-        <h3>Backend is starting up</h3>
-        <p>Render's free tier goes to sleep after inactivity. It usually wakes up within 30 seconds. Click Try Again.</p>
+        <h3>Unable to reach server</h3>
+        <p>The analysis service is currently unavailable. Please try again in a moment.</p>
         <button class="btn btn-primary" id="retryBtn" style="margin-top:12px;padding:10px 24px;">Try Again</button>
       </div>
 

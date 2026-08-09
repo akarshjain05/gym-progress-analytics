@@ -1,86 +1,24 @@
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
 
-os.environ.setdefault("SECRET_KEY", "test-token")
-os.environ.setdefault("TESTING", "1")
-
-from app.main import app
-from app.database import Base, get_db
-from app.seed_exercises import seed_exercises
-
-# Disable rate limiting for integration tests
-app.state.limiter.enabled = False
-
-# Run Celery tasks synchronously in tests
-from app.worker import celery_app
-celery_app.conf.update(task_always_eager=True)
-
-
-@pytest.fixture()
-def client(tmp_path):
-    db_file = tmp_path / "test.db"
-    engine = create_engine(f"sqlite:///{db_file}", connect_args={"check_same_thread": False})
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-    Base.metadata.create_all(bind=engine)
-    seed_db = TestingSessionLocal()
-    seed_exercises(seed_db)
-    seed_db.close()
-
-    def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
-
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        c.TestingSessionLocal = TestingSessionLocal
-        yield c
-    app.dependency_overrides.clear()
-    Base.metadata.drop_all(bind=engine)
-
-
-def auth_headers(client, username="alice", password="hunter22"):
-    client.post("/auth/register", json={"username": username, "email": f"{username}@example.com", "password": password})
-    db = client.TestingSessionLocal()
-    from app import models
-    user = db.query(models.User).filter_by(username=username).first()
-    if user:
-        user.email_verified = True
-        db.commit()
-    db.close()
-    resp = client.post("/auth/login", data={"username": username, "password": password})
-    assert resp.status_code == 200, resp.text
-    token = resp.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
-
-
-def test_register_and_login(client):
+def test_register_and_login(client, auth_headers):
     headers = auth_headers(client)
     resp = client.get("/profile/me", headers=headers)
     assert resp.status_code == 200
     assert resp.json()["username"] == "alice"
 
 
-def test_duplicate_username_rejected(client):
+def test_duplicate_username_rejected(client, auth_headers):
     client.post("/auth/register", json={"username": "bob", "email": "bob@example.com", "password": "password1"})
     resp = client.post("/auth/register", json={"username": "bob", "email": "bob2@example.com", "password": "password1"})
     assert resp.status_code == 400
 
 
-def test_unauthenticated_request_rejected(client):
+def test_unauthenticated_request_rejected(client, auth_headers):
     resp = client.get("/profile/me")
     assert resp.status_code == 401
 
 
-def test_weight_logging_and_upsert(client):
+def test_weight_logging_and_upsert(client, auth_headers):
     headers = auth_headers(client)
     r1 = client.post("/weight", json={"date": "2026-01-01", "weight_kg": 80.0}, headers=headers)
     assert r1.status_code == 201
@@ -92,7 +30,7 @@ def test_weight_logging_and_upsert(client):
     assert logs[0]["weight_kg"] == 79.8
 
 
-def test_weight_summary_trend_and_goal_projection(client):
+def test_weight_summary_trend_and_goal_projection(client, auth_headers):
     headers = auth_headers(client)
     client.put("/profile/me", json={"goal_weight_kg": 75.0}, headers=headers)
     # Log a clean linear loss of 0.5kg/week over 6 weeks (42 days)
@@ -112,7 +50,7 @@ def test_weight_summary_trend_and_goal_projection(client):
     assert summary["estimated_days_to_goal"] > 0
 
 
-def test_exercise_list_includes_predefined(client):
+def test_exercise_list_includes_predefined(client, auth_headers):
     headers = auth_headers(client)
     resp = client.get("/exercises", headers=headers)
     assert resp.status_code == 200
@@ -121,7 +59,7 @@ def test_exercise_list_includes_predefined(client):
     assert "Squat" in names
 
 
-def test_custom_exercise_isolated_per_user(client):
+def test_custom_exercise_isolated_per_user(client, auth_headers):
     headers_a = auth_headers(client, "userA", "passwordA1")
     headers_b = auth_headers(client, "userB", "passwordB1")
     client.post("/exercises", json={"name": "Custom Unlikely Exercise", "category": "compound"}, headers=headers_a)
@@ -134,7 +72,7 @@ def test_custom_exercise_isolated_per_user(client):
     assert "Custom Unlikely Exercise" not in names_b
 
 
-def test_lift_logging_and_progress_percent_increase(client):
+def test_lift_logging_and_progress_percent_increase(client, auth_headers):
     headers = auth_headers(client)
     exercises = client.get("/exercises", headers=headers).json()
     bench = next(e for e in exercises if e["name"] == "Bench Press")
@@ -152,13 +90,13 @@ def test_lift_logging_and_progress_percent_increase(client):
     assert progress["personal_record_1rm_kg"] == pytest.approx(112.0, abs=0.01)
 
 
-def test_lift_log_rejects_invalid_exercise(client):
+def test_lift_log_rejects_invalid_exercise(client, auth_headers):
     headers = auth_headers(client)
     resp = client.post("/lifts", json={"exercise_id": 999999, "date": "2026-01-01", "weight_kg": 80, "reps": 5}, headers=headers)
     assert resp.status_code == 404
 
 
-def test_personal_records_endpoint(client):
+def test_personal_records_endpoint(client, auth_headers):
     headers = auth_headers(client)
     exercises = client.get("/exercises", headers=headers).json()
     bench = next(e for e in exercises if e["name"] == "Bench Press")
@@ -174,11 +112,8 @@ def test_personal_records_endpoint(client):
     assert pr_names == {"Bench Press", "Squat"}
 
 
-def test_calorie_logging_and_actual_tdee():
-    pass  # covered in dedicated test below for clarity
 
-
-def test_nutrition_summary_actual_tdee_from_real_data(client):
+def test_nutrition_summary_actual_tdee_from_real_data(client, auth_headers):
     headers = auth_headers(client)
     import datetime
     base = datetime.date(2026, 1, 1)
@@ -196,7 +131,7 @@ def test_nutrition_summary_actual_tdee_from_real_data(client):
     assert summary["actual_tdee_estimate_kcal"] == pytest.approx(2750, abs=5)
 
 
-def test_calorie_log_upsert_same_day(client):
+def test_calorie_log_upsert_same_day(client, auth_headers):
     headers = auth_headers(client)
     client.post("/nutrition", json={"date": "2026-01-01", "calories": 2000}, headers=headers)
     client.post("/nutrition", json={"date": "2026-01-01", "calories": 2500}, headers=headers)
@@ -205,7 +140,7 @@ def test_calorie_log_upsert_same_day(client):
     assert logs[0]["calories"] == 2500
 
 
-def test_goal_lift_set_and_list(client):
+def test_goal_lift_set_and_list(client, auth_headers):
     headers = auth_headers(client)
     exercises = client.get("/exercises", headers=headers).json()
     bench = next(e for e in exercises if e["name"] == "Bench Press")
@@ -216,7 +151,7 @@ def test_goal_lift_set_and_list(client):
     assert goals[0]["target_weight_kg"] == 100
 
 
-def test_dashboard_streak_tracking(client):
+def test_dashboard_streak_tracking(client, auth_headers):
     headers = auth_headers(client)
     import datetime
     today = datetime.date.today()
@@ -231,7 +166,7 @@ def test_dashboard_streak_tracking(client):
     assert dash["longest_streak_days"] == 3
 
 
-def test_insights_generated_from_data(client):
+def test_insights_generated_from_data(client, auth_headers):
     headers = auth_headers(client)
     exercises = client.get("/exercises", headers=headers).json()
     bench = next(e for e in exercises if e["name"] == "Bench Press")
@@ -243,7 +178,7 @@ def test_insights_generated_from_data(client):
     assert "Bench Press" in titles
 
 
-def test_users_cannot_see_each_others_data(client):
+def test_users_cannot_see_each_others_data(client, auth_headers):
     headers_a = auth_headers(client, "isolA", "passwordA1")
     headers_b = auth_headers(client, "isolB", "passwordB1")
     client.post("/weight", json={"date": "2026-01-01", "weight_kg": 70}, headers=headers_a)

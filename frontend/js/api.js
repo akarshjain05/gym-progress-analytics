@@ -1,6 +1,6 @@
 /* ===========================================================
    IRONLOG API client
-   Set API_BASE_URL to your deployed Render backend URL.
+   Set API_BASE_URL to your deployed backend URL.
    While developing locally with `uvicorn` on port 8000, the
    default below already works.
    =========================================================== */

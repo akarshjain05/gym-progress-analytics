@@ -8,7 +8,7 @@ Ironlog is a monolithic web application structured into a clear separation betwe
 
 *   **Frontend:** Pure Vanilla HTML/CSS/JavaScript. It operates as a Progressive Web App (PWA) with offline-support mechanisms and service workers.
 *   **Backend:** Python with FastAPI. Handles authentication, data persistence, analytics calculations, and AI-driven forecasting.
-*   **Database:** SQLite using SQLAlchemy as the ORM and Alembic for schema migrations.
+*   **Database:** SQLite for local development and testing, PostgreSQL for production. Uses SQLAlchemy as the ORM and Alembic for schema migrations.
 *   **Deployment:** Designed to run via Docker Compose, utilizing standard CI/CD pipelines (e.g., GitHub Actions).
 
 ## 2. Frontend Design
@@ -41,7 +41,7 @@ The backend is modularized via FastAPI Routers to keep the codebase clean.
     *   `analytics.py`: Aggregation queries for dashboard charts.
 
 ### Authentication
-The application uses secure HTTP-only cookies/sessions for authentication to protect user data. 
+The application uses JWT Bearer tokens stored in localStorage for frontend authentication. The login endpoint also sets a secure, HTTP-only cookie (currently unused by the frontend but available for future migration/security hardening). 
 
 ## 4. Data Model (Schema)
 
@@ -59,7 +59,7 @@ The database schema is highly relational, centered around the `User`.
 
 1.  **"Sessions Away" Forecasting:** The predictive AI Coach deliberately avoids calculating strict calendar dates for goals, opting instead for a "sessions away" metric. This accommodates users who take unplanned rest days without artificially breaking their trends.
 2.  **No-Build Frontend:** The decision to avoid Webpack/Babel/NPM for the frontend means the code you see is exactly what the browser runs, making debugging trivial and deployments near-instant.
-3.  **Local Development:** Uses an `empty.db` seed and SQLite so any developer can spin up the full stack in seconds without configuring Postgres or external services.
+3.  **Local Development:** Uses an `empty.db` seed and SQLite so any developer can spin up the full stack in seconds without configuring Postgres or external services, while production deployments seamlessly leverage PostgreSQL.
 
 ## 6. Integrations & Extensions
 *   **Push Notifications:** Implemented via standard Web Push API.

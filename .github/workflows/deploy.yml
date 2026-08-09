@@ -21,11 +21,15 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          INITIAL_ADMIN_USERNAME: ${{ secrets.INITIAL_ADMIN_USERNAME }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,SECRET_KEY,GOOGLE_CLIENT_ID,VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY,BREVO_API_KEY,BREVO_SENDER_EMAIL
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,SECRET_KEY,GOOGLE_CLIENT_ID,VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY,BREVO_API_KEY,BREVO_SENDER_EMAIL,SENTRY_DSN,FRONTEND_URL,GEMINI_API_KEY,INITIAL_ADMIN_USERNAME
           script: |
             cd gym-progress-analytics
             echo "POSTGRES_USER=$POSTGRES_USER" > .env
@@ -37,6 +41,10 @@ jobs:
             echo "VAPID_PRIVATE_KEY=$VAPID_PRIVATE_KEY" >> .env
             echo "BREVO_API_KEY=$BREVO_API_KEY" >> .env
             echo "BREVO_SENDER_EMAIL=$BREVO_SENDER_EMAIL" >> .env
+            echo "SENTRY_DSN=$SENTRY_DSN" >> .env
+            echo "FRONTEND_URL=$FRONTEND_URL" >> .env
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env
+            echo "INITIAL_ADMIN_USERNAME=$INITIAL_ADMIN_USERNAME" >> .env
             git pull
             docker compose up -d --build
 

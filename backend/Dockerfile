@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 
-# We add celery and redis to the requirements if they aren't there
+# Dependencies are pinned in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir celery redis
 
 COPY . .
 

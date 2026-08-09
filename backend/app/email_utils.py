@@ -8,10 +8,10 @@ BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 def send_password_reset_email(to_email: str, reset_link: str) -> None:
     """
     Sends a password reset email via Brevo's transactional email HTTP API.
-    Uses HTTPS (port 443), NOT SMTP - Render's free tier (and many cloud
-    platforms) silently blocks or hangs outbound SMTP connections as an
-    anti-spam measure, which has no clean error and just looks like the
-    request hanging forever. Brevo's REST API avoids that entirely.
+    Uses HTTPS (port 443), NOT SMTP - many cloud platforms (like AWS EC2)
+    silently block or hang outbound SMTP connections as an anti-spam measure,
+    which has no clean error and just looks like the request hanging forever.
+    Brevo's REST API avoids that entirely.
 
     If BREVO_API_KEY isn't configured, this prints the reset link to the
     server logs instead of sending an email, so local development and

@@ -1,7 +1,7 @@
 """
 analytics.py — fixed for IST timezone.
 
-The key change: date_type.today() on Render returns UTC date. For users in
+The key change: date_type.today() on cloud platforms returns UTC date. For users in
 India (IST = UTC+5:30) this means after midnight IST but before 5:30am UTC,
 "today" on the server is still yesterday — so a PR logged on June 15 IST
 can appear as "this week" when it shouldn't, or vice versa.
