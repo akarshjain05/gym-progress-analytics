@@ -381,7 +381,10 @@ function renderShell(activeId, pageTitle, subtitle) {
       <main class="main-content">
         <div class="page-header">
           <div>
-            <h1>${escapeHtml(pageTitle)}</h1>
+            <h1 style="display:flex; align-items:center; gap:12px;">
+              ${escapeHtml(pageTitle)}
+              <span id="global-offline-badge" style="display:none; font-size:12px; padding:2px 8px; border-radius:12px; background:var(--bg-tertiary); color:var(--text-secondary); font-weight:normal; letter-spacing:0.5px;">Offline Mode</span>
+            </h1>
             <div class="subtitle" id="pageSubtitle" style="${escapeHtml(subtitle ? "" : "display:none;")}">${escapeHtml(subtitle || "")}</div>
           </div>
           <div id="pageHeaderActions"></div>
@@ -444,6 +447,17 @@ function renderShell(activeId, pageTitle, subtitle) {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeDrawer();
   });
+
+  // Offline indicator logic
+  const updateOfflineBadge = () => {
+    const badge = document.getElementById('global-offline-badge');
+    if (badge) {
+      badge.style.display = navigator.onLine ? 'none' : 'inline-block';
+    }
+  };
+  window.addEventListener('online', updateOfflineBadge);
+  window.addEventListener('offline', updateOfflineBadge);
+  updateOfflineBadge();
 
   // Show skeleton screen while data loads
   if (window.Skeleton) {

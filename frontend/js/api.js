@@ -92,11 +92,20 @@ const OfflineSync = {
         console.log(`[OfflineSync] Flushing ${escapeHtml(items.length)} items to server...`);
         for (const item of items) {
           try {
-            await fetch(`${escapeHtml(API_BASE_URL)}${escapeHtml(item.path)}`, {
+            const resp = await fetch(`${escapeHtml(API_BASE_URL)}${escapeHtml(item.path)}`, {
               method: item.method,
               headers: item.headers,
+              credentials: "include",
               body: item.body === undefined ? undefined : (item.form ? item.body : JSON.stringify(item.body)),
             });
+            
+            if (resp.status === 401) {
+              console.warn("[OfflineSync] Session expired while offline sync was running. Aborting sync and redirecting.");
+              Auth.clear();
+              window.location.href = "index.html";
+              break;
+            }
+
             // Delete from queue on success
             await new Promise((res) => {
               const delTx = this.db.transaction("queue", "readwrite");
