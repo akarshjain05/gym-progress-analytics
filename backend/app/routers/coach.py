@@ -591,12 +591,15 @@ def get_analysis(
         .all()
     )
 
-    current_weight = weight_logs[-1].weight_kg if weight_logs else None
-    strength = _predict_strength_hybrid(lift_logs, db)
-    weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
-    muscle_vol = _muscle_group_volume(lift_logs, db)
-    consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
-    nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
+    try:
+        current_weight = weight_logs[-1].weight_kg if weight_logs else None
+        strength = _predict_strength_hybrid(lift_logs, db)
+        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
+        muscle_vol = _muscle_group_volume(lift_logs, db)
+        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
+        nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to process analysis data.")
 
     # Data phase summary
     lift_days = len({l.date for l in lift_logs})
@@ -664,12 +667,15 @@ async def get_advice(
             yield "data: [DONE]\n\n"
         return StreamingResponse(no_data(), media_type="text/event-stream")
 
-    current_weight = weight_logs[-1].weight_kg if weight_logs else None
-    strength = _predict_strength_hybrid(lift_logs, db)
-    weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
-    muscle_vol = _muscle_group_volume(lift_logs, db)
-    consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
-    nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
+    try:
+        current_weight = weight_logs[-1].weight_kg if weight_logs else None
+        strength = _predict_strength_hybrid(lift_logs, db)
+        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
+        muscle_vol = _muscle_group_volume(lift_logs, db)
+        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
+        nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to process coaching data.")
 
     analysis = {
         "consistency": consistency,
@@ -786,9 +792,8 @@ Be direct and specific. Use their actual numbers. Sound like a real coach. Max 3
                             continue
 
         except Exception:
-            advice = _rule_based_advice(analysis)
-            for word in advice.split(" "):
-                yield f"data: {json.dumps({'text': word + ' '})}\n\n"
+            # Yield a formatted error event that the frontend can parse as a graceful degradation
+            yield f"data: {json.dumps({'error': 'AI Coach service is currently unavailable. Please try again later.'})}\n\n"
 
         yield "data: [DONE]\n\n"
 
