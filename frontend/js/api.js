@@ -128,12 +128,7 @@ OfflineSync.flush().catch(console.error);
 async function apiRequest(path, { method = "GET", body, auth = true, form = false, _retry = false } = {}) {
   const headers = {};
   if (!form && body !== undefined) headers["Content-Type"] = "application/json";
-  if (auth) {
-    if (!Auth.isLoggedIn()) {
-      window.location.href = "index.html";
-      throw new ApiError("Not authenticated", 401);
-    }
-  }
+  // Rely on HttpOnly cookies and backend 401 responses instead of client-side checks
 
   let resp;
   try {
