@@ -2,7 +2,7 @@ from datetime import datetime, date, timezone
 
 from sqlalchemy import (
     Column, Integer, String, Float, Date, DateTime, ForeignKey, Boolean,
-    UniqueConstraint, Text, JSON
+    UniqueConstraint, Text, JSON, CheckConstraint
 )
 from sqlalchemy.orm import relationship
 
@@ -87,7 +87,11 @@ class BodyWeightLog(Base):
 
     user = relationship("User", back_populates="weight_logs")
 
-    __table_args__ = (UniqueConstraint("user_id", "date", name="uq_weight_per_user_per_day"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "date", name="uq_weight_per_user_per_day"),
+        CheckConstraint("weight_kg > 0", name="chk_bodyweight_positive"),
+        CheckConstraint("body_fat_pct >= 0 AND body_fat_pct <= 100", name="chk_bodyfat_range"),
+    )
 
 
 class BodyMeasurement(Base):
@@ -110,7 +114,18 @@ class BodyMeasurement(Base):
 
     user = relationship("User", back_populates="measurements")
 
-    __table_args__ = (UniqueConstraint("user_id", "date", name="uq_measurements_per_user_per_day"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "date", name="uq_measurements_per_user_per_day"),
+        CheckConstraint("chest > 0", name="chk_measurement_chest_positive"),
+        CheckConstraint("waist > 0", name="chk_measurement_waist_positive"),
+        CheckConstraint("neck > 0", name="chk_measurement_neck_positive"),
+        CheckConstraint("hip > 0", name="chk_measurement_hip_positive"),
+        CheckConstraint("arm > 0", name="chk_measurement_arm_positive"),
+        CheckConstraint("forearm > 0", name="chk_measurement_forearm_positive"),
+        CheckConstraint("thigh > 0", name="chk_measurement_thigh_positive"),
+        CheckConstraint("calf > 0", name="chk_measurement_calf_positive"),
+        CheckConstraint("shoulders > 0", name="chk_measurement_shoulders_positive"),
+    )
 
 
 class LiftLog(Base):
@@ -132,6 +147,12 @@ class LiftLog(Base):
     exercise = relationship("Exercise")
     session = relationship("WorkoutSession", back_populates="lift_logs")
 
+    __table_args__ = (
+        CheckConstraint("weight_kg >= 0", name="chk_lift_weight_nonnegative"),
+        CheckConstraint("reps > 0", name="chk_lift_reps_positive"),
+        CheckConstraint("rpe >= 0 AND rpe <= 10", name="chk_lift_rpe_range"),
+    )
+
 
 class CalorieLog(Base):
     __tablename__ = "calorie_logs"
@@ -147,7 +168,13 @@ class CalorieLog(Base):
 
     user = relationship("User", back_populates="calorie_logs")
 
-    __table_args__ = (UniqueConstraint("user_id", "date", name="uq_calories_per_user_per_day"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "date", name="uq_calories_per_user_per_day"),
+        CheckConstraint("calories >= 0", name="chk_calories_nonnegative"),
+        CheckConstraint("protein_g >= 0", name="chk_protein_nonnegative"),
+        CheckConstraint("carbs_g >= 0", name="chk_carbs_nonnegative"),
+        CheckConstraint("fats_g >= 0", name="chk_fats_nonnegative"),
+    )
 
 
 class Goal(Base):
@@ -180,6 +207,15 @@ class Goal(Base):
 
     user = relationship("User", back_populates="goals")
     exercise = relationship("Exercise")
+
+    __table_args__ = (
+        CheckConstraint("target_weight_kg > 0", name="chk_goal_weight_positive"),
+        CheckConstraint("target_reps > 0", name="chk_goal_reps_positive"),
+        CheckConstraint("target_body_weight_kg > 0", name="chk_goal_bw_positive"),
+        CheckConstraint("target_calories >= 0", name="chk_goal_calories_nonnegative"),
+        CheckConstraint("target_protein_g >= 0", name="chk_goal_protein_nonnegative"),
+        CheckConstraint("target_workouts_per_week > 0", name="chk_goal_workouts_positive"),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -220,7 +256,7 @@ class WorkoutTemplateExercise(Base):
     __tablename__ = "workout_template_exercises"
 
     id = Column(Integer, primary_key=True, index=True)
-    template_id = Column(Integer, ForeignKey("workout_templates.id"), nullable=False, index=True)
+    template_id = Column(Integer, ForeignKey("workout_templates.id", ondelete="CASCADE"), nullable=False, index=True)
     exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False)
     position = Column(Integer, nullable=False, default=0)   # display order
 
@@ -233,6 +269,13 @@ class WorkoutTemplateExercise(Base):
 
     template = relationship("WorkoutTemplate", back_populates="exercises")
     exercise = relationship("Exercise")
+
+    __table_args__ = (
+        CheckConstraint("target_sets > 0", name="chk_template_sets_positive"),
+        CheckConstraint("target_reps > 0", name="chk_template_reps_positive"),
+        CheckConstraint("target_weight_kg >= 0", name="chk_template_weight_nonnegative"),
+        CheckConstraint("rest_seconds >= 0", name="chk_template_rest_nonnegative"),
+    )
 
 
 class WorkoutSession(Base):

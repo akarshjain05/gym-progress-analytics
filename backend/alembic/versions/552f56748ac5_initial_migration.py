@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 1037e3f89dbd
+Revision ID: 552f56748ac5
 Revises: 
-Create Date: 2026-07-13 19:03:17.255466
+Create Date: 2026-08-12 21:34:36.008170
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1037e3f89dbd'
+revision: str = '552f56748ac5'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -42,12 +42,15 @@ def upgrade() -> None:
     sa.Column('unit_preference', sa.String(), nullable=False),
     sa.Column('goal_weight_kg', sa.Float(), nullable=True),
     sa.Column('sidebar_collapsed', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('onboarding_completed', sa.Boolean(), server_default='false', nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-    op.create_index(op.f('ix_users_google_id'), 'users', ['google_id'], unique=True)
-    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
-    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+    with op.batch_alter_table('users', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_users_email'), ['email'], unique=True)
+        batch_op.create_index(batch_op.f('ix_users_google_id'), ['google_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_users_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_users_username'), ['username'], unique=True)
+
     op.create_table('body_measurements',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -63,12 +66,23 @@ def upgrade() -> None:
     sa.Column('shoulders', sa.Float(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('unit', sa.String(), server_default='cm', nullable=False),
+    sa.CheckConstraint('arm > 0', name='chk_measurement_arm_positive'),
+    sa.CheckConstraint('calf > 0', name='chk_measurement_calf_positive'),
+    sa.CheckConstraint('chest > 0', name='chk_measurement_chest_positive'),
+    sa.CheckConstraint('forearm > 0', name='chk_measurement_forearm_positive'),
+    sa.CheckConstraint('hip > 0', name='chk_measurement_hip_positive'),
+    sa.CheckConstraint('neck > 0', name='chk_measurement_neck_positive'),
+    sa.CheckConstraint('shoulders > 0', name='chk_measurement_shoulders_positive'),
+    sa.CheckConstraint('thigh > 0', name='chk_measurement_thigh_positive'),
+    sa.CheckConstraint('waist > 0', name='chk_measurement_waist_positive'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id', 'date', name='uq_measurements_per_user_per_day')
     )
-    op.create_index(op.f('ix_body_measurements_id'), 'body_measurements', ['id'], unique=False)
-    op.create_index(op.f('ix_body_measurements_user_id'), 'body_measurements', ['user_id'], unique=False)
+    with op.batch_alter_table('body_measurements', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_body_measurements_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_body_measurements_user_id'), ['user_id'], unique=False)
+
     op.create_table('body_weight_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -76,12 +90,16 @@ def upgrade() -> None:
     sa.Column('weight_kg', sa.Float(), nullable=False),
     sa.Column('body_fat_pct', sa.Float(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.CheckConstraint('body_fat_pct >= 0 AND body_fat_pct <= 100', name='chk_bodyfat_range'),
+    sa.CheckConstraint('weight_kg > 0', name='chk_bodyweight_positive'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id', 'date', name='uq_weight_per_user_per_day')
     )
-    op.create_index(op.f('ix_body_weight_logs_id'), 'body_weight_logs', ['id'], unique=False)
-    op.create_index(op.f('ix_body_weight_logs_user_id'), 'body_weight_logs', ['user_id'], unique=False)
+    with op.batch_alter_table('body_weight_logs', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_body_weight_logs_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_body_weight_logs_user_id'), ['user_id'], unique=False)
+
     op.create_table('calorie_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -91,25 +109,37 @@ def upgrade() -> None:
     sa.Column('carbs_g', sa.Float(), nullable=True),
     sa.Column('fats_g', sa.Float(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.CheckConstraint('calories >= 0', name='chk_calories_nonnegative'),
+    sa.CheckConstraint('carbs_g >= 0', name='chk_carbs_nonnegative'),
+    sa.CheckConstraint('fats_g >= 0', name='chk_fats_nonnegative'),
+    sa.CheckConstraint('protein_g >= 0', name='chk_protein_nonnegative'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id', 'date', name='uq_calories_per_user_per_day')
     )
-    op.create_index(op.f('ix_calorie_logs_id'), 'calorie_logs', ['id'], unique=False)
-    op.create_index(op.f('ix_calorie_logs_user_id'), 'calorie_logs', ['user_id'], unique=False)
+    with op.batch_alter_table('calorie_logs', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_calorie_logs_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_calorie_logs_user_id'), ['user_id'], unique=False)
+
     op.create_table('exercises',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('category', sa.String(), nullable=True),
     sa.Column('muscle_group', sa.String(), nullable=True),
+    sa.Column('secondary_muscle', sa.String(), nullable=True),
+    sa.Column('equipment', sa.String(), nullable=True),
+    sa.Column('difficulty', sa.String(), nullable=True),
+    sa.Column('instructions', sa.String(), nullable=True),
     sa.Column('is_custom', sa.Boolean(), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name', 'created_by', name='uq_exercise_name_per_owner')
     )
-    op.create_index(op.f('ix_exercises_id'), 'exercises', ['id'], unique=False)
-    op.create_index(op.f('ix_exercises_name'), 'exercises', ['name'], unique=False)
+    with op.batch_alter_table('exercises', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_exercises_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_exercises_name'), ['name'], unique=False)
+
     op.create_table('push_subscriptions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -120,7 +150,9 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
-    op.create_index(op.f('ix_push_subscriptions_id'), 'push_subscriptions', ['id'], unique=False)
+    with op.batch_alter_table('push_subscriptions', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_push_subscriptions_id'), ['id'], unique=False)
+
     op.create_table('workout_templates',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -132,9 +164,11 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_workout_templates_id'), 'workout_templates', ['id'], unique=False)
-    op.create_index(op.f('ix_workout_templates_share_id'), 'workout_templates', ['share_id'], unique=True)
-    op.create_index(op.f('ix_workout_templates_user_id'), 'workout_templates', ['user_id'], unique=False)
+    with op.batch_alter_table('workout_templates', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_workout_templates_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_workout_templates_share_id'), ['share_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_workout_templates_user_id'), ['user_id'], unique=False)
+
     op.create_table('goals',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -150,12 +184,20 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('is_completed', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
+    sa.CheckConstraint('target_body_weight_kg > 0', name='chk_goal_bw_positive'),
+    sa.CheckConstraint('target_calories >= 0', name='chk_goal_calories_nonnegative'),
+    sa.CheckConstraint('target_protein_g >= 0', name='chk_goal_protein_nonnegative'),
+    sa.CheckConstraint('target_reps > 0', name='chk_goal_reps_positive'),
+    sa.CheckConstraint('target_weight_kg > 0', name='chk_goal_weight_positive'),
+    sa.CheckConstraint('target_workouts_per_week > 0', name='chk_goal_workouts_positive'),
     sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_goals_id'), 'goals', ['id'], unique=False)
-    op.create_index(op.f('ix_goals_user_id'), 'goals', ['user_id'], unique=False)
+    with op.batch_alter_table('goals', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_goals_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_goals_user_id'), ['user_id'], unique=False)
+
     op.create_table('workout_sessions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -171,8 +213,10 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_workout_sessions_id'), 'workout_sessions', ['id'], unique=False)
-    op.create_index(op.f('ix_workout_sessions_user_id'), 'workout_sessions', ['user_id'], unique=False)
+    with op.batch_alter_table('workout_sessions', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_workout_sessions_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_workout_sessions_user_id'), ['user_id'], unique=False)
+
     op.create_table('workout_template_exercises',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('template_id', sa.Integer(), nullable=False),
@@ -183,12 +227,18 @@ def upgrade() -> None:
     sa.Column('target_weight_kg', sa.Float(), nullable=True),
     sa.Column('rest_seconds', sa.Integer(), nullable=False),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.CheckConstraint('rest_seconds >= 0', name='chk_template_rest_nonnegative'),
+    sa.CheckConstraint('target_reps > 0', name='chk_template_reps_positive'),
+    sa.CheckConstraint('target_sets > 0', name='chk_template_sets_positive'),
+    sa.CheckConstraint('target_weight_kg >= 0', name='chk_template_weight_nonnegative'),
     sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
-    sa.ForeignKeyConstraint(['template_id'], ['workout_templates.id'], ),
+    sa.ForeignKeyConstraint(['template_id'], ['workout_templates.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_workout_template_exercises_id'), 'workout_template_exercises', ['id'], unique=False)
-    op.create_index(op.f('ix_workout_template_exercises_template_id'), 'workout_template_exercises', ['template_id'], unique=False)
+    with op.batch_alter_table('workout_template_exercises', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_workout_template_exercises_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_workout_template_exercises_template_id'), ['template_id'], unique=False)
+
     op.create_table('lift_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -200,55 +250,82 @@ def upgrade() -> None:
     sa.Column('rpe', sa.Float(), nullable=True),
     sa.Column('set_number', sa.Integer(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.CheckConstraint('reps > 0', name='chk_lift_reps_positive'),
+    sa.CheckConstraint('rpe >= 0 AND rpe <= 10', name='chk_lift_rpe_range'),
+    sa.CheckConstraint('weight_kg >= 0', name='chk_lift_weight_nonnegative'),
     sa.ForeignKeyConstraint(['exercise_id'], ['exercises.id'], ),
     sa.ForeignKeyConstraint(['session_id'], ['workout_sessions.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_lift_logs_exercise_id'), 'lift_logs', ['exercise_id'], unique=False)
-    op.create_index(op.f('ix_lift_logs_id'), 'lift_logs', ['id'], unique=False)
-    op.create_index(op.f('ix_lift_logs_session_id'), 'lift_logs', ['session_id'], unique=False)
-    op.create_index(op.f('ix_lift_logs_user_id'), 'lift_logs', ['user_id'], unique=False)
+    with op.batch_alter_table('lift_logs', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_lift_logs_exercise_id'), ['exercise_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_lift_logs_id'), ['id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_lift_logs_session_id'), ['session_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_lift_logs_user_id'), ['user_id'], unique=False)
+
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_lift_logs_user_id'), table_name='lift_logs')
-    op.drop_index(op.f('ix_lift_logs_session_id'), table_name='lift_logs')
-    op.drop_index(op.f('ix_lift_logs_id'), table_name='lift_logs')
-    op.drop_index(op.f('ix_lift_logs_exercise_id'), table_name='lift_logs')
+    with op.batch_alter_table('lift_logs', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_lift_logs_user_id'))
+        batch_op.drop_index(batch_op.f('ix_lift_logs_session_id'))
+        batch_op.drop_index(batch_op.f('ix_lift_logs_id'))
+        batch_op.drop_index(batch_op.f('ix_lift_logs_exercise_id'))
+
     op.drop_table('lift_logs')
-    op.drop_index(op.f('ix_workout_template_exercises_template_id'), table_name='workout_template_exercises')
-    op.drop_index(op.f('ix_workout_template_exercises_id'), table_name='workout_template_exercises')
+    with op.batch_alter_table('workout_template_exercises', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_workout_template_exercises_template_id'))
+        batch_op.drop_index(batch_op.f('ix_workout_template_exercises_id'))
+
     op.drop_table('workout_template_exercises')
-    op.drop_index(op.f('ix_workout_sessions_user_id'), table_name='workout_sessions')
-    op.drop_index(op.f('ix_workout_sessions_id'), table_name='workout_sessions')
+    with op.batch_alter_table('workout_sessions', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_workout_sessions_user_id'))
+        batch_op.drop_index(batch_op.f('ix_workout_sessions_id'))
+
     op.drop_table('workout_sessions')
-    op.drop_index(op.f('ix_goals_user_id'), table_name='goals')
-    op.drop_index(op.f('ix_goals_id'), table_name='goals')
+    with op.batch_alter_table('goals', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_goals_user_id'))
+        batch_op.drop_index(batch_op.f('ix_goals_id'))
+
     op.drop_table('goals')
-    op.drop_index(op.f('ix_workout_templates_user_id'), table_name='workout_templates')
-    op.drop_index(op.f('ix_workout_templates_share_id'), table_name='workout_templates')
-    op.drop_index(op.f('ix_workout_templates_id'), table_name='workout_templates')
+    with op.batch_alter_table('workout_templates', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_workout_templates_user_id'))
+        batch_op.drop_index(batch_op.f('ix_workout_templates_share_id'))
+        batch_op.drop_index(batch_op.f('ix_workout_templates_id'))
+
     op.drop_table('workout_templates')
-    op.drop_index(op.f('ix_push_subscriptions_id'), table_name='push_subscriptions')
+    with op.batch_alter_table('push_subscriptions', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_push_subscriptions_id'))
+
     op.drop_table('push_subscriptions')
-    op.drop_index(op.f('ix_exercises_name'), table_name='exercises')
-    op.drop_index(op.f('ix_exercises_id'), table_name='exercises')
+    with op.batch_alter_table('exercises', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_exercises_name'))
+        batch_op.drop_index(batch_op.f('ix_exercises_id'))
+
     op.drop_table('exercises')
-    op.drop_index(op.f('ix_calorie_logs_user_id'), table_name='calorie_logs')
-    op.drop_index(op.f('ix_calorie_logs_id'), table_name='calorie_logs')
+    with op.batch_alter_table('calorie_logs', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_calorie_logs_user_id'))
+        batch_op.drop_index(batch_op.f('ix_calorie_logs_id'))
+
     op.drop_table('calorie_logs')
-    op.drop_index(op.f('ix_body_weight_logs_user_id'), table_name='body_weight_logs')
-    op.drop_index(op.f('ix_body_weight_logs_id'), table_name='body_weight_logs')
+    with op.batch_alter_table('body_weight_logs', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_body_weight_logs_user_id'))
+        batch_op.drop_index(batch_op.f('ix_body_weight_logs_id'))
+
     op.drop_table('body_weight_logs')
-    op.drop_index(op.f('ix_body_measurements_user_id'), table_name='body_measurements')
-    op.drop_index(op.f('ix_body_measurements_id'), table_name='body_measurements')
+    with op.batch_alter_table('body_measurements', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_body_measurements_user_id'))
+        batch_op.drop_index(batch_op.f('ix_body_measurements_id'))
+
     op.drop_table('body_measurements')
-    op.drop_index(op.f('ix_users_username'), table_name='users')
-    op.drop_index(op.f('ix_users_id'), table_name='users')
-    op.drop_index(op.f('ix_users_google_id'), table_name='users')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
+    with op.batch_alter_table('users', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_users_username'))
+        batch_op.drop_index(batch_op.f('ix_users_id'))
+        batch_op.drop_index(batch_op.f('ix_users_google_id'))
+        batch_op.drop_index(batch_op.f('ix_users_email'))
+
     op.drop_table('users')
     # ### end Alembic commands ###
