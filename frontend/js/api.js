@@ -28,13 +28,12 @@ window.setAlert = function(message, type = "error") {
   }
 };
 const Auth = {
-  getToken() { return localStorage.getItem("ironlog_token"); },
-  setToken(token) { localStorage.setItem("ironlog_token", token); },
+  getToken() { return null; /* Deprecated, using HttpOnly cookies */ },
+  setToken(token) { /* No-op, managed by browser cookie */ },
   clear() { 
-    localStorage.removeItem("ironlog_token"); 
     localStorage.removeItem("ironlog_user"); 
   },
-  isLoggedIn() { return !!this.getToken(); },
+  isLoggedIn() { return !!this.getUser(); },
   getUser() {
     const userJson = localStorage.getItem("ironlog_user");
     if (!userJson) return null;
@@ -130,12 +129,10 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
   const headers = {};
   if (!form && body !== undefined) headers["Content-Type"] = "application/json";
   if (auth) {
-    const token = Auth.getToken();
-    if (!token) {
+    if (!Auth.isLoggedIn()) {
       window.location.href = "index.html";
       throw new ApiError("Not authenticated", 401);
     }
-    headers["Authorization"] = `Bearer ${escapeHtml(token)}`;
   }
 
   let resp;
@@ -143,6 +140,7 @@ async function apiRequest(path, { method = "GET", body, auth = true, form = fals
     resp = await fetch(`${escapeHtml(API_BASE_URL)}${escapeHtml(path)}`, {
       method,
       headers,
+      credentials: "include",
       body: body === undefined ? undefined : (form ? body : JSON.stringify(body)),
       cache: method === 'GET' ? 'no-cache' : 'default',
     });
@@ -192,7 +190,7 @@ const Api = {
     form.set("username", username);
     form.set("password", password);
     const data = await apiRequest("/auth/login", { method: "POST", auth: false, form: true, body: form });
-    Auth.setToken(data.access_token);
+    // Auth.setToken is no longer needed (cookie is set automatically)
     const user = await apiRequest("/profile/me");
     Auth.setUser(user);
     return user;
@@ -215,9 +213,6 @@ const Api = {
   // --- google sign-in / password reset ---
   async googleLogin(idToken) {
     const data = await apiRequest("/auth/google", { method: "POST", auth: false, body: { id_token: idToken } });
-    if (!data.needs_setup && data.access_token) {
-      Auth.setToken(data.access_token);
-    }
     return data;
   },
   async completeGoogleSignup(setupToken, username, password) {
@@ -225,9 +220,6 @@ const Api = {
       method: "POST", auth: false,
       body: { setup_token: setupToken, username, password },
     });
-    if (data.access_token) {
-      Auth.setToken(data.access_token);
-    }
     return data;
   },
   forgotPassword(email) {

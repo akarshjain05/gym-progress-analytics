@@ -140,7 +140,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
 
 @router.post("/google", response_model=schemas.GoogleLoginOut)
 @limiter.limit("10/minute")
-def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
+def google_login(request: Request, response: Response, payload: schemas.GoogleLoginIn, db: Session = Depends(get_db)):
     google_data = verify_google_id_token(payload.id_token)
     google_id = google_data["sub"]
     email = google_data["email"]
@@ -165,6 +165,14 @@ def google_login(request: Request, payload: schemas.GoogleLoginIn, db: Session =
         return {"needs_setup": True, "setup_token": setup_token, "email": user.email}
 
     access_token = create_access_token(data={"sub": user.username})
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        samesite="lax",
+        secure=not settings.frontend_url.startswith("http://localhost"),
+        max_age=settings.access_token_expire_minutes * 60
+    )
     return {"needs_setup": False, "access_token": access_token, "token_type": "bearer"}
 
 

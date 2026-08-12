@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = None
 
     demo_mode: bool = False
+    
+    environment: str = "development"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

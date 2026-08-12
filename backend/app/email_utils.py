@@ -24,7 +24,8 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
     email-provider failure shouldn't turn into a 500 for the user.
     """
     if not settings.brevo_api_key:
-        print(f"[DEV - no BREVO_API_KEY configured] Password reset link for {to_email}: {reset_link}")
+        if settings.environment != "production":
+            print(f"[DEV - no BREVO_API_KEY configured] Password reset link for {to_email}: {reset_link}")
         return
 
     text_body = (
@@ -71,7 +72,8 @@ def send_verification_email(to_email: str, verify_link: str) -> None:
     Sends an email verification link via Brevo's transactional email HTTP API.
     """
     if not settings.brevo_api_key:
-        print(f"[DEV - no BREVO_API_KEY configured] Email verification link for {to_email}: {verify_link}")
+        if settings.environment != "production":
+            print(f"[DEV - no BREVO_API_KEY configured] Verification link for {to_email}: {verify_link}")
         return
 
     text_body = (
