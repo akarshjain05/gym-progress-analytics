@@ -327,9 +327,9 @@
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
     const allGroups = [...orderedGroups, ...extraGroups];
 
-    select.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
+    select.innerHTML = allGroups.map(g =>
       `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${escapeHtml(groups[g].length)})</option>`
-    ).join(""));
+    ).join("");
 
     // Change handler
     select.addEventListener("change", () => {
@@ -359,9 +359,9 @@
 
   function populateExerciseSelect(groupExercises) {
     const select = document.getElementById("exerciseSelect");
-    select.innerHTML = DOMPurify.sanitize(groupExercises.map(ex =>
+    select.innerHTML = groupExercises.map(ex =>
       `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)}</option>`
-    ).join(""));
+    ).join("");
     // Trigger load for first exercise in group
     if (groupExercises.length > 0) {
       return loadProgress(groupExercises[0].id);
@@ -385,16 +385,16 @@
     const extraGroups = Object.keys(groups).filter(g => !MUSCLE_ORDER.includes(g)).sort();
     const allGroups = [...orderedGroups, ...extraGroups];
 
-    selectMuscle.innerHTML = DOMPurify.sanitize(allGroups.map(g =>
+    selectMuscle.innerHTML = allGroups.map(g =>
       `<option value="${escapeHtml(g)}">${escapeHtml(String(MUSCLE_LABELS[g] || g))} (${escapeHtml(groups[g].length)})</option>`
-    ).join(""));
+    ).join("");
 
     selectMuscle.addEventListener("change", () => {
       const g = selectMuscle.value;
       if (groups[g]) {
-        selectExercise.innerHTML = DOMPurify.sanitize(groups[g].map(ex =>
+        selectExercise.innerHTML = groups[g].map(ex =>
           `<option value="${escapeHtml(ex.id)}">${escapeHtml(ex.name)}</option>`
-        ).join(""));
+        ).join("");
       }
     });
 

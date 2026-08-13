@@ -74,9 +74,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.equipment) equipSet.add(e.equipment.toLowerCase());
     });
     const equipments = [...equipSet].sort();
-    equipmentSelect.innerHTML = DOMPurify.sanitize(`<option value="">All Equipment</option>` + equipments.map(eq => 
+    equipmentSelect.innerHTML = `<option value="">All Equipment</option>` + equipments.map(eq => 
       `<option value="${escapeHtml(eq)}">${escapeHtml(capitalize(eq))}</option>`
-    ).join(''));
+    ).join('');
   }
 
   function populateMuscleSelect(exercises) {
@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', async () => {
        if (idxB !== -1) return 1;
        return a.localeCompare(b);
     });
-    muscleSelect.innerHTML = DOMPurify.sanitize(`<option value="">All Muscles</option>` + muscles.map(m => 
+    muscleSelect.innerHTML = `<option value="">All Muscles</option>` + muscles.map(m => 
       `<option value="${escapeHtml(m)}">${escapeHtml(capitalize(m))}</option>`
-    ).join(''));
+    ).join('');
   }
 
   function renderLibrary(exercises) {

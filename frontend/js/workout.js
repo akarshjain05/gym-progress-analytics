@@ -220,19 +220,19 @@
        return a.localeCompare(b);
     });
     
-    muscleSel.innerHTML = DOMPurify.sanitize(`<option value="">All Muscles</option>` + muscles.map(m => 
+    muscleSel.innerHTML = `<option value="">All Muscles</option>` + muscles.map(m => 
       `<option value="${escapeHtml(m)}">${escapeHtml(m.charAt(0).toUpperCase() + m.slice(1))}</option>`
-    ).join(''));
+    ).join('');
     
-    exSel.innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
+    exSel.innerHTML = buildGroupedExerciseOptions(exercises);
     
     muscleSel.addEventListener('change', () => {
        const val = muscleSel.value;
        if (!val) {
-         exSel.innerHTML = DOMPurify.sanitize(buildGroupedExerciseOptions(exercises));
+         exSel.innerHTML = buildGroupedExerciseOptions(exercises);
        } else {
          const filtered = exercises.filter(e => (e.muscle_group || 'other').toLowerCase() === val);
-         exSel.innerHTML = DOMPurify.sanitize(filtered.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`).join(''));
+         exSel.innerHTML = filtered.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`).join('');
        }
     });
   }
