@@ -11,6 +11,7 @@
   // ── State ────────────────────────────────────────────────────────────────
   let exercises = [];          // all available exercises
   let templates = [];          // user's saved templates
+  let workoutHistory = [];     // user's workout history
   let activeWorkout = null;    // { template, exercises: [{...}], startTime, timerInterval }
 
   // ── Initial render ────────────────────────────────────────────────────────
@@ -1356,7 +1357,8 @@
   document.getElementById('startFreeBtn').addEventListener('click', () => startWorkout(0));
 
   // ── Utility ───────────────────────────────────────────────────────────────
-  })();
+  init();
+})();
 
 document.addEventListener('click', () => {
   document.querySelectorAll('.wk-dropdown-menu').forEach(m => m.style.display = 'none');
