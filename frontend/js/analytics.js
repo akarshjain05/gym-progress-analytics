@@ -37,9 +37,12 @@ async function initAnalytics() {
     </div>
   `);
 
-
-
-
+  document.getElementById("compareWrapper").addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON" && e.target.hasAttribute("data-days")) {
+      const days = parseInt(e.target.getAttribute("data-days"), 10);
+      loadCompare(days);
+    }
+  });
 const TIER_BADGE = {
   beginner: "badge-grey", novice: "badge-blue", intermediate: "badge-green",
   advanced: "badge-gold", elite: "badge-red",
@@ -292,10 +295,10 @@ async function loadCompare(days = 90) {
     <div class="card">
       <div class="card-title">Compare to past you</div>
       <div class="compare-toggles mb-12">
-        <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
-        <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
-        <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
-        <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
+        <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" data-days="7">7 Days</button>
+        <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" data-days="30">30 Days</button>
+        <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" data-days="90">90 Days</button>
+        <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" data-days="365">1 Year</button>
       </div>
       <div class="empty-state"><p>Loading comparison...</p></div>
     </div>
@@ -309,10 +312,10 @@ async function loadCompare(days = 90) {
         <div class="card">
           <div class="card-title">Compare to past you</div>
           <div class="compare-toggles mb-12">
-            <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
-            <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
-            <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
-            <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
+            <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" data-days="7">7 Days</button>
+            <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" data-days="30">30 Days</button>
+            <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" data-days="90">90 Days</button>
+            <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" data-days="365">1 Year</button>
           </div>
           <div class="empty-state"><p>Not enough history in the past period to compare. Check back later!</p></div>
         </div>
@@ -341,10 +344,10 @@ async function loadCompare(days = 90) {
       <div class="card">
         <div class="card-title">Compare to past you</div>
         <div class="compare-toggles mb-16">
-          <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" onclick="loadCompare(7)">7 Days</button>
-          <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" onclick="loadCompare(30)">30 Days</button>
-          <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" onclick="loadCompare(90)">90 Days</button>
-          <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" onclick="loadCompare(365)">1 Year</button>
+          <button class="btn ${escapeHtml(days === 7 ? 'active' : '')}" data-days="7">7 Days</button>
+          <button class="btn ${escapeHtml(days === 30 ? 'active' : '')}" data-days="30">30 Days</button>
+          <button class="btn ${escapeHtml(days === 90 ? 'active' : '')}" data-days="90">90 Days</button>
+          <button class="btn ${escapeHtml(days === 365 ? 'active' : '')}" data-days="365">1 Year</button>
         </div>
         
         <!-- Volume -->
