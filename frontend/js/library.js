@@ -109,12 +109,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="lib-group">
           <div class="lib-group-title">${escapeHtml(g.label)} (${escapeHtml(g.items.length)})</div>
           ${g.items.map(ex => {
-            const equip = ex.equipment ? `<span style="opacity:0.7;"> • ${ex.equipment}</span>` : '';
+            const equip = ex.equipment ? `<span style="opacity:0.7;"> • ${escapeHtml(ex.equipment)}</span>` : '';
             return `
             <div class="lib-item" onclick="window.showExerciseInfo(${escapeHtml(ex.id)})">
               <div>
                 <div class="lib-item-name">${escapeHtml(ex.name)}</div>
-                <div class="lib-item-meta">${escapeHtml(capitalize(ex.category || 'Compound'))}${escapeHtml(equip)}</div>
+                <div class="lib-item-meta">${escapeHtml(capitalize(ex.category || 'Compound'))}${equip}</div>
               </div>
               <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--text-tertiary);">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
