@@ -235,7 +235,7 @@ async function loadGoalExerciseOptions() {
 function renderGoalCard(g, isCompleted) {
   let title = "";
   let badge = `<span class="badge-goal badge-${escapeHtml(g.goal_type)}">${escapeHtml(g.goal_type)}</span>`;
-  let subtitleHTML = g.target_date ? `${escapeHtml(badge)} &bull; Target: ${escapeHtml(fmtDate(g.target_date))}` : badge;
+  let subtitleHTML = g.target_date ? `${badge} &bull; Target: ${escapeHtml(fmtDate(g.target_date))}` : badge;
   
   if (g.goal_type === "lift") {
     title = `${escapeHtml(exerciseMap[g.exercise_id] || "Unknown Lift")}: ${escapeHtml(fmtKg(g.target_weight_kg))} kg × ${escapeHtml(g.target_reps)}`;
@@ -255,7 +255,7 @@ function renderGoalCard(g, isCompleted) {
       <input type="checkbox" class="goal-checkbox" onchange="toggleGoal(${escapeHtml(g.id)})" ${escapeHtml(isCompleted ? 'checked' : '')}>
       <div class="goal-details">
         <div class="goal-title">${escapeHtml(title)}</div>
-        <div class="goal-subtitle">${escapeHtml(subtitleHTML)}</div>
+        <div class="goal-subtitle">${subtitleHTML}</div>
       </div>
       <div class="goal-actions">
         <button class="icon-btn icon-btn-danger" onclick="deleteGoal(${escapeHtml(g.id)})" title="Delete Goal">

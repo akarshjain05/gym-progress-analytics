@@ -499,7 +499,7 @@ window.showExerciseInfo = async function(exerciseId) {
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
           <div class="wk-modal-title" style="display:flex; align-items:center;">
-            ${escapeHtml(ex.name)} ${escapeHtml(difficultyBadge)}
+            ${escapeHtml(ex.name)} ${difficultyBadge}
           </div>
           <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'" aria-label="Close">${CLOSE_ICON}</button>
         </div>
