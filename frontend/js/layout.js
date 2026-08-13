@@ -37,7 +37,7 @@ window.renderDataTable = function(containerId, data, columns, deleteCallback) {
       delTd = `
         <td>
           <div class="row-actions">
-            <button class="icon-btn" onclick="${deleteCallback}(${escapeHtml(item.id)})" title="Delete">
+            <button class="icon-btn" onclick="${deleteCallback}(${escapeHtml(item.id)})" title="Delete" aria-label="Delete entry">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
             </button>
           </div>
@@ -501,7 +501,7 @@ window.showExerciseInfo = async function(exerciseId) {
           <div class="wk-modal-title" style="display:flex; align-items:center;">
             ${escapeHtml(ex.name)} ${escapeHtml(difficultyBadge)}
           </div>
-          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'">${CLOSE_ICON}</button>
+          <button class="wk-modal-close" onclick="document.getElementById('exerciseInfoModal').style.display='none'" aria-label="Close">${CLOSE_ICON}</button>
         </div>
         <div class="wk-modal-body" style="line-height:1.5;">
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
@@ -541,7 +541,7 @@ window.showCustomExerciseModal = function(onSuccess) {
       <div class="wk-modal" style="max-width:500px;">
         <div class="wk-modal-header">
           <span class="wk-modal-title">Add custom exercise</span>
-          <button class="wk-modal-close" id="closeGlobalCustomModal">✕</button>
+          <button class="wk-modal-close" id="closeGlobalCustomModal" aria-label="Close">✕</button>
         </div>
         <div class="wk-modal-body" style="padding-right: 8px;">
           <div class="wk-field" style="margin-bottom:12px;">

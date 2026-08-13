@@ -79,12 +79,23 @@ async function loadDashboard() {
 
       let statsGridHtml = "";
       if (dash.current_weight_kg === null && dash.current_streak_days === 0 && dash.avg_calories_last_7_days === null) {
-        statsGridHtml = buildEmptyState(
-          "Welcome to IRONLOG", 
-          "You haven't logged any data yet. Start by logging your weight, a workout, or your calories below.", 
-          "Log your first workout", 
-          "workout.html"
-        );
+        content.innerHTML = DOMPurify.sanitize(`
+          <div class="empty-state" style="padding: 4rem 1.5rem; text-align: center; background: var(--bg-secondary); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 2rem;">
+            <div style="background:var(--bg-tertiary); width:64px; height:64px; border-radius:32px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:32px;height:32px;color:var(--plate-blue);">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.75rem; color: var(--text-primary); font-weight: 700;">Welcome to IRONLOG</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.6;">You haven't logged any data yet. Start tracking your strength and consistency today.</p>
+            <a href="workout.html" class="btn btn-primary" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; max-width: 250px; font-weight: bold; margin-bottom: 1rem; padding: 12px;">Log your first workout</a>
+            <div>
+              <a href="weight.html" style="color: var(--text-secondary); font-size: 0.95rem; text-decoration: underline;">Or log your body weight</a>
+            </div>
+          </div>
+        `);
+        window.hideLoading && window.hideLoading();
+        return;
       } else {
         statsGridHtml = `
           <div class="grid grid-stats">

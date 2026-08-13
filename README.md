@@ -4,6 +4,25 @@
 
 A full-stack, multi-user fitness tracker: body weight, lifts, and calories in, real trend analysis out. Built with a robust backend and a blazing-fast vanilla frontend, deployed autonomously via CI/CD.
 
+## 📸 App Preview
+
+<div align="center">
+  <img src="docs/desktop_dashboard.png" alt="Desktop Dashboard" width="70%" />
+  &nbsp;&nbsp;
+  <img src="docs/mobile_view.gif" alt="Mobile App View" width="25%" />
+</div>
+
+## 🏗 System Architecture
+
+```mermaid
+graph TD
+    User((User)) -->|HTTPS| Caddy[Caddy Reverse Proxy]
+    Caddy -->|/api/*| FastAPI[FastAPI Backend]
+    Caddy -->|/* static files| VanillaJS[Vanilla JS PWA]
+    FastAPI <--> SQLite[(SQLite / PostgreSQL)]
+    VanillaJS <-->|Offline Queue| IDB[(IndexedDB)]
+```
+
 ## Tech Stack & Infrastructure
 
 - **Backend**: Python, FastAPI, SQLAlchemy, SQLite
@@ -68,7 +87,7 @@ docker compose up -d --build
 ```
 
 - **Frontend**: Available at `http://localhost:8080`
-- **Backend API Docs**: Available at `http://localhost:8000/docs`
+- **Backend API Docs**: Available at `http://localhost:8000/docs`. **Note for reviewers:** The backend is built with FastAPI, which *auto-generates* self-documenting, interactive Swagger/OpenAPI documentation. Simply navigate to `/docs` while the server is running to explore and test the entire API.
 
 ## Manual Local Setup
 

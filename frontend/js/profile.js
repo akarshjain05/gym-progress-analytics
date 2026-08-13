@@ -36,13 +36,13 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
             </div>
             <div class="field">
               <label for="pAge">Age</label>
-              <input type="number" id="pAge" min="10" max="100" placeholder="e.g. 25">
+              <input type="number" id="pAge" min="0" step="1" placeholder="e.g. 25">
             </div>
           </div>
           <div class="form-row">
             <div class="field">
               <label for="pHeight">Height (cm)</label>
-              <input type="number" id="pHeight" min="50" max="300" step="0.1" placeholder="e.g. 178">
+              <input type="number" id="pHeight" min="0" step="any" placeholder="e.g. 178">
             </div>
             <div class="field">
               <label for="pActivity">Activity level</label>
@@ -66,7 +66,7 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
             </div>
             <div class="field">
               <label for="pGoal">Goal weight (kg)</label>
-              <input type="number" id="pGoal" min="1" step="0.1" placeholder="e.g. 78">
+              <input type="number" id="pGoal" min="0" step="any" placeholder="e.g. 78">
             </div>
           </div>
           <button type="submit" class="btn btn-primary" id="pSaveBtn">Save changes</button>

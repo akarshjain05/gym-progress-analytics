@@ -11,30 +11,31 @@ const MUSCLE_GROUP_COLORS = {
   glutes: "#D46BA3", calves: "#7BAE7F", abs: "#B0A458", other: "#6B7480",
 };
 
-document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
-  <div id="calendarWrapper" class="mb-16"></div>
-  <div id="compareWrapper" class="mb-16"></div>
+async function initAnalytics() {
+  document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
+    <div id="calendarWrapper" class="mb-16"></div>
+    <div id="compareWrapper" class="mb-16"></div>
 
 
 
 
-  <div class="card mb-16">
-    <div class="card-title">Weight trend</div>
-    <canvas id="weightTrendCanvas" height="100"></canvas>
-  </div>
-
-  <div class="card mb-16">
-    <div class="card-title">Weekly training volume <span class="text-tertiary" style="font-weight:400;">(all lifts, kg × reps)</span></div>
-    <canvas id="volumeCanvas" height="80"></canvas>
-  </div>
-
-  <div class="card mb-16">
-    <div class="card-title">Muscle Balance <span class="text-tertiary" style="font-weight:400;">(volume by group)</span></div>
-    <div style="position: relative; height: 320px; width: 100%; display: flex; justify-content: center;">
-      <canvas id="muscleVolumeCanvas"></canvas>
+    <div class="card mb-16">
+      <div class="card-title">Weight trend</div>
+      <canvas id="weightTrendCanvas" height="100"></canvas>
     </div>
-  </div>
-`);
+
+    <div class="card mb-16">
+      <div class="card-title">Weekly training volume <span class="text-tertiary" style="font-weight:400;">(all lifts, kg × reps)</span></div>
+      <canvas id="volumeCanvas" height="80"></canvas>
+    </div>
+
+    <div class="card mb-16">
+      <div class="card-title">Muscle Balance <span class="text-tertiary" style="font-weight:400;">(volume by group)</span></div>
+      <div style="position: relative; height: 320px; width: 100%; display: flex; justify-content: center;">
+        <canvas id="muscleVolumeCanvas"></canvas>
+      </div>
+    </div>
+  `);
 
 
 
@@ -397,8 +398,14 @@ async function loadCompare(days = 90) {
   }
 }
 
-loadCompare(90);
-loadCalendar();
-loadWeightTrend();
-loadVolumeChart();
-loadMuscleGroupVolumeChart();
+  await Promise.all([
+    loadCompare(90),
+    loadCalendar(),
+    loadWeightTrend(),
+    loadVolumeChart(),
+    loadMuscleGroupVolumeChart()
+  ]);
+  window.hideLoading && window.hideLoading();
+}
+
+initAnalytics();

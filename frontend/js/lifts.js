@@ -34,11 +34,11 @@
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Weight (kg)</label>
-                <input type="number" id="editSetWeight" step="0.1" class="form-control" required style="width:100%; box-sizing:border-box;">
+                <input type="number" id="editSetWeight" min="0" step="any" class="form-control" required style="width:100%; box-sizing:border-box;">
               </div>
               <div style="flex:1;">
                 <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Reps</label>
-                <input type="number" id="editSetReps" class="form-control" required style="width:100%; box-sizing:border-box;">
+                <input type="number" id="editSetReps" min="1" step="1" class="form-control" required style="width:100%; box-sizing:border-box;">
               </div>
             </div>
             <div>
@@ -266,9 +266,23 @@
 
   // ── Muscle group order ───────────────────────────────────────────────────
   const MUSCLE_ORDER = [
-    "chest", "back", "shoulders", "quads", "hamstrings",
-    "glutes", "adductors", "legs", "biceps", "triceps",
-    "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"
+    "chest",
+    "back",
+    "shoulders",
+    "quads",
+    "hamstrings",
+    "glutes",
+    "adductors",
+    "legs",
+    "biceps",
+    "triceps",
+    "abs",
+    "calves",
+    "forearms",
+    "neck",
+    "hip flexors",
+    "full body",
+    "other"
   ];
 
 
@@ -971,11 +985,11 @@
     div.className = "modal-set-row";
     div.innerHTML = DOMPurify.sanitize(`
       <span class="modal-set-num" style="min-width: 38px;">Set ${escapeHtml(setCount)}</span>
-      <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="0.5" style="width: 76px; padding: 8px 6px; text-align: center;">
+      <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="any" style="width: 76px; padding: 8px 6px; text-align: center;">
       <span style="color:#a09880;font-size:13px; font-weight:700;">×</span>
-      <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" max="100" style="width: 72px; padding: 8px 6px; text-align: center;">
+      <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" step="1" max="100" style="width: 72px; padding: 8px 6px; text-align: center;">
       <input type="number" class="text-input set-rpe-input" placeholder="RPE" min="1" max="10" step="0.5" style="width: 68px; padding: 8px 6px; text-align: center;">
-      <button class="set-remove-btn" title="Remove" style="margin-left: auto; margin-right: -4px; font-size: 20px;">✕</button>
+      <button class="set-remove-btn" title="Remove" style="margin-left: auto; margin-right: -4px; font-size: 20px;" aria-label="Remove set">✕</button>
     `);
     div.querySelector(".set-remove-btn").addEventListener("click", () => div.remove());
     document.getElementById("setsContainer").appendChild(div);

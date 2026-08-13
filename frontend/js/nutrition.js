@@ -19,10 +19,10 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
         <form id="calForm">
           <div class="form-row">
             <div class="field"><label for="cDate">Date</label><input type="date" id="cDate" class="form-control" required></div>
-            <div class="field"><label for="cCalories">Calories</label><input type="number" id="cCalories" class="form-control" min="0" step="1" required placeholder="e.g. 2400"></div>
-            <div class="field"><label for="cProtein">Protein (g)</label><input type="number" id="cProtein" class="form-control" min="0" step="1" placeholder="optional"></div>
-            <div class="field"><label for="cCarbs">Carbs (g)</label><input type="number" id="cCarbs" class="form-control" min="0" step="1" placeholder="optional"></div>
-            <div class="field"><label for="cFats">Fats (g)</label><input type="number" id="cFats" class="form-control" min="0" step="1" placeholder="optional"></div>
+            <div class="field"><label for="cCalories">Calories</label><input type="number" id="cCalories" class="form-control" min="0" step="any" required placeholder="e.g. 2400"></div>
+            <div class="field"><label for="cProtein">Protein (g)</label><input type="number" id="cProtein" class="form-control" min="0" step="any" placeholder="optional"></div>
+            <div class="field"><label for="cCarbs">Carbs (g)</label><input type="number" id="cCarbs" class="form-control" min="0" step="any" placeholder="optional"></div>
+            <div class="field"><label for="cFats">Fats (g)</label><input type="number" id="cFats" class="form-control" min="0" step="any" placeholder="optional"></div>
           </div>
           <div class="field"><label for="cNotes">Notes <span class="text-tertiary">(optional)</span></label><input id="cNotes" class="form-control" placeholder="e.g. refeed day"></div>
           <div class="flex gap-12" style="margin-top:16px;">
@@ -225,8 +225,10 @@ async function loadAll() {
       document.getElementById("calorieCanvas").style.display = "none";
       renderTable([]);
     }
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    window.hideLoading && window.hideLoading();
   }
 }
 

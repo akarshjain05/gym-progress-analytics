@@ -32,45 +32,45 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
         </div>
         <div class="field">
           <label for="mChest">Chest</label>
-          <input type="number" id="mChest" step="0.1" min="0" max="300" placeholder="e.g. 102.5">
+          <input type="number" id="mChest" min="0" step="any" max="300" placeholder="e.g. 102.5">
         </div>
         <div class="field">
           <label for="mWaist">Waist</label>
-          <input type="number" id="mWaist" step="0.1" min="0" max="300" placeholder="e.g. 85.0">
+          <input type="number" id="mWaist" min="0" step="any" max="300" placeholder="e.g. 85.0">
         </div>
       </div>
       <div class="form-row">
         <div class="field">
           <label for="mNeck">Neck</label>
-          <input type="number" id="mNeck" step="0.1" min="0" max="300" placeholder="e.g. 40.5">
+          <input type="number" id="mNeck" min="0" step="any" max="300" placeholder="e.g. 40.5">
         </div>
         <div class="field">
           <label for="mHip">Hip</label>
-          <input type="number" id="mHip" step="0.1" min="0" max="300">
+          <input type="number" id="mHip" min="0" step="any" max="300">
         </div>
         <div class="field">
           <label for="mArm">Arm</label>
-          <input type="number" id="mArm" step="0.1" min="0" max="300">
+          <input type="number" id="mArm" min="0" step="any" max="300">
         </div>
       </div>
       <div class="form-row">
         <div class="field">
           <label for="mForearm">Forearm</label>
-          <input type="number" id="mForearm" step="0.1" min="0" max="300">
+          <input type="number" id="mForearm" min="0" step="any" max="300">
         </div>
         <div class="field">
           <label for="mThigh">Thigh</label>
-          <input type="number" id="mThigh" step="0.1" min="0" max="300">
+          <input type="number" id="mThigh" min="0" step="any" max="300">
         </div>
         <div class="field">
           <label for="mCalf">Calf</label>
-          <input type="number" id="mCalf" step="0.1" min="0" max="300">
+          <input type="number" id="mCalf" min="0" step="any" max="300">
         </div>
       </div>
       <div class="form-row">
         <div class="field">
           <label for="mShoulders">Shoulders</label>
-          <input type="number" id="mShoulders" step="0.1" min="0" max="300">
+          <input type="number" id="mShoulders" min="0" step="any" max="300">
         </div>
       </div>
       <div class="field">
@@ -247,6 +247,7 @@ async function loadData() {
     if (typeof window.hideLoading === "function") window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    if (typeof window.hideLoading === "function") window.hideLoading();
   }
 }
 

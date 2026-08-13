@@ -26,11 +26,11 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
             </div>
             <div class="field">
               <label for="wWeight">Weight (kg)</label>
-              <input type="number" id="wWeight" class="form-control" step="0.1" min="1" max="400" required placeholder="e.g. 82.5">
+              <input type="number" id="wWeight" class="form-control" min="0" step="any" required placeholder="e.g. 82.5">
             </div>
             <div class="field">
               <label for="wBf">Body fat % <span class="text-tertiary">(optional)</span></label>
-              <input type="number" id="wBf" class="form-control" step="0.1" min="0" max="80" placeholder="e.g. 18.5">
+              <input type="number" id="wBf" class="form-control" min="0" step="any" placeholder="e.g. 18.5">
             </div>
           </div>
           <div class="field">
@@ -221,8 +221,10 @@ async function loadAll() {
       document.getElementById("weightCanvas").style.display = "none";
       renderTable([]);
     }
+    window.hideLoading && window.hideLoading();
   } catch (err) {
     handleApiError(err);
+    window.hideLoading && window.hideLoading();
   }
 }
 

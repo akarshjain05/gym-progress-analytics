@@ -94,16 +94,16 @@
               <div class="ob-field">
                 <label class="ob-label">Current weight</label>
                 <div class="ob-input-group">
-                  <input type="number" id="obCurrentWeight" class="ob-input"
-                    placeholder="e.g. 75" min="30" max="250" step="0.1">
+                  <input type="number" id="obCurrentWeight" class="ob-input" min="0" step="any"
+                    placeholder="e.g. 75.5" required>
                   <span class="ob-input-suffix">kg</span>
                 </div>
               </div>
               <div class="ob-field">
                 <label class="ob-label">Goal weight</label>
                 <div class="ob-input-group">
-                  <input type="number" id="obGoalWeight" class="ob-input"
-                    placeholder="e.g. 80" min="30" max="250" step="0.1">
+                  <input type="number" id="obGoalWeight" class="ob-input" min="0" step="any"
+                    placeholder="e.g. 70.0 (optional)">
                   <span class="ob-input-suffix">kg</span>
                 </div>
               </div>
@@ -112,14 +112,14 @@
             <div class="ob-field-row">
               <div class="ob-field">
                 <label class="ob-label">Age</label>
-                <input type="number" id="obAge" class="ob-input"
-                  placeholder="e.g. 22" min="10" max="100">
+                <input type="number" id="obAge" class="ob-input" min="0" step="1"
+                  placeholder="e.g. 25" required>
               </div>
               <div class="ob-field">
                 <label class="ob-label">Height</label>
                 <div class="ob-input-group">
-                  <input type="number" id="obHeight" class="ob-input"
-                    placeholder="e.g. 175" min="100" max="250">
+                  <input type="number" id="obHeight" class="ob-input" min="0" step="any"
+                    placeholder="e.g. 175">
                   <span class="ob-input-suffix">cm</span>
                 </div>
               </div>
@@ -170,8 +170,8 @@
             <div class="ob-field">
               <label class="ob-label">Today's weight</label>
               <div class="ob-input-group ob-input-large">
-                <input type="number" id="obWeightLog" class="ob-input ob-input-big"
-                  placeholder="75.0" min="30" max="250" step="0.1">
+                <input type="number" id="obWeightLog" class="ob-input ob-input-big" min="0" step="any"
+                  placeholder="75.5" required style="text-align: center;">
                 <span class="ob-input-suffix ob-suffix-big">kg</span>
               </div>
             </div>
@@ -204,15 +204,15 @@
               <div class="ob-field">
                 <label class="ob-label">Weight</label>
                 <div class="ob-input-group">
-                  <input type="number" id="obLiftWeight" class="ob-input"
-                    placeholder="60" min="0" max="600" step="0.5">
+                  <input type="number" id="obLiftWeight" class="ob-input" min="0" step="any"
+                    placeholder="kg" required>
                   <span class="ob-input-suffix">kg</span>
                 </div>
               </div>
               <div class="ob-field">
                 <label class="ob-label">Reps</label>
-                <input type="number" id="obLiftReps" class="ob-input"
-                  placeholder="8" min="1" max="100">
+                <input type="number" id="obLiftReps" class="ob-input" min="1" step="1"
+                  placeholder="e.g. 5" required>
               </div>
             </div>
             <div class="ob-tip">

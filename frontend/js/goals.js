@@ -43,29 +43,29 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <select id="gExercise"></select>
               </div>
               <div class="form-row">
-                <div class="field"><label for="gWeight">Target weight (kg)</label><input type="number" id="gWeight" min="1" step="0.5" placeholder="e.g. 120"></div>
-                <div class="field"><label for="gReps">At reps</label><input type="number" id="gReps" min="1" value="1"></div>
+                <div class="field"><label for="gWeight">Target weight (kg)</label><input type="number" id="gWeight" min="0" step="any" placeholder="e.g. 120"></div>
+                <div class="field"><label for="gReps">At reps</label><input type="number" id="gReps" min="1" step="1" value="1"></div>
               </div>
             </div>
             
             <div id="fields-weight" class="goal-type-fields" style="display:none;">
               <div class="field">
                 <label for="gBodyWeight">Target body weight (kg)</label>
-                <input type="number" id="gBodyWeight" min="1" step="0.5" placeholder="e.g. 75">
+                <input type="number" id="gBodyWeight" min="0" step="any" placeholder="e.g. 75">
               </div>
             </div>
 
             <div id="fields-nutrition" class="goal-type-fields" style="display:none;">
               <div class="form-row">
-                <div class="field"><label for="gCalories">Daily Calories</label><input type="number" id="gCalories" min="1" placeholder="e.g. 2500"></div>
-                <div class="field"><label for="gProtein">Daily Protein (g)</label><input type="number" id="gProtein" min="1" placeholder="e.g. 150"></div>
+                <div class="field"><label for="gCalories">Daily Calories</label><input type="number" id="gCalories" min="0" step="any" placeholder="e.g. 2500"></div>
+                <div class="field"><label for="gProtein">Daily Protein (g)</label><input type="number" id="gProtein" min="0" step="any" placeholder="e.g. 150"></div>
               </div>
             </div>
             
             <div id="fields-frequency" class="goal-type-fields" style="display:none;">
               <div class="field">
                 <label for="gFrequency">Workouts per week</label>
-                <input type="number" id="gFrequency" min="1" max="14" placeholder="e.g. 4">
+                <input type="number" id="gFrequency" min="1" max="14" step="1" placeholder="e.g. 4">
               </div>
             </div>
 

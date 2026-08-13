@@ -61,7 +61,7 @@
       <div class="wk-modal">
         <div class="wk-modal-header">
           <span id="templateModalTitle">New Template</span>
-          <button class="wk-modal-close" id="closeTemplateModal">✕</button>
+          <button class="wk-modal-close" id="closeTemplateModal" aria-label="Close template modal">✕</button>
         </div>
         <div class="wk-modal-body">
           <div class="wk-field">
@@ -146,7 +146,7 @@
       <div class="wk-modal" style="max-height:90vh; overflow-y:auto;">
         <div class="wk-modal-header">
           <h2 id="hdTitle" style="font-size:18px; margin:0;">Workout Details</h2>
-          <button class="wk-modal-close" id="closeHistoryDetailModal">✕</button>
+          <button class="wk-modal-close" id="closeHistoryDetailModal" aria-label="Close history details">✕</button>
         </div>
         <div class="wk-modal-body" id="hdBody">
           <!-- Content dynamically loaded -->
@@ -207,7 +207,7 @@
     const exSel = document.getElementById(exSelId);
     if (!muscleSel || !exSel) return;
     
-    const MUSCLE_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "abs", "calves", "forearms", "neck", "hip flexors", "full body"];
+    const MUSCLE_ORDER = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes", "adductors", "legs", "biceps", "triceps", "abs", "calves", "forearms", "neck", "hip flexors", "full body", "other"];
     
     const muscles = [...new Set(exercises.map(e => (e.muscle_group || 'other').toLowerCase()))];
     muscles.sort((a,b) => {
@@ -255,7 +255,7 @@
         <div class="wk-tc-header">
           <div class="wk-tc-name">${escapeHtml(t.name)}</div>
           <div class="wk-tc-actions" style="position:relative;">
-            <button class="wk-icon-btn wk-menu-btn" data-id="${escapeHtml(t.id)}">⋮</button>
+            <button class="wk-icon-btn wk-menu-btn" data-id="${escapeHtml(t.id)}" aria-label="Template menu">⋮</button>
             <div class="wk-dropdown-menu" id="wk-menu-${escapeHtml(t.id)}" style="display:none; position:absolute; right:0; top:24px; background:#1A1D21; border:1px solid #2D3748; border-radius:8px; overflow:hidden; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.5); min-width:120px;">
               <button class="wk-dropdown-item wk-share-btn" data-id="${escapeHtml(t.id)}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px;">Share</button>
               <button class="wk-dropdown-item wk-edit-btn" data-id="${escapeHtml(t.id)}" style="width:100%; padding:10px 16px; text-align:left; background:transparent; border:none; color:#E2E8F0; cursor:pointer; font-size:14px; border-top:1px solid #2D3748;">Edit</button>
@@ -335,7 +335,7 @@
                 <span class="wk-history-icon">${escapeHtml(s.template_id ? '📋' : '🏋️')}</span>
                 ${escapeHtml(s.template_name)}
               </div>
-              <button class="wk-icon-btn wk-history-del" data-id="${escapeHtml(s.id)}" title="Delete" style="font-size: 16px;">✕</button>
+              <button class="wk-icon-btn wk-history-del" data-id="${escapeHtml(s.id)}" title="Delete" style="font-size: 16px;" aria-label="Delete workout record">✕</button>
             </div>
             <div class="wk-history-meta">
               <span>${escapeHtml(fmtDuration(s.duration_seconds))}</span>
@@ -499,17 +499,17 @@
         <div class="wk-tmpl-ex-info">
           <div class="wk-tmpl-ex-name">${escapeHtml(e.exercise_name)}</div>
           <div class="wk-tmpl-ex-inputs">
-            <label>Sets<input type="number" class="wk-input wk-input-sm tmpl-sets"
+            <label>Sets<input type="number" class="wk-input wk-input-sm tmpl-sets" min="1" step="1"
               value="${escapeHtml(e.target_sets)}" min="1" max="20" data-idx="${escapeHtml(i)}"></label>
-            <label>Reps<input type="number" class="wk-input wk-input-sm tmpl-reps"
+            <label>Reps<input type="number" class="wk-input wk-input-sm tmpl-reps" min="1" step="1"
               value="${escapeHtml(e.target_reps)}" min="1" max="100" data-idx="${escapeHtml(i)}"></label>
-            <label>Weight(kg)<input type="number" class="wk-input wk-input-sm tmpl-weight"
+            <label>Weight(kg)<input type="number" class="wk-input wk-input-sm tmpl-weight" min="0" step="any"
               value="${escapeHtml(e.target_weight_kg || '')}" min="0" max="600" step="0.5" placeholder="—" data-idx="${escapeHtml(i)}"></label>
-            <label>Rest(s)<input type="number" class="wk-input wk-input-sm tmpl-rest"
+            <label>Rest(s)<input type="number" class="wk-input wk-input-sm tmpl-rest" min="0" step="1"
               value="${escapeHtml(e.rest_seconds)}" min="0" max="600" data-idx="${escapeHtml(i)}"></label>
           </div>
         </div>
-        <button class="wk-icon-btn wk-tmpl-remove" data-idx="${escapeHtml(i)}">✕</button>
+        <button class="wk-icon-btn wk-tmpl-remove" data-idx="${escapeHtml(i)}" aria-label="Remove exercise">✕</button>
       </div>
     `).join(''));
 

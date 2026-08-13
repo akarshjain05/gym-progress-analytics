@@ -51,11 +51,11 @@ const CALCULATORS_HTML = `
         <div class="calc-row">
           <div class="form-group">
             <label>Target Weight (kg)</label>
-            <input type="number" id="plateTarget" class="form-control" placeholder="e.g. 100" value="100">
+            <input type="number" id="plateTarget" class="form-control" placeholder="e.g. 100" value="100" min="0" step="any">
           </div>
           <div class="form-group">
             <label>Bar Weight (kg)</label>
-            <input type="number" id="plateBar" class="form-control" value="20">
+            <input type="number" id="plateBar" class="form-control" value="20" min="0" step="any">
           </div>
         </div>
         <div class="calc-result" id="plateResultBox">
@@ -75,11 +75,11 @@ const CALCULATORS_HTML = `
         <div class="calc-row">
           <div class="form-group">
             <label>Weight (kg)</label>
-            <input type="number" id="ormWeight" class="form-control" placeholder="100">
+            <input type="number" id="ormWeight" class="form-control" placeholder="100" min="0" step="any">
           </div>
           <div class="form-group">
             <label>Reps</label>
-            <input type="number" id="ormReps" class="form-control" placeholder="5">
+            <input type="number" id="ormReps" class="form-control" placeholder="5" min="1" step="1">
           </div>
         </div>
         <div class="calc-result">
@@ -99,11 +99,11 @@ const CALCULATORS_HTML = `
           <div class="calc-row">
             <div class="form-group">
               <label>Weight (kg)</label>
-              <input type="number" step="0.1" id="bmWeight" class="form-control" required>
+              <input type="number" step="any" min="0" id="bmWeight" class="form-control" required>
             </div>
             <div class="form-group">
               <label>Height (cm)</label>
-              <input type="number" step="0.1" id="bmHeight" class="form-control" required>
+              <input type="number" step="any" min="0" id="bmHeight" class="form-control" required>
             </div>
           </div>
           <div class="form-group">
@@ -135,11 +135,11 @@ const CALCULATORS_HTML = `
           <div class="calc-row">
             <div class="form-group">
               <label>Body Weight (kg)</label>
-              <input type="number" step="0.1" id="pwWeight" class="form-control" required>
+              <input type="number" step="any" min="0" id="pwWeight" class="form-control" required>
             </div>
             <div class="form-group">
               <label>Total Lifted (kg)</label>
-              <input type="number" step="0.5" id="pwTotal" class="form-control" required>
+              <input type="number" step="any" min="0" id="pwTotal" class="form-control" required>
             </div>
           </div>
           <div class="form-group">
@@ -168,7 +168,7 @@ const CALCULATORS_HTML = `
         <form id="macroForm" onsubmit="event.preventDefault(); window.CalculatorsPage.calcMacros();" style="display: flex; flex-direction: column; gap: 1rem;">
           <div class="form-group">
             <label>Daily Calories</label>
-            <input type="number" id="macCals" class="form-control" required placeholder="e.g. 2500">
+            <input type="number" id="macCals" class="form-control" required placeholder="e.g. 2500" min="0" step="any">
           </div>
           <div class="form-group">
             <label>Goal</label>
