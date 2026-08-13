@@ -912,10 +912,10 @@
               <div class="pr-exercise">
                 ${escapeHtml(pr.exercise)}
               </div>
-              <div class="pr-1rm">${escapeHtml(prMetric)}</div>
+              <div class="pr-1rm">${prMetric}</div>
               <div class="pr-achieved">${escapeHtml(prAchieved)}</div>
               <div class="pr-date">${escapeHtml(fmtDate(pr.date))}</div>
-              <div class="pr-level">${escapeHtml(levelBadge)}</div>
+              <div class="pr-level">${levelBadge}</div>
             </div>
           `;
         }).join("");
