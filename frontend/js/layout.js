@@ -256,7 +256,7 @@ function buildMobileDrawer(activeId) {
       </div>
 
       <nav class="drawer-nav">
-        ${escapeHtml(navLinks)}
+        ${navLinks}
       </nav>
 
       <div class="drawer-footer sidebar-footer" style="padding: 16px 20px; padding-bottom: calc(16px + var(--safe-bottom)); border-top: 1px solid rgba(255,255,255,0.07); margin-top: 0;">
@@ -298,7 +298,7 @@ function buildBottomNav(activeId) {
     </a>
   `).join('');
 
-  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${escapeHtml(links)}</nav>`;
+  return `<nav class="mobile-bottom-nav" aria-label="Quick navigation">${links}</nav>`;
 }
 
 function openDrawer() {
