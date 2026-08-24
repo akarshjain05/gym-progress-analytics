@@ -15,7 +15,7 @@ from .routers import (
     auth, profile, weight, exercises, lifts,
     nutrition, goals, analytics, coach, workout_templates, admin, calculators, measurements
 )
-from .push_notifications import router as push_router, PushSubscription
+from .push_notifications import router as push_router
 from .export import router as export_router
 from sqlalchemy import text
 from . import models
@@ -27,15 +27,6 @@ async def lifespan(app: FastAPI):
     import os
     
     if not os.getenv("TESTING"):
-        # Automatically run alembic upgrade head on startup
-        try:
-            subprocess.run(
-                ["alembic", "upgrade", "head"],
-                cwd=os.path.dirname(os.path.dirname(__file__)),
-                check=True
-            )
-        except Exception as e:
-            print(f"Warning: Alembic migration failed to run automatically: {e}")
 
         db = SessionLocal()
         try:

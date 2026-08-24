@@ -206,6 +206,11 @@ BODYWEIGHT_REP_STANDARDS = {
 }
 
 # Maps exercise name → bodyweight rep standard key
+
+def is_bodyweight_exercise(exercise_name: str) -> bool:
+    """Return True if the exercise relies on bodyweight reps/time standards."""
+    return exercise_name.strip().lower() in BODYWEIGHT_EXERCISE_MAP
+
 BODYWEIGHT_EXERCISE_MAP = {
     "pull-up":           "pull_up",
     "pullup":            "pull_up",
@@ -547,7 +552,6 @@ EXERCISE_TO_STANDARD = {
 
     # ── Chest — weighted bodyweight ───────────────────────────────────────
     "weighted dip":                    "weighted_dip",
-    "dip":                             None,  # bodyweight → use rep standard
     # ↑ None = route to BODYWEIGHT_EXERCISE_MAP for reps-based classification
 
     # ── Back — barbell ────────────────────────────────────────────────────
@@ -581,12 +585,6 @@ EXERCISE_TO_STANDARD = {
     "dumbbell row":                    "db_row",
 
     # ── Back — bodyweight ─────────────────────────────────────────────────
-    "pull-up":                         None,  # bodyweight reps
-    "pullup":                          None,
-    "pull up":                         None,
-    "chin-up":                         None,  # bodyweight reps
-    "chinup":                          None,
-    "chin up":                         None,
 
     # ── Back — weighted bodyweight ────────────────────────────────────────
     "weighted pull-up":                "weighted_pullup",
@@ -698,8 +696,6 @@ EXERCISE_TO_STANDARD = {
 
     # ── Core ──────────────────────────────────────────────────────────────
     "cable crunch":                    "cable_crunch",
-    "hanging leg raise":               None,  # bodyweight reps
-    "plank":                           None,  # time-based bodyweight
 }
 
 

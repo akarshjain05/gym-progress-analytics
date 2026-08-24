@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from .. import schemas, models
@@ -87,7 +87,7 @@ def get_admin_logs(
     logs = []
     
     # Lift Logs
-    lift_logs = db.query(models.LiftLog).order_by(models.LiftLog.id.desc()).limit(30).all()
+    lift_logs = db.query(models.LiftLog).options(joinedload(models.LiftLog.user), joinedload(models.LiftLog.exercise)).order_by(models.LiftLog.id.desc()).limit(30).all()
     for l in lift_logs:
         logs.append(schemas.AdminLogEntryOut(
             log_id=l.id,
@@ -100,7 +100,7 @@ def get_admin_logs(
         ))
         
     # Weight Logs
-    weight_logs = db.query(models.BodyWeightLog).order_by(models.BodyWeightLog.id.desc()).limit(30).all()
+    weight_logs = db.query(models.BodyWeightLog).options(joinedload(models.BodyWeightLog.user)).order_by(models.BodyWeightLog.id.desc()).limit(30).all()
     for w in weight_logs:
         logs.append(schemas.AdminLogEntryOut(
             log_id=w.id,
@@ -126,7 +126,7 @@ def get_admin_logs(
         ))
         
     # Goals
-    goals = db.query(models.Goal).order_by(models.Goal.id.desc()).limit(30).all()
+    goals = db.query(models.Goal).options(joinedload(models.Goal.user)).order_by(models.Goal.id.desc()).limit(30).all()
     for g in goals:
         desc = f"Set a new {g.goal_type} goal"
         if g.goal_type == "lift" and g.exercise:

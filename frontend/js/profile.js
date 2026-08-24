@@ -41,7 +41,7 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
           </div>
           <div class="form-row">
             <div class="field">
-              <label for="pHeight">Height (cm)</label>
+              <label for="pHeight">Height (<span class="len-unit">cm</span>)</label>
               <input type="number" id="pHeight" min="0" step="any" placeholder="e.g. 178">
             </div>
             <div class="field">
@@ -90,10 +90,12 @@ async function loadProfile() {
     document.getElementById("pEmail").value = user.email;
     document.getElementById("pGender").value = user.gender || "";
     document.getElementById("pAge").value = user.age ?? "";
-    document.getElementById("pHeight").value = user.height_cm ?? "";
+    document.getElementById("pHeight").value = user.height_cm ? Number(cmToUserUnit(user.height_cm).toFixed(1)) : "";
     document.getElementById("pActivity").value = user.activity_level || "moderate";
     document.getElementById("pUnit").value = user.unit_preference || "kg";
-    document.getElementById("pGoal").value = user.goal_weight_kg ?? "";
+    document.querySelectorAll('.len-unit').forEach(el => el.textContent = getLengthUnit());
+    document.querySelectorAll('.w-unit').forEach(el => el.textContent = getUserUnit());
+    document.getElementById("pGoal").value = user.goal_weight_kg ? Number(kgToUserUnit(user.goal_weight_kg).toFixed(1)) : "";
   } catch (err) {
     handleApiError(err);
   }
@@ -107,10 +109,10 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
     await Api.updateProfile({
       gender: document.getElementById("pGender").value || null,
       age: document.getElementById("pAge").value ? parseInt(document.getElementById("pAge").value) : null,
-      height_cm: document.getElementById("pHeight").value ? parseFloat(document.getElementById("pHeight").value) : null,
+      height_cm: document.getElementById("pHeight").value ? userUnitToCm(document.getElementById("pHeight").value) : null,
       activity_level: document.getElementById("pActivity").value,
       unit_preference: document.getElementById("pUnit").value,
-      goal_weight_kg: document.getElementById("pGoal").value ? parseFloat(document.getElementById("pGoal").value) : null,
+      goal_weight_kg: document.getElementById("pGoal").value ? userUnitToKg(document.getElementById("pGoal").value) : null,
     });
     showToast("Profile updated.");
     await loadProfile();

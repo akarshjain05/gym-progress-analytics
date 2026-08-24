@@ -28,7 +28,6 @@ from . import models, calculations as calc, push_notifications
 from collections import defaultdict
 from datetime import timedelta, timezone, datetime
 
-from app.time_utils import ist_today
 
 
 
@@ -122,3 +121,33 @@ def generate_insights(user_id: int, db: Session = None):
     finally:
         if own_session:
             db.close()
+
+import requests
+from .config import settings
+
+@celery_app.task(name="send_email_task", bind=True, max_retries=3)
+def send_email_task(self, to_email: str, subject: str, html_content: str, text_content: str):
+    if not settings.brevo_api_key:
+        if settings.environment != "production":
+            print(f"[DEV - no BREVO_API_KEY] Email to {to_email}: {subject}")
+        return
+
+    BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+    payload = {
+        "sender": {"email": settings.brevo_sender_email, "name": "IRONLOG"},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "htmlContent": html_content,
+        "textContent": text_content,
+    }
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.brevo_api_key,
+        "content-type": "application/json",
+    }
+    try:
+        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f"[ERROR] Celery failed to send email: {e}")
+        raise self.retry(exc=e, countdown=60)

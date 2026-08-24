@@ -60,11 +60,8 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
         "content-type": "application/json",
     }
 
-    try:
-        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        print(f"[ERROR] Failed to send password reset email via Brevo: {e}")
+    from .worker import send_email_task
+    send_email_task.delay(to_email, payload["subject"], payload["htmlContent"], payload["textContent"])
 
 
 def send_verification_email(to_email: str, verify_link: str) -> None:
@@ -108,8 +105,5 @@ def send_verification_email(to_email: str, verify_link: str) -> None:
         "content-type": "application/json",
     }
 
-    try:
-        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        print(f"[ERROR] Failed to send verification email via Brevo: {e}")
+    from .worker import send_email_task
+    send_email_task.delay(to_email, payload["subject"], payload["htmlContent"], payload["textContent"])

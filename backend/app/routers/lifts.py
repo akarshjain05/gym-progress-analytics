@@ -156,17 +156,7 @@ def delete_lift(
     return None
 
 
-BODYWEIGHT_EXERCISE_NAMES = {
-    "pull-up", "pullup", "pull up",
-    "chin-up", "chinup", "chin up",
-    "dip",
-    "hanging leg raise",
-    "plank",
-}
 
-
-def _is_bodyweight_exercise(exercise_name: str) -> bool:
-    return exercise_name.strip().lower() in BODYWEIGHT_EXERCISE_NAMES
 
 
 def _get_strength_info(
@@ -188,7 +178,7 @@ def _get_strength_info(
       - Uses pr_1rm / bodyweight ratio
       - breakpoints are kg values
     """
-    is_bw = _is_bodyweight_exercise(exercise_name)
+    is_bw = calc.is_bodyweight_exercise(exercise_name)
 
     # Bodyweight exercises only need gender, not bodyweight_kg
     if is_bw:
@@ -333,7 +323,7 @@ def lift_progress(
     # For bodyweight exercises (dip, pull-up etc.) use max reps as the metric
     best_reps_ever = 0
     latest_session_best_reps = 0
-    if _is_bodyweight_exercise(exercise.name):
+    if calc.is_bodyweight_exercise(exercise.name):
         best_reps_ever = max((log.reps for log in logs), default=0)
         latest_date = session_dates[0]
         latest_session_best_reps = max(
@@ -346,7 +336,7 @@ def lift_progress(
 
     percentile = None
     if bw_kg:
-        metric = best_reps_ever if _is_bodyweight_exercise(exercise.name) else pr_1rm
+        metric = best_reps_ever if calc.is_bodyweight_exercise(exercise.name) else pr_1rm
         gender = current_user.gender or "male"
         pct_data = calc.get_strength_percentile(exercise.name, gender, bw_kg, metric)
         if pct_data:
@@ -357,7 +347,7 @@ def lift_progress(
         "exercise": exercise.name,
         "muscle_group": exercise.muscle_group,
         "category": exercise.category,
-        "is_bodyweight": _is_bodyweight_exercise(exercise.name),
+        "is_bodyweight": calc.is_bodyweight_exercise(exercise.name),
         "first_session_1rm_kg": series[0]["estimated_1rm_kg"],
         "latest_session_1rm_kg": latest_1rm,
         "change_pct": calc.percent_change(series[-2]["estimated_1rm_kg"], latest_1rm) if len(series) > 1 else None,
@@ -403,16 +393,19 @@ def all_personal_records(
     )
     bw_kg = latest_bw.weight_kg if latest_bw else None
 
+    exercise_ids = list(by_exercise.keys())
+    exercises = {ex.id: ex for ex in db.query(models.Exercise).filter(models.Exercise.id.in_(exercise_ids)).all()}
+
     flat = []
     for exercise_id, entries in by_exercise.items():
-        exercise = db.get(models.Exercise, exercise_id)
+        exercise = exercises.get(exercise_id)
         if not exercise:
             continue
         best = max(entries, key=lambda e: calc.estimate_1rm_epley(e.weight_kg, e.reps))
         pr_1rm = calc.estimate_1rm_epley(best.weight_kg, best.reps)
 
         # For bodyweight exercises use max reps as metric
-        best_reps = max((e.reps for e in entries), default=0) if _is_bodyweight_exercise(exercise.name) else 0
+        best_reps = max((e.reps for e in entries), default=0) if calc.is_bodyweight_exercise(exercise.name) else 0
         strength_info = _get_strength_info(
             exercise.name, current_user.gender, bw_kg, pr_1rm, best_reps=best_reps
         )
@@ -422,7 +415,7 @@ def all_personal_records(
             "exercise": exercise.name,
             "muscle_group": exercise.muscle_group or "other",
             "category": exercise.category,
-            "is_bodyweight": _is_bodyweight_exercise(exercise.name),
+            "is_bodyweight": calc.is_bodyweight_exercise(exercise.name),
             "best_reps": best_reps,
             "estimated_1rm_kg": pr_1rm,
             "achieved_with": {"weight_kg": best.weight_kg, "reps": best.reps},

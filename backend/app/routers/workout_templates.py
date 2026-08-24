@@ -30,6 +30,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .. import models
+from ..services import workout_service
 from ..database import get_db
 from ..security import get_current_user
 
@@ -112,113 +113,7 @@ def _tex_out(te: models.WorkoutTemplateExercise) -> dict:
     }
 
 
-def _finish_workout_logic(
-    payload: FinishWorkoutIn,
-    db: Session,
-    current_user: models.User,
-    template_id: Optional[int],
-    template_name: str,
-):
-    """Shared logic for finishing both template and free workouts."""
-    from .. import calculations as calc
 
-    if not payload.exercises:
-        raise HTTPException(status_code=400, detail="No exercises to save")
-
-    total_sets_saved = sum(
-        1 for ex in payload.exercises for s in ex.sets if s.completed
-    )
-    if total_sets_saved == 0:
-        raise HTTPException(status_code=400, detail="No completed sets to save")
-        
-    exercises_saved = sum(
-        1 for ex in payload.exercises if any(s.completed for s in ex.sets)
-    )
-
-    session = models.WorkoutSession(
-        user_id=current_user.id,
-        template_id=template_id,
-        template_name=template_name,
-        date=payload.date,
-        duration_seconds=payload.duration_seconds,
-        exercises_count=exercises_saved,
-        sets_count=total_sets_saved,
-    )
-    db.add(session)
-    db.flush()
-
-    new_prs = []
-
-    for ex_data in payload.exercises:
-        exercise = (
-            db.query(models.Exercise)
-            .filter(
-                models.Exercise.id == ex_data.exercise_id,
-                or_(
-                    models.Exercise.created_by.is_(None),
-                    models.Exercise.created_by == current_user.id
-                ),
-            )
-            .first()
-        )
-        if not exercise:
-            continue
-
-        completed_sets = [s for s in ex_data.sets if s.completed]
-        if not completed_sets:
-            continue
-
-        existing_logs = (
-            db.query(models.LiftLog)
-            .filter(
-                models.LiftLog.user_id == current_user.id,
-                models.LiftLog.exercise_id == ex_data.exercise_id,
-            )
-            .all()
-        )
-        old_pr = max(
-            (calc.estimate_1rm_epley(l.weight_kg, l.reps) for l in existing_logs),
-            default=0.0,
-        )
-
-        set_number = 1
-        session_1rms = []
-        for set_data in completed_sets:
-            entry = models.LiftLog(
-                user_id=current_user.id,
-                exercise_id=ex_data.exercise_id,
-                date=payload.date,
-                weight_kg=set_data.weight_kg,
-                reps=set_data.reps,
-                rpe=set_data.rpe,
-                set_number=set_number,
-                notes=ex_data.notes,
-            )
-            session.lift_logs.append(entry)
-            db.add(entry)
-            session_1rms.append(calc.estimate_1rm_epley(set_data.weight_kg, set_data.reps))
-            set_number += 1
-
-        if session_1rms:
-            session_best = max(session_1rms)
-            if session_best > old_pr:
-                new_prs.append({
-                    "exercise": exercise.name,
-                    "new_1rm_kg": round(session_best, 1),
-                    "old_1rm_kg": round(old_pr, 1),
-                })
-
-    db.commit()
-    db.refresh(session)
-
-    return {
-        "success": True,
-        "session_id": session.id,
-        "exercises_saved": exercises_saved,
-        "total_sets_saved": total_sets_saved,
-        "new_prs": new_prs,
-        "date": payload.date.isoformat(),
-    }
 
 
 # ---------------------------------------------------------------------------
@@ -287,7 +182,7 @@ def finish_free_workout(
     current_user: models.User = Depends(get_current_user),
 ):
     """Finish a free (no template) workout session."""
-    return _finish_workout_logic(payload, db, current_user, None, "Free Workout")
+    return workout_service.finish_workout_logic(payload, db, current_user, None, "Free Workout")
 
 
 @router.get("/history")
@@ -512,6 +407,26 @@ def update_template(
         t.name = payload.name.strip()
     if payload.description is not None:
         t.description = payload.description
+        
+    if payload.exercises is not None:
+        # Delete old exercises
+        db.query(models.WorkoutTemplateExercise).filter(
+            models.WorkoutTemplateExercise.template_id == t.id
+        ).delete()
+        # Insert new ones
+        for ex in payload.exercises:
+            te = models.WorkoutTemplateExercise(
+                template_id=t.id,
+                exercise_id=ex.exercise_id,
+                position=ex.position,
+                target_sets=ex.target_sets,
+                target_reps=ex.target_reps,
+                target_weight_kg=ex.target_weight_kg,
+                rest_seconds=ex.rest_seconds,
+                notes=ex.notes,
+            )
+            db.add(te)
+            
     t.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(t)
@@ -658,4 +573,4 @@ def finish_workout(
     """
     # Verify template belongs to user
     tmpl = _get_template(db, template_id, current_user)
-    return _finish_workout_logic(payload, db, current_user, template_id, tmpl.name)
+    return workout_service.finish_workout_logic(payload, db, current_user, template_id, tmpl.name)

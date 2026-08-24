@@ -99,26 +99,20 @@ function isoWeekLabel(dateStr) {
 async function loadVolumeChart() {
   const ctx = document.getElementById("volumeCanvas");
   try {
-    const logs = await Api.listLifts();
-    if (!logs.length) {
+    const data = await Api.volume();
+    if (!data.length) {
       ctx.parentElement.innerHTML = DOMPurify.sanitize(`<div class="card-title">Weekly training volume</div><div class="empty-state"><p>Log some sets to see weekly volume.</p></div>`);
       return;
     }
-    const byWeek = {};
-    for (const l of logs) {
-      const wk = isoWeekLabel(l.date);
-      byWeek[wk] = (byWeek[wk] || 0) + l.weight_kg * l.reps;
-    }
-    const weeks = Object.keys(byWeek).sort();
 
     if (volumeChart) volumeChart.destroy();
     volumeChart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: weeks.map(w => fmtDate(w)),
+        labels: data.map(d => fmtDate(d.week_label)),
         datasets: [{
-          label: "Volume (kg)",
-          data: weeks.map(w => Math.round(byWeek[w])),
+          label: "Volume",
+          data: data.map(d => Math.round(kgToUserUnit(d.volume))),
           backgroundColor: "#E2402D",
           borderRadius: 4,
         }],

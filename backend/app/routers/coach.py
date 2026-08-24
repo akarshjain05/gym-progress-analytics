@@ -36,7 +36,7 @@ from ..security import get_current_user
 
 router = APIRouter(prefix="/coach", tags=["coach"])
 
-from app.time_utils import ist_today
+from app.time_utils import get_today
 
 
 # ---------------------------------------------------------------------------
@@ -145,8 +145,8 @@ def _eta_for_exercise(latest_1rm: float, target_1rm: float, trend: str, phase: i
         "sessions_away": sessions_away
     }
 
-def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
-    today = ist_today()
+def _predict_strength_hybrid(lift_logs: list, db: Session, timezone_str: str) -> list[dict]:
+    today = get_today(timezone_str)
     if not lift_logs:
         return []
     user_id = lift_logs[0].user_id
@@ -156,9 +156,12 @@ def _predict_strength_hybrid(lift_logs: list, db: Session) -> list[dict]:
     for log in lift_logs:
         by_exercise[log.exercise_id].append(log)
 
+    eids = list(by_exercise.keys())
+    exercises = {ex.id: ex for ex in db.query(models.Exercise).filter(models.Exercise.id.in_(eids)).all()}
+    
     results = []
     for eid, logs in by_exercise.items():
-        ex = db.get(models.Exercise, eid)
+        ex = exercises.get(eid)
         if not ex:
             continue
 
@@ -287,7 +290,7 @@ def _predict_weight_hybrid(weight_logs: list, profile_goal: Optional[float], cur
     Phase 1 (< 5 logs): baseline rate from goal direction.
     Phase 2 (>= 5 logs): personal regression.
     """
-    today = ist_today()
+    today = get_today(timezone_str)
 
     if len(weight_logs) < 5:
         # ── PHASE 1: Baseline ──────────────────────────────────────────────
@@ -369,18 +372,18 @@ def _predict_weight_hybrid(weight_logs: list, profile_goal: Optional[float], cur
 # Muscle Group Volume
 # ---------------------------------------------------------------------------
 
-def _muscle_group_volume(lift_logs: list, db: Session) -> dict:
-    today = ist_today()
+def _muscle_group_volume(lift_logs: list, db: Session, timezone_str: str) -> dict:
+    today = get_today(timezone_str)
     cutoff_recent = today - timedelta(days=28)
     cutoff_prev = today - timedelta(days=56)
-    exercise_cache: dict[int, models.Exercise] = {}
     recent_vol: dict[str, float] = defaultdict(float)
     prev_vol: dict[str, float] = defaultdict(float)
+    
+    eids = list({log.exercise_id for log in lift_logs})
+    exercises = {ex.id: ex for ex in db.query(models.Exercise).filter(models.Exercise.id.in_(eids)).all()}
 
     for log in lift_logs:
-        if log.exercise_id not in exercise_cache:
-            exercise_cache[log.exercise_id] = db.get(models.Exercise, log.exercise_id)
-        ex = exercise_cache[log.exercise_id]
+        ex = exercises.get(log.exercise_id)
         if not ex or not ex.muscle_group:
             continue
         vol = log.weight_kg * log.reps
@@ -407,8 +410,8 @@ def _muscle_group_volume(lift_logs: list, db: Session) -> dict:
 # Consistency Score
 # ---------------------------------------------------------------------------
 
-def _consistency_score(lift_logs: list, weight_logs: list, calorie_logs: list) -> dict:
-    today = ist_today()
+def _consistency_score(lift_logs: list, weight_logs: list, calorie_logs: list, timezone_str: str) -> dict:
+    today = get_today(timezone_str)
     last_28 = today - timedelta(days=28)
     lift_days = {l.date for l in lift_logs if l.date >= last_28}
     weight_days = {w.date for w in weight_logs if w.date >= last_28}
@@ -593,10 +596,10 @@ def get_analysis(
 
     try:
         current_weight = weight_logs[-1].weight_kg if weight_logs else None
-        strength = _predict_strength_hybrid(lift_logs, db)
+        strength = _predict_strength_hybrid(lift_logs, db, current_user.timezone)
         weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
-        muscle_vol = _muscle_group_volume(lift_logs, db)
-        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
+        muscle_vol = _muscle_group_volume(lift_logs, db, current_user.timezone)
+        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs, current_user.timezone)
         nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to process analysis data.")
@@ -669,10 +672,10 @@ async def get_advice(
 
     try:
         current_weight = weight_logs[-1].weight_kg if weight_logs else None
-        strength = _predict_strength_hybrid(lift_logs, db)
+        strength = _predict_strength_hybrid(lift_logs, db, current_user.timezone)
         weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
-        muscle_vol = _muscle_group_volume(lift_logs, db)
-        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs)
+        muscle_vol = _muscle_group_volume(lift_logs, db, current_user.timezone)
+        consistency = _consistency_score(lift_logs, weight_logs, calorie_logs, current_user.timezone)
         nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to process coaching data.")
@@ -812,7 +815,7 @@ def get_next_eta(db: Session = Depends(get_db), current_user: models.User = Depe
     if not lift_logs:
         return None
         
-    strength_results = _predict_strength_hybrid(lift_logs, db)
+    strength_results = _predict_strength_hybrid(lift_logs, db, current_user.timezone)
     
     valid_etas = []
     for res in strength_results:

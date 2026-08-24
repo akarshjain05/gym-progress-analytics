@@ -568,17 +568,8 @@
     try {
       if (editingTemplateId) {
         await apiRequest(`/templates/${escapeHtml(editingTemplateId)}`, {
-          method: 'PUT', body: { name, description: desc || null },
+          method: 'PUT', body: payload,
         });
-        const existing = templates.find(t => t.id === editingTemplateId);
-        if (existing) {
-          for (const te of existing.exercises) {
-            await apiRequest(`/templates/${escapeHtml(editingTemplateId)}/exercises/${escapeHtml(te.id)}`, { method: 'DELETE' });
-          }
-        }
-        for (const ex of payload.exercises) {
-          await apiRequest(`/templates/${escapeHtml(editingTemplateId)}/exercises`, { method: 'POST', body: ex });
-        }
       } else {
         await apiRequest('/templates', { method: 'POST', body: payload });
       }

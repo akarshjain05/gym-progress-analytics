@@ -31,16 +31,6 @@ router = APIRouter(prefix="/push", tags=["push"])
 # Model — store one subscription per user (last registered device wins)
 # ---------------------------------------------------------------------------
 
-class PushSubscription(Base):
-    __tablename__ = "push_subscriptions"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
-    endpoint = Column(Text, nullable=False)
-    p256dh = Column(Text, nullable=False)   # public key
-    auth = Column(Text, nullable=False)      # auth secret
-
-    user = relationship("User")
 
 
 # ---------------------------------------------------------------------------
@@ -58,7 +48,7 @@ class PushSubscriptionIn(BaseModel):
 
 
 
-def _send_push(subscription: PushSubscription, title: str, body: str, url: str = "/workout.html") -> tuple[bool, str]:
+def _send_push(subscription: models.PushSubscription, title: str, body: str, url: str = "/workout.html") -> tuple[bool, str]:
     """
     Send a Web Push notification using pywebpush.
     Returns (True, "") on success, (False, reason) on failure.
@@ -108,8 +98,8 @@ def subscribe(
     current_user: models.User = Depends(get_current_user),
 ):
     """Save or update the push subscription for the current user."""
-    existing = db.query(PushSubscription).filter(
-        PushSubscription.user_id == current_user.id
+    existing = db.query(models.PushSubscription).filter(
+        models.PushSubscription.user_id == current_user.id
     ).first()
 
     if existing:
@@ -117,7 +107,7 @@ def subscribe(
         existing.p256dh = payload.keys.p256dh
         existing.auth = payload.keys.auth
     else:
-        sub = PushSubscription(
+        sub = models.PushSubscription(
             user_id=current_user.id,
             endpoint=payload.endpoint,
             p256dh=payload.keys.p256dh,
@@ -135,8 +125,8 @@ def unsubscribe(
     current_user: models.User = Depends(get_current_user),
 ):
     """Remove the push subscription for the current user."""
-    sub = db.query(PushSubscription).filter(
-        PushSubscription.user_id == current_user.id
+    sub = db.query(models.PushSubscription).filter(
+        models.PushSubscription.user_id == current_user.id
     ).first()
     if sub:
         db.delete(sub)
@@ -150,8 +140,8 @@ def send_test(
     current_user: models.User = Depends(get_current_user),
 ):
     """Send a test notification to the current user."""
-    sub = db.query(PushSubscription).filter(
-        PushSubscription.user_id == current_user.id
+    sub = db.query(models.PushSubscription).filter(
+        models.PushSubscription.user_id == current_user.id
     ).first()
     if not sub:
         raise HTTPException(status_code=404, detail="No push subscription found. Enable notifications first.")
@@ -192,18 +182,32 @@ def notify_inactivity_check(db: Session):
     Check all users. If they haven't logged a workout in 3+ days, send a reminder.
     Call this from a daily cron/scheduler endpoint.
     """
+    from sqlalchemy import func
+    
     three_days_ago = date.today() - timedelta(days=3)
-    subs = db.query(PushSubscription).all()
+    subs = db.query(models.PushSubscription).all()
+    
+    if not subs:
+        return
+        
+    user_ids = list({sub.user_id for sub in subs})
+    
+    # Get max date per user_id in one query
+    latest_logs = (
+        db.query(models.LiftLog.user_id, func.max(models.LiftLog.date).label('max_date'))
+        .filter(models.LiftLog.user_id.in_(user_ids))
+        .group_by(models.LiftLog.user_id)
+        .all()
+    )
+    
+    last_log_dates = {row.user_id: row.max_date for row in latest_logs}
+    
+    subs_to_delete = []
 
     for sub in subs:
-        latest_log = (
-            db.query(models.LiftLog)
-            .filter(models.LiftLog.user_id == sub.user_id)
-            .order_by(models.LiftLog.date.desc())
-            .first()
-        )
-        if latest_log is None or latest_log.date <= three_days_ago:
-            days_ago = (date.today() - latest_log.date).days if latest_log else "a while"
+        last_date = last_log_dates.get(sub.user_id)
+        if last_date is None or last_date <= three_days_ago:
+            days_ago = (date.today() - last_date).days if last_date else "a while"
             ok, reason = _send_push(
                 sub,
                 title="Time to train!",
@@ -211,8 +215,12 @@ def notify_inactivity_check(db: Session):
                 url="/workout.html",
             )
             if not ok and reason == "410_GONE":
-                db.delete(sub)
-                db.commit()
+                subs_to_delete.append(sub)
+                
+    if subs_to_delete:
+        for s in subs_to_delete:
+            db.delete(s)
+        db.commit()
 
 
 @router.post("/check-inactivity")

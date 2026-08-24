@@ -290,6 +290,8 @@ const Api = {
 
   // --- analytics ---
   dashboard() { return apiRequest("/analytics/dashboard"); },
+  volume() { return apiRequest("/analytics/volume"); },
+  muscleVolume() { return apiRequest("/analytics/muscle_volume"); },
   nextEta() { return apiRequest("/coach/next-eta"); },
   insights() { return apiRequest("/analytics/insights"); },
   wrapped(year, month) {
@@ -426,11 +428,65 @@ window.appConfirm = function(title, message, okText = 'OK', cancelText = 'Cancel
   });
 };
 
+
 // --- small formatting helpers used across pages ---
+function getUserUnit() {
+  const u = Auth.getUser();
+  return u && u.unit_preference === 'lbs' ? 'lbs' : 'kg';
+}
+
+function kgToUserUnit(kg) {
+  if (kg === null || kg === undefined) return null;
+  const unit = getUserUnit();
+  return unit === 'lbs' ? kg * 2.20462 : kg;
+}
+
+function userUnitToKg(val) {
+  if (val === null || val === undefined || val === "") return null;
+  const unit = getUserUnit();
+  return unit === 'lbs' ? parseFloat(val) / 2.20462 : parseFloat(val);
+}
+
+
+function getLengthUnit() {
+  const u = Auth.getUser();
+  return u && u.unit_preference === 'lbs' ? 'in' : 'cm';
+}
+
+function cmToUserUnit(cm) {
+  if (cm === null || cm === undefined) return null;
+  const unit = getLengthUnit();
+  return unit === 'in' ? cm / 2.54 : cm;
+}
+
+function userUnitToCm(val) {
+  if (val === null || val === undefined || val === "") return null;
+  const unit = getLengthUnit();
+  return unit === 'in' ? parseFloat(val) * 2.54 : parseFloat(val);
+}
+
+function fmtCm(v, decimals = 1) {
+  if (v === null || v === undefined) return "—";
+  const converted = cmToUserUnit(v);
+  return Number(converted).toFixed(decimals);
+}
+
+function formatLength(cm, decimals = 1) {
+  if (cm === null || cm === undefined) return "—";
+  return fmtCm(cm, decimals) + " " + getLengthUnit();
+}
+
 function fmtKg(v, decimals = 1) {
   if (v === null || v === undefined) return "—";
-  return Number(v).toFixed(decimals);
+  const converted = kgToUserUnit(v);
+  return Number(converted).toFixed(decimals);
 }
+
+function formatWeight(kg, decimals = 1) {
+  if (kg === null || kg === undefined) return "—";
+  return fmtKg(kg, decimals) + " " + getUserUnit();
+}
+
 
 function fmtDelta(v, suffix = "") {
   if (v === null || v === undefined) return { text: "No trend yet", cls: "neutral" };

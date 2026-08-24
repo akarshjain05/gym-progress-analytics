@@ -6,7 +6,7 @@ India (IST = UTC+5:30) this means after midnight IST but before 5:30am UTC,
 "today" on the server is still yesterday — so a PR logged on June 15 IST
 can appear as "this week" when it shouldn't, or vice versa.
 
-Fix: use a helper ist_today() that returns the current date in IST always.
+Fix: use a helper get_today(current_user.timezone) that returns the current date in IST always.
 """
 from collections import defaultdict
 from datetime import date as date_type, datetime, timedelta, timezone
@@ -23,17 +23,17 @@ from ..worker import generate_insights
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
-from app.time_utils import ist_today
+from app.time_utils import get_today
 
 
 
 
 
-def _logging_streak(active_days: set[date_type]) -> dict:
+def _logging_streak(active_days: set[date_type], timezone_str: str) -> dict:
     if not active_days:
         return {"current_streak_days": 0, "longest_streak_days": 0}
 
-    today = ist_today()
+    today = get_today(timezone_str)
     # Current streak: count back from today (or yesterday, so a day that
     # hasn't been logged YET today doesn't zero out the streak)
     current = 0
@@ -81,7 +81,7 @@ def dashboard(
     )
 
     active_days = {l.date for l in weight_logs} | {l.date for l in lift_logs} | {l.date for l in calorie_logs}
-    streak = _logging_streak(active_days)
+    streak = _logging_streak(active_days, current_user.timezone)
 
     current_weight = weight_logs[-1].weight_kg if weight_logs else None
     weight_change_30d = None
@@ -132,7 +132,7 @@ def wrapped(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    today = ist_today()
+    today = get_today(timezone_str)
     target_year = year or today.year
     target_month = month or today.month
 
@@ -326,7 +326,7 @@ def get_compare(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    today = ist_today()
+    today = get_today(timezone_str)
     current_end = today
     current_start = today - timedelta(days=days)
     
@@ -357,10 +357,23 @@ def get_compare(
     }
 
 def _period_stats(user_id: int, start: date_type, end: date_type, db: Session) -> dict:
-    # We need logs < end for PR calculation
-    all_lift_logs = (
+    from sqlalchemy import func
+    
+    # Fast paths for unbounded PR check: pre-compute max 1RM before start
+    prev_maxes = db.query(
+        models.LiftLog.exercise_id, 
+        func.max(models.LiftLog.weight_kg * (1.0 + models.LiftLog.reps / 30.0)).label('max_1rm')
+    ).filter(
+        models.LiftLog.user_id == user_id, 
+        models.LiftLog.date < start
+    ).group_by(models.LiftLog.exercise_id).all()
+    
+    max_1rm_by_ex = {row.exercise_id: row.max_1rm or 0.0 for row in prev_maxes}
+    
+    # We only fetch lift logs in the target window
+    lift_logs_in_period = (
         db.query(models.LiftLog)
-        .filter(models.LiftLog.user_id == user_id, models.LiftLog.date < end)
+        .filter(models.LiftLog.user_id == user_id, models.LiftLog.date >= start, models.LiftLog.date < end)
         .order_by(models.LiftLog.date.asc())
         .all()
     )
@@ -391,29 +404,21 @@ def _period_stats(user_id: int, start: date_type, end: date_type, db: Session) -
         
     total_volume_kg = 0.0
     pr_count = 0
-    max_1rm_by_ex = {}
     
-    for l in all_lift_logs:
+    for l in lift_logs_in_period:
         pd = _parse_date(l.date)
         if not pd: continue
         
-        # Calculate 1RM
+        active_days.add(pd)
+        if l.weight_kg and l.reps:
+            total_volume_kg += (l.weight_kg * l.reps)
+            
         est_1rm = calc.estimate_1rm_epley(l.weight_kg, l.reps) if l.weight_kg and l.reps else 0.0
         
-        # PR logic
-        is_pr = False
         prev_max = max_1rm_by_ex.get(l.exercise_id, 0)
         if est_1rm > prev_max:
             max_1rm_by_ex[l.exercise_id] = est_1rm
-            is_pr = True
-            
-        # Is it in our target window?
-        if pd >= start and pd < end:
-            active_days.add(pd)
-            if l.weight_kg and l.reps:
-                total_volume_kg += (l.weight_kg * l.reps)
-            if is_pr:
-                pr_count += 1
+            pr_count += 1
 
     # Add active days from other logs
     for l in weight_logs:
@@ -434,3 +439,29 @@ def _period_stats(user_id: int, start: date_type, end: date_type, db: Session) -
         "active_days": len(active_days),
         "sessions_per_week": round(sessions_per_week, 2)
     }
+
+from sqlalchemy import func
+
+@router.get("/volume")
+def get_volume_data(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    # Group by ISO year and week
+    # SQLite strftime('%Y-%W', date) gives Year-Week
+    rows = db.query(
+        func.strftime('%Y-%W', models.LiftLog.date).label('week'),
+        func.min(models.LiftLog.date).label('week_start'),
+        func.sum(models.LiftLog.weight_kg * models.LiftLog.reps).label('volume')
+    ).filter(models.LiftLog.user_id == current_user.id).group_by('week').order_by('week').all()
+    
+    return [{"week_label": row.week_start, "volume": row.volume} for row in rows]
+
+@router.get("/muscle_volume")
+def get_muscle_volume_data(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    rows = db.query(
+        models.Exercise.muscle_group,
+        func.sum(models.LiftLog.weight_kg * models.LiftLog.reps).label('volume')
+    ).join(models.Exercise).filter(
+        models.LiftLog.user_id == current_user.id,
+        models.Exercise.muscle_group != None
+    ).group_by(models.Exercise.muscle_group).all()
+    
+    return {row.muscle_group: row.volume for row in rows if row.muscle_group}

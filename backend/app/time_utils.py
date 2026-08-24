@@ -1,9 +1,12 @@
-from datetime import datetime, timezone, timedelta
-from datetime import date as date_type
+import datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-# IST = UTC + 5:30
-IST = timezone(timedelta(hours=5, minutes=30))
-
-def ist_today() -> date_type:
-    """Returns the current date in Indian Standard Time (UTC+5:30)."""
-    return datetime.now(IST).date()
+def get_today(timezone_str: str = "UTC") -> datetime.date:
+    """Returns the current date in the specified timezone (fallback to UTC)."""
+    if not timezone_str:
+        timezone_str = "UTC"
+    try:
+        tz = ZoneInfo(timezone_str)
+    except ZoneInfoNotFoundError:
+        tz = datetime.timezone.utc
+    return datetime.datetime.now(tz).date()

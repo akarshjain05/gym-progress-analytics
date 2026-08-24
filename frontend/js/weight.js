@@ -25,7 +25,7 @@ document.getElementById("pageContent").innerHTML = DOMPurify.sanitize(`
               <input type="date" id="wDate" class="form-control" required>
             </div>
             <div class="field">
-              <label for="wWeight">Weight (kg)</label>
+              <label for="wWeight">Weight (<span class="display-unit"></span>)</label>
               <input type="number" id="wWeight" class="form-control" min="0" step="any" required placeholder="e.g. 82.5">
             </div>
             <div class="field">
@@ -77,7 +77,7 @@ weightForm.addEventListener("submit", async (e) => {
   try {
     await Api.logWeight({
       date: document.getElementById("wDate").value,
-      weight_kg: parseFloat(document.getElementById("wWeight").value),
+      weight_kg: userUnitToKg(document.getElementById("wWeight").value),
       body_fat_pct: document.getElementById("wBf").value ? parseFloat(document.getElementById("wBf").value) : null,
       notes: document.getElementById("wNotes").value || null,
     });
@@ -128,13 +128,13 @@ function renderSummary(summary) {
     }, 0);
     return;
   }
-  const totalDelta = fmtDelta(summary.total_change_kg, " kg");
-  const weeklyDelta = fmtDelta(summary.weekly_rate_kg, " kg/wk");
+  const totalDelta = fmtDelta(summary.total_change_kg, " " + getUserUnit());
+  const weeklyDelta = fmtDelta(summary.weekly_rate_kg, " " + getUserUnit() + "/wk");
   el.innerHTML = DOMPurify.sanitize(`
     <div class="card stat-card">
       <div class="stat-label">Current</div>
-      <div class="stat-value">${escapeHtml(fmtKg(summary.current_weight_kg))}<span class="unit">kg</span></div>
-      <div class="stat-delta neutral">Started at ${escapeHtml(fmtKg(summary.starting_weight_kg))} kg</div>
+      <div class="stat-value">${escapeHtml(fmtKg(summary.current_weight_kg))}<span class="unit">${escapeHtml(getUserUnit())}</span></div>
+      <div class="stat-delta neutral">Started at ${escapeHtml(fmtKg(summary.starting_weight_kg))} ${escapeHtml(getUserUnit())}</div>
     </div>
     <div class="card stat-card">
       <div class="stat-label">Total change</div>
@@ -148,7 +148,7 @@ function renderSummary(summary) {
     </div>
     <div class="card stat-card">
       <div class="stat-label">Goal</div>
-      <div class="stat-value" style="font-size:26px;">${escapeHtml(summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " kg" : "Not set")}</div>
+      <div class="stat-value" style="font-size:26px;">${escapeHtml(summary.goal_weight_kg ? fmtKg(summary.goal_weight_kg) + " " + getUserUnit() : "Not set")}</div>
       <div class="stat-delta neutral">${escapeHtml(summary.estimated_days_to_goal ? `~${Math.round(summary.estimated_days_to_goal/7)} weeks at this pace` : (summary.goal_weight_kg ? "Can't project yet" : "Set one in Profile"))}</div>
     </div>
   `);
@@ -167,7 +167,7 @@ function renderChart(series) {
       labels,
       datasets: [
         {
-          label: "Weight",
+          label: "Weight (" + getUserUnit() + ")",
           data: weights,
           borderColor: "#C9CCD1",
           backgroundColor: "rgba(201,204,209,0.06)",
@@ -203,7 +203,7 @@ function renderChart(series) {
 function renderTable(logs) {
   window.renderDataTable("weightTableWrap", logs, [
     { label: "Date", className: "label-cell", render: l => escapeHtml(fmtDate(l.date)) },
-    { label: "Weight", render: l => `${escapeHtml(fmtKg(l.weight_kg))} kg` },
+    { label: "Weight (" + getUserUnit() + ")", render: l => `${escapeHtml(fmtKg(l.weight_kg))} kg` },
     { label: "Body fat", render: l => escapeHtml(l.body_fat_pct !== null && l.body_fat_pct !== undefined ? l.body_fat_pct + "%" : "—") },
     { label: "Notes", className: "label-cell text-secondary", render: l => escapeHtml(l.notes || "") }
   ], "deleteEntry");

@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.database import Base
 from app.models import *
-from app.push_notifications import *
 from app.config import settings
 
 # add your model's MetaData object here

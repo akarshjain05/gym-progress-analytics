@@ -2,7 +2,7 @@ from datetime import datetime, date, timezone
 
 from sqlalchemy import (
     Column, Integer, String, Float, Date, DateTime, ForeignKey, Boolean,
-    UniqueConstraint, Text, JSON, CheckConstraint
+    UniqueConstraint, Text, JSON, CheckConstraint, Index
 )
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,8 @@ from .database import Base
 
 class User(Base):
     __tablename__ = "users"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=True)
@@ -36,6 +38,7 @@ class User(Base):
     height_cm = Column(Float, nullable=True)
     activity_level = Column(String, nullable=True, default="moderate")
     unit_preference = Column(String, nullable=False, default="kg")
+    timezone = Column(String, default="UTC", server_default="UTC")
 
     goal_weight_kg = Column(Float, nullable=True)
     sidebar_collapsed = Column(Boolean, default=False, nullable=False, server_default='false')
@@ -61,6 +64,8 @@ class User(Base):
 class Exercise(Base):
     __tablename__ = "exercises"
 
+
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
     category = Column(String, nullable=True)
@@ -77,6 +82,8 @@ class Exercise(Base):
 
 class BodyWeightLog(Base):
     __tablename__ = "body_weight_logs"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -96,6 +103,8 @@ class BodyWeightLog(Base):
 
 class BodyMeasurement(Base):
     __tablename__ = "body_measurements"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -132,6 +141,8 @@ class LiftLog(Base):
     """One row = one logged set."""
     __tablename__ = "lift_logs"
 
+
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False, index=True)
@@ -151,11 +162,14 @@ class LiftLog(Base):
         CheckConstraint("weight_kg >= 0", name="chk_lift_weight_nonnegative"),
         CheckConstraint("reps > 0", name="chk_lift_reps_positive"),
         CheckConstraint("rpe >= 0 AND rpe <= 10", name="chk_lift_rpe_range"),
+        Index("idx_liftlog_user_date", "user_id", "date")
     )
 
 
 class CalorieLog(Base):
     __tablename__ = "calorie_logs"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -179,6 +193,8 @@ class CalorieLog(Base):
 
 class Goal(Base):
     __tablename__ = "goals"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -209,6 +225,13 @@ class Goal(Base):
     exercise = relationship("Exercise")
 
     __table_args__ = (
+        CheckConstraint(
+            "(goal_type = 'lift' AND exercise_id IS NOT NULL AND (target_weight_kg IS NOT NULL OR target_reps IS NOT NULL)) OR "
+            "(goal_type = 'weight' AND target_body_weight_kg IS NOT NULL) OR "
+            "(goal_type = 'nutrition' AND (target_calories IS NOT NULL OR target_protein_g IS NOT NULL)) OR "
+            "(goal_type = 'frequency' AND target_workouts_per_week IS NOT NULL)",
+            name="check_goal_polymorphic"
+        ),
         CheckConstraint("target_weight_kg > 0", name="chk_goal_weight_positive"),
         CheckConstraint("target_reps > 0", name="chk_goal_reps_positive"),
         CheckConstraint("target_body_weight_kg > 0", name="chk_goal_bw_positive"),
@@ -228,6 +251,8 @@ class WorkoutTemplate(Base):
     Contains an ordered list of exercises with target sets/reps/weight.
     """
     __tablename__ = "workout_templates"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -254,6 +279,8 @@ class WorkoutTemplateExercise(Base):
     The user can deviate — actual logged weights come from LiftLog.
     """
     __tablename__ = "workout_template_exercises"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
     template_id = Column(Integer, ForeignKey("workout_templates.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -287,6 +314,8 @@ class WorkoutSession(Base):
     """
     __tablename__ = "workout_sessions"
 
+
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     template_id = Column(Integer, ForeignKey("workout_templates.id", ondelete="SET NULL"), nullable=True)  # null for free workout
@@ -301,3 +330,17 @@ class WorkoutSession(Base):
     user = relationship("User", back_populates="workout_sessions")
     template = relationship("WorkoutTemplate")
     lift_logs = relationship("LiftLog", back_populates="session", cascade="all, delete-orphan")
+
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+
+
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+    endpoint = Column(Text, nullable=False)
+    p256dh = Column(Text, nullable=False)   # public key
+    auth = Column(Text, nullable=False)      # auth secret
+
+    user = relationship("User")

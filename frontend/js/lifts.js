@@ -33,7 +33,7 @@
             <input type="hidden" id="editSetId">
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
-                <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Weight (kg)</label>
+                <label class="form-label" style="font-size:12px; margin-bottom:4px; display:block; color:var(--text-secondary);">Weight</label>
                 <input type="number" id="editSetWeight" min="0" step="any" class="form-control" required style="width:100%; box-sizing:border-box;">
               </div>
               <div style="flex:1;">
@@ -84,12 +84,12 @@
         <div class="lifts-stats-row">
           <div class="stat-card">
             <div class="stat-label" data-label="latest">LATEST EST. 1RM</div>
-            <div class="stat-big"><span id="latest1rm">—</span> <span class="stat-unit" id="latest1rmUnit">kg</span></div>
+            <div class="stat-big"><span id="latest1rm">—</span> <span class="stat-unit" id="latest1rmUnit">${escapeHtml(getUserUnit())}</span></div>
             <div class="stat-sub" id="changePct"></div>
           </div>
           <div class="stat-card" style="position:relative;">
             <div class="stat-label" data-label="pr">PERSONAL RECORD</div>
-            <div class="stat-big"><span id="pr1rm">—</span> <span class="stat-unit" id="pr1rmUnit">kg</span></div>
+            <div class="stat-big"><span id="pr1rm">—</span> <span class="stat-unit" id="pr1rmUnit">${escapeHtml(getUserUnit())}</span></div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
               <div class="stat-sub" id="prDate"></div>
               <button id="btnSharePr" style="display:none; background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:14px; padding:0; display:flex; align-items:center; gap:4px; font-weight:600;" title="Share PR to Instagram">📤 Share</button>
@@ -435,8 +435,8 @@
       // ALWAYS reset labels first to avoid stale values when switching exercises
       document.querySelector('[data-label="latest"]').textContent = "LATEST EST. 1RM";
       document.querySelector('[data-label="pr"]').textContent = "PERSONAL RECORD";
-      document.getElementById("latest1rmUnit").textContent = "kg";
-      document.getElementById("pr1rmUnit").textContent = "kg";
+      document.getElementById("latest1rmUnit").textContent = getUserUnit();
+      document.getElementById("pr1rmUnit").textContent = getUserUnit();
 
       // Stats — bodyweight exercises show reps, weighted show kg
       const isBWExercise = !!(data.is_bodyweight || data.is_bodyweight_exercise);
@@ -452,8 +452,8 @@
         document.getElementById("changePct").textContent = "Bodyweight — classified by max reps";
         document.getElementById("changePct").className = "stat-sub neutral";
       } else {
-        document.getElementById("latest1rm").textContent = fmtKg(data.latest_session_1rm_kg);
-        document.getElementById("pr1rm").textContent = fmtKg(data.personal_record_1rm_kg);
+        document.getElementById("latest1rm").textContent = formatWeight(data.latest_session_1rm_kg);
+        document.getElementById("pr1rm").textContent = formatWeight(data.personal_record_1rm_kg);
         document.getElementById("prDate").textContent = fmtDate(data.personal_record_date);
         if (data.change_pct != null) {
           const delta = fmtDelta(data.change_pct, "%");
@@ -645,18 +645,18 @@
           const isActive = level === tier;
           scaleHtml += `<div class="scale-seg ${escapeHtml(isActive ? "active" : "")}"
             style="width:${escapeHtml(segWidth)}%;background:${escapeHtml(tierColors[i])};opacity:${escapeHtml(isActive ? 1 : 0.35)};"
-            title="${escapeHtml(tier)}: ${escapeHtml(val)}kg"></div>`;
+            title="${escapeHtml(tier)}: ${escapeHtml(val)} ${escapeHtml(getUserUnit())}"></div>`;
           labelsHtml += `<div class="scale-label" style="width:${escapeHtml(segWidth)}%;color:${escapeHtml(tierColors[i])};">
             <div style="font-size:10px;font-weight:600;text-transform:capitalize;">${escapeHtml(tier)}</div>
-            <div style="font-size:9px;">${escapeHtml(val)}kg</div>
+            <div style="font-size:9px;">${escapeHtml(val)} ${escapeHtml(getUserUnit())}</div>
           </div>`;
         });
 
         // User marker: position = pr / maxVal * 100 (correct since scale spans 0→maxVal)
         const userPct = Math.min(97, (pr / maxVal * 100)).toFixed(1);
-        scaleHtml += `<div class="scale-marker" style="left:${escapeHtml(userPct)}%" title="Your PR: ${escapeHtml(pr)}kg">
+        scaleHtml += `<div class="scale-marker" style="left:${escapeHtml(userPct)}%" title="Your PR: ${escapeHtml(pr)} ${escapeHtml(getUserUnit())}">
           <div class="scale-marker-arrow"></div>
-          <div class="scale-marker-label">${escapeHtml(pr)}kg</div>
+          <div class="scale-marker-label">${escapeHtml(pr)} ${escapeHtml(getUserUnit())}</div>
         </div>`;
 
         scaleEl.innerHTML = DOMPurify.sanitize(`<div class="scale-track">${scaleHtml}</div>`);
@@ -725,7 +725,7 @@
         data: {
           labels: series.map(s => fmtDate(s.date)),
           datasets: [{
-            label: "Est. 1RM (kg)",
+            label: "Est. 1RM",
             data: series.map(s => s.estimated_1rm_kg),
             borderColor: "#c0392b",
             backgroundColor: "rgba(192,57,43,0.1)",
@@ -741,7 +741,7 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              callbacks: { label: ctx => `Est. 1RM: ${escapeHtml(ctx.parsed.y)} kg` }
+              callbacks: { label: ctx => `Est. 1RM: ${escapeHtml(formatWeight(ctx.parsed.y))}` }
             }
           },
           scales: {
@@ -765,7 +765,7 @@
       const setsHtml = session.sets.map((set, setIdx) => `
         <div class="set-row" data-id="${escapeHtml(set.id)}">
           <span class="set-num">#${escapeHtml(setIdx + 1)}</span>
-          <span class="set-weight">${escapeHtml(set.weight_kg)} kg</span>
+          <span class="set-weight">${escapeHtml(formatWeight(set.weight_kg))}</span>
           <span class="set-reps">${escapeHtml(set.reps)} reps</span>
           <span class="set-rpe">${escapeHtml(set.rpe != null ? "RPE " + set.rpe : "—")}</span>
           <span class="set-note">${escapeHtml(set.notes || "")}</span>
@@ -784,7 +784,7 @@
         <div class="session-group" style="overflow: visible !important;">
           <div class="session-date-row" data-idx="${escapeHtml(idx)}">
             <span class="session-date-label">${escapeHtml(formatFullDate(session.date))}</span>
-            <span class="session-meta">${escapeHtml(session.set_count)} sets · ${escapeHtml(session.volume_kg)} kg vol · Best 1RM: ${escapeHtml(session.best_1rm_kg)} kg</span>
+            <span class="session-meta">${escapeHtml(session.set_count)} sets · ${escapeHtml(formatWeight(session.volume_kg))} vol · Best 1RM: ${escapeHtml(formatWeight(session.best_1rm_kg))}</span>
             <span class="session-chevron" id="chevron-${escapeHtml(idx)}">${escapeHtml(isFirst ? "▲" : "▼")}</span>
           </div>
           <div class="session-sets" id="sets-${escapeHtml(idx)}" style="${escapeHtml(isFirst ? "" : "display:none;")}">
@@ -859,7 +859,7 @@
         document.querySelectorAll('.set-dropdown').forEach(d => d.style.display = 'none');
         const log = JSON.parse(btn.dataset.log.replace(/&apos;/g, "'"));
         document.getElementById("editSetId").value = log.id;
-        document.getElementById("editSetWeight").value = log.weight_kg;
+        document.getElementById("editSetWeight").value = kgToUserUnit(log.weight_kg).toFixed(1);
         document.getElementById("editSetReps").value = log.reps;
         document.getElementById("editSetRPE").value = log.rpe || "";
         document.getElementById("editSetNotes").value = log.notes || "";
@@ -902,10 +902,10 @@
           const isBW = pr.is_bodyweight;
           const prMetric = isBW
             ? `${escapeHtml(pr.best_reps)} reps`
-            : `${escapeHtml(fmtKg(pr.estimated_1rm_kg))} <span class="pr-unit">kg</span>`;
+            : `${escapeHtml(fmtKg(pr.estimated_1rm_kg))} <span class="pr-unit">${escapeHtml(getUserUnit())}</span>`;
           const prAchieved = isBW
             ? `Best set: ${escapeHtml(pr.achieved_with.reps)} reps`
-            : `${escapeHtml(pr.achieved_with.weight_kg)}kg × ${escapeHtml(pr.achieved_with.reps)}`;
+            : `${escapeHtml(pr.achieved_with.weight_kg)} ${escapeHtml(getUserUnit())} × ${escapeHtml(pr.achieved_with.reps)}`;
 
           return `
             <div class="pr-row" data-exid="${escapeHtml(pr.exercise_id)}" style="cursor:pointer;">
@@ -985,7 +985,7 @@
     div.className = "modal-set-row";
     div.innerHTML = DOMPurify.sanitize(`
       <span class="modal-set-num" style="min-width: 38px;">Set ${escapeHtml(setCount)}</span>
-      <input type="number" class="text-input set-weight-input" placeholder="kg" min="0" step="any" style="width: 76px; padding: 8px 6px; text-align: center;">
+      <input type="number" class="text-input set-weight-input" placeholder="${escapeHtml(getUserUnit())}" min="0" step="any" style="width: 76px; padding: 8px 6px; text-align: center;">
       <span style="color:#a09880;font-size:13px; font-weight:700;">×</span>
       <input type="number" class="text-input set-reps-input" placeholder="reps" min="1" step="1" max="100" style="width: 72px; padding: 8px 6px; text-align: center;">
       <input type="number" class="text-input set-rpe-input" placeholder="RPE" min="1" max="10" step="0.5" style="width: 68px; padding: 8px 6px; text-align: center;">
@@ -1015,7 +1015,7 @@
     let valid = true;
 
     setRows.forEach(row => {
-      const weight = parseFloat(row.querySelector(".set-weight-input").value);
+      const weight = userUnitToKg(row.querySelector(".set-weight-input").value);
       const reps = parseInt(row.querySelector(".set-reps-input").value);
       const rpe = parseFloat(row.querySelector(".set-rpe-input").value) || null;
       if (isNaN(weight) || isNaN(reps) || weight < 0 || reps < 1) { valid = false; return; }
@@ -1114,7 +1114,7 @@
     e.preventDefault();
     const logId = document.getElementById("editSetId").value;
     const payload = {
-      weight_kg: parseFloat(document.getElementById("editSetWeight").value),
+      weight_kg: userUnitToKg(document.getElementById("editSetWeight").value),
       reps: parseInt(document.getElementById("editSetReps").value, 10),
       rpe: document.getElementById("editSetRPE").value ? parseFloat(document.getElementById("editSetRPE").value) : null,
       notes: document.getElementById("editSetNotes").value || null
@@ -1174,7 +1174,7 @@
     // Gradient effects
     card.style.backgroundImage = "radial-gradient(circle at 50% -20%, rgba(226,64,45,0.25), transparent 60%), radial-gradient(circle at 120% 100%, rgba(62,124,177,0.15), transparent 70%)";
 
-    const prValue = isBWExercise ? data.best_reps_ever + " reps" : fmtKg(data.personal_record_1rm_kg) + " kg";
+    const prValue = isBWExercise ? data.best_reps_ever + " reps" : fmtKg(data.personal_record_1rm_kg) + " " + getUserUnit();
     const prDateStr = fmtDate(data.personal_record_date);
     const estText = isBWExercise ? "Max Reps" : "est. 1RM";
     
