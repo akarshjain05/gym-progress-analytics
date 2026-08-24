@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 push_notifications.py — Web Push Notification Router
 
@@ -83,7 +86,7 @@ def _send_push(subscription: models.PushSubscription, title: str, body: str, url
         if getattr(e, "response", None) is not None:
             if e.response.status_code in [410, 404]:
                 return False, "410_GONE"
-        print(f"[push] Failed to send to user {subscription.user_id}: {e}")
+        logger.info(f"[push] Failed to send to user {subscription.user_id}: {e}")
         return False, str(e)
 
 

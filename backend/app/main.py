@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from contextlib import asynccontextmanager
 import sentry_sdk
 
@@ -38,7 +41,7 @@ async def lifespan(app: FastAPI):
                     )
                     db.commit()
                 except Exception as e:
-                    print(f"Failed to set initial admin: {e}")
+                    logger.info(f"Failed to set initial admin: {e}")
             seed_exercises(db)
         finally:
             db.close()

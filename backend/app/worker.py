@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import os
 from celery import Celery
 
@@ -129,7 +132,7 @@ from .config import settings
 def send_email_task(self, to_email: str, subject: str, html_content: str, text_content: str):
     if not settings.brevo_api_key:
         if settings.environment != "production":
-            print(f"[DEV - no BREVO_API_KEY] Email to {to_email}: {subject}")
+            logger.info(f"[DEV] Email to {to_email}: {subject}")
         return
 
     BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
@@ -149,5 +152,5 @@ def send_email_task(self, to_email: str, subject: str, html_content: str, text_c
         resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
         resp.raise_for_status()
     except requests.RequestException as e:
-        print(f"[ERROR] Celery failed to send email: {e}")
+        logger.error(f"Celery failed to send email: {e}")
         raise self.retry(exc=e, countdown=60)

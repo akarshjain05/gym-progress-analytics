@@ -101,26 +101,20 @@ def _get_all_user_data(db: Session, user: models.User) -> dict:
     ]
 
     # Workout sessions (history)
-    workout_sessions = []
-    try:
-        from . import models as m
-        if hasattr(m, 'WorkoutSession'):
-            sessions = db.query(m.WorkoutSession).filter(
-                m.WorkoutSession.user_id == user.id
-            ).order_by(m.WorkoutSession.date.desc()).all()
-            workout_sessions = [
-                {
-                    "date": str(s.date),
-                    "template_name": s.template_name,
-                    "duration_seconds": s.duration_seconds,
-                    "exercises_count": s.exercises_count,
-                    "sets_count": s.sets_count,
-                    "notes": s.notes,
-                }
-                for s in sessions
-            ]
-    except Exception:
-        logger.exception(f"Failed to fetch workout sessions for user {user.id} during export")
+    sessions = db.query(models.WorkoutSession).filter(
+        models.WorkoutSession.user_id == user.id
+    ).order_by(models.WorkoutSession.date.desc()).all()
+    workout_sessions = [
+        {
+            "date": str(s.date),
+            "template_name": s.template_name,
+            "duration_seconds": s.duration_seconds,
+            "exercises_count": s.exercises_count,
+            "sets_count": s.sets_count,
+            "notes": s.notes,
+        }
+        for s in sessions
+    ]
 
     return {
         "exported_at": datetime.now(timezone.utc).isoformat(),

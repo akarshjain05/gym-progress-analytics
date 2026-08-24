@@ -225,7 +225,7 @@ class LiftLogIn(BaseModel):
     date: date
     weight_kg: float = Field(ge=0, le=600)
     reps: int = Field(gt=0, le=100)
-    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    rpe: Optional[float] = Field(default=None, ge=0, le=10)
     set_number: Optional[int] = None
     notes: Optional[str] = None
 
@@ -237,7 +237,7 @@ class LiftLogIn(BaseModel):
 class LiftLogUpdate(BaseModel):
     weight_kg: Optional[float] = Field(None, ge=0, le=600)
     reps: Optional[int] = Field(None, gt=0, le=100)
-    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    rpe: Optional[float] = Field(default=None, ge=0, le=10)
     notes: Optional[str] = Field(default=None, max_length=500)
 
     @field_validator("rpe")
@@ -256,7 +256,7 @@ class SetEntry(BaseModel):
     (those are shared across the whole session, see LiftSessionIn below)."""
     weight_kg: float = Field(ge=0, le=600)
     reps: int = Field(gt=0, le=100)
-    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    rpe: Optional[float] = Field(default=None, ge=0, le=10)
 
     @field_validator("rpe")
     @classmethod
@@ -428,7 +428,7 @@ class ReorderIn(BaseModel):
 class LoggedSet(BaseModel):
     weight_kg: float = Field(ge=0, le=600)
     reps: int = Field(ge=1, le=100)
-    rpe: Optional[float] = Field(default=None, ge=1, le=10)
+    rpe: Optional[float] = Field(default=None, ge=0, le=10)
     completed: bool = True   # False = user skipped this set
 
 

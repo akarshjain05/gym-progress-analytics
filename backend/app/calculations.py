@@ -667,7 +667,6 @@ EXERCISE_TO_STANDARD = {
     "barbell back squat":              "squat",
     "front squat":                     "front_squat",
     "hack squat":                      "hack_squat",
-    "romanian deadlift (rdl)":         "romanian_dl",
 
     # ── Legs — smith machine ─────────────────────────────────────────────
     "smith machine squat":             "smith_squat",

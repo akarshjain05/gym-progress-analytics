@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import requests
 
 from .config import settings
@@ -25,7 +28,7 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
     """
     if not settings.brevo_api_key:
         if settings.environment != "production":
-            print(f"[DEV - no BREVO_API_KEY configured] Password reset link for {to_email}: {reset_link}")
+            logger.info(f"[DEV] Password reset link for {to_email}: {reset_link}")
         return
 
     text_body = (
@@ -70,7 +73,7 @@ def send_verification_email(to_email: str, verify_link: str) -> None:
     """
     if not settings.brevo_api_key:
         if settings.environment != "production":
-            print(f"[DEV - no BREVO_API_KEY configured] Verification link for {to_email}: {verify_link}")
+            logger.info(f"[DEV] Verification link for {to_email}: {verify_link}")
         return
 
     text_body = (
