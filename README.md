@@ -19,17 +19,23 @@ graph TD
     User((User)) -->|HTTPS| Caddy[Caddy Reverse Proxy]
     Caddy -->|/api/*| FastAPI[FastAPI Backend]
     Caddy -->|/* static files| VanillaJS[Vanilla JS PWA]
-    FastAPI <--> SQLite[(SQLite / PostgreSQL)]
+    FastAPI <--> Postgres[(PostgreSQL)]
+    FastAPI --> Celery[Celery Workers]
+    Celery <--> Redis[(Redis)]
     VanillaJS <-->|Offline Queue| IDB[(IndexedDB)]
+    VanillaJS <-->|Service Worker| Push[Push Notifications]
 ```
 
 ## Tech Stack & Infrastructure
 
-- **Backend**: Python, FastAPI, SQLAlchemy, SQLite
-- **Frontend**: Vanilla HTML, CSS, JavaScript (Zero build step, Chart.js for visualizations)
+- **Backend**: Python, FastAPI, SQLAlchemy, Alembic
+- **Database**: PostgreSQL (Production) & SQLite (Testing)
+- **Background Jobs**: Celery + Redis (for asynchronous emails and push notifications)
+- **Frontend**: Vanilla HTML, CSS, JavaScript (Zero build step, Chart.js for visualizations, Service Workers for PWA functionality)
 - **Infrastructure**: Hosted on AWS EC2, fully containerized with Docker & Docker Compose
 - **Web Server**: Caddy (acts as a reverse proxy and automatically provisions SSL/TLS certificates via Let's Encrypt for secure HTTPS)
-- **CI/CD**: GitHub Actions (Every push to the `main` branch triggers an automated deployment to the EC2 server, pulling the latest code and rebuilding containers seamlessly)
+- **Security & Reliability**: HttpOnly secure cookies (no XSS-vulnerable localStorage tokens), strict CORS, SlowAPI rate-limiting (proxy-aware), and Sentry exception tracking (with PII scrubbing).
+- **CI/CD**: GitHub Actions. Every push to the `main` branch spins up a fresh test database, tests Alembic migration paths, runs the comprehensive Pytest suite (70+ tests), and upon success, automatically deploys to EC2.
 
 ## Features & Analytics
 
@@ -43,7 +49,9 @@ Nothing here is decorative — every number on screen comes from a tested formul
 - **Compare to Past You** — Real-time period-over-period delta tracking (7, 30, 90 days, 1 year) comparing training volume, new PRs hit, and consistency metrics to prove your hard work is paying off.
 - **ETA Forecasting** — Linear regression models predict exactly what date you'll hit a target weight for a given exercise based on your recent 1RM trajectories.
 - **AI Coach** — Uses Gemini to analyze your recent logs, strength levels, and trends, providing actionable feedback tailored to your progress.
-- **Progressive Web App (PWA)** — Installable on iOS/Android home screens for a native app feel, complete with optimized data-fetching and skeleton loading states.
+- **Push Notifications** — Opt-in native web push notifications to keep you on track with your routines and goals.
+- **GDPR Export** — Instantly export your entire IRONLOG database footprint as raw JSON or a fully flattened multi-sheet CSV, heavily tested and secured against spreadsheet macro-injection attacks (CWE-1236).
+- **Progressive Web App (PWA)** — Installable on iOS/Android home screens for a native app feel, complete with optimized offline IndexedDB request queueing and skeleton loading states.
 
 ## Premium UI / UX
 
@@ -56,26 +64,28 @@ Nothing here is decorative — every number on screen comes from a tested formul
 
 ```
 gym-progress-analytics/
-├── backend/                 FastAPI + SQLAlchemy + SQLite
+├── backend/                 FastAPI + SQLAlchemy + Alembic + Celery
 │   ├── app/
 │   │   ├── main.py          App entrypoint, CORS, router wiring
-│   │   ├── models.py        SQLAlchemy models
+│   │   ├── models.py        SQLAlchemy models & table composite indexes
 │   │   ├── schemas.py       Pydantic request/response schemas
 │   │   ├── calculations.py  All formulas - isolated & unit-tested
-│   │   ├── security.py      JWT auth, password hashing
+│   │   ├── worker.py        Celery worker for async tasks (Brevo, Push)
 │   │   └── routers/         auth, profile, weight, exercises, lifts, etc.
-│   ├── tests/               Pytest test suite
+│   ├── tests/               Comprehensive Pytest suite
+│   ├── alembic/             Database migration scripts
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   └── .env.example
 ├── frontend/                 Vanilla HTML/CSS/JS (no build step)
 │   ├── index.html            Login / register
 │   ├── dashboard.html        Overview, streak, insights
+│   ├── sw.js                 Service Worker for Push Notifications
 │   ├── css/                  Design system, themes, mobile breakpoints
-│   └── js/                   API clients, layout management, Chart.js
+│   └── js/                   API clients, offline queues, layout, Chart.js
 ├── docker-compose.yml        Local and production container orchestration
 ├── Caddyfile                 Reverse proxy & SSL configuration
-└── .github/workflows/deploy.yml  Automated CI/CD deployment script
+└── .github/workflows/ci.yml  Automated CI/CD pipeline (Tests -> Deploy)
 ```
 
 ## Running Locally (Docker)
@@ -97,7 +107,12 @@ If you prefer to run it without Docker:
 ```bash
 cd backend
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload
+
+# Start Redis locally (required for Celery)
+# In another terminal:
+celery -A app.worker.celery_app worker --loglevel=info
 ```
 
 **Frontend**:
@@ -110,7 +125,9 @@ Open `http://127.0.0.1:8080`.
 ## Automated Deployments (CI/CD)
 
 This project features a fully automated deployment pipeline. When code is pushed to the `main` branch, a GitHub Action is triggered:
-1. Logs into the EC2 instance via SSH.
-2. Pulls the latest changes from `main`.
-3. Runs `docker compose up -d --build` to seamlessly update the live application.
-4. Caddy handles routing for **ironlog.in** and maintains secure HTTPS connections automatically via Let's Encrypt.
+1. Provisions a test environment and verifies Alembic database migrations.
+2. Runs the full backend Pytest suite.
+3. Upon success, logs into the EC2 instance via SSH.
+4. Pulls the latest changes from `main`.
+5. Runs `docker compose up -d --build` to seamlessly update the live application.
+6. Caddy handles routing for **ironlog.in** and maintains secure HTTPS connections automatically via Let's Encrypt.
