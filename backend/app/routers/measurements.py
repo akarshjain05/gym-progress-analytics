@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from .. import schemas, models
 from ..database import get_db
@@ -41,9 +42,32 @@ def log_measurement(
 
     entry = models.BodyMeasurement(user_id=current_user.id, **payload.model_dump())
     db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
+    try:
+        db.commit()
+        db.refresh(entry)
+        return entry
+    except IntegrityError:
+        db.rollback()
+        existing = (
+            db.query(models.BodyMeasurement)
+            .filter(models.BodyMeasurement.user_id == current_user.id, models.BodyMeasurement.date == payload.date)
+            .first()
+        )
+        if existing:
+            existing.chest = payload.chest
+            existing.waist = payload.waist
+            existing.neck = payload.neck
+            existing.hip = payload.hip
+            existing.arm = payload.arm
+            existing.forearm = payload.forearm
+            existing.thigh = payload.thigh
+            existing.calf = payload.calf
+            existing.shoulders = payload.shoulders
+            existing.notes = payload.notes
+            db.commit()
+            db.refresh(existing)
+            return existing
+        raise
 
 
 @router.get("", response_model=list[schemas.BodyMeasurementOut])

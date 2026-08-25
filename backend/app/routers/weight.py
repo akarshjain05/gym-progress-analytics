@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from .. import schemas, models, calculations as calc
 from ..database import get_db
@@ -34,9 +35,25 @@ def log_weight(
 
     entry = models.BodyWeightLog(user_id=current_user.id, **payload.model_dump())
     db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
+    try:
+        db.commit()
+        db.refresh(entry)
+        return entry
+    except IntegrityError:
+        db.rollback()
+        existing = (
+            db.query(models.BodyWeightLog)
+            .filter(models.BodyWeightLog.user_id == current_user.id, models.BodyWeightLog.date == payload.date)
+            .first()
+        )
+        if existing:
+            existing.weight_kg = payload.weight_kg
+            existing.body_fat_pct = payload.body_fat_pct
+            existing.notes = payload.notes
+            db.commit()
+            db.refresh(existing)
+            return existing
+        raise  # Should never happen
 
 
 @router.get("", response_model=list[schemas.WeightLogOut])

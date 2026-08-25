@@ -132,6 +132,7 @@ def wrapped(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    timezone_str = current_user.timezone or "UTC"
     today = get_today(timezone_str)
     target_year = year or today.year
     target_month = month or today.month
@@ -326,6 +327,7 @@ def get_compare(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    timezone_str = current_user.timezone or "UTC"
     today = get_today(timezone_str)
     current_end = today
     current_start = today - timedelta(days=days)

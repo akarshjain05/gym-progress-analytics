@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from .. import schemas, models, calculations as calc
 from ..database import get_db
@@ -31,9 +32,24 @@ def log_calories(
 
     entry = models.CalorieLog(user_id=current_user.id, **payload.model_dump())
     db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
+    try:
+        db.commit()
+        db.refresh(entry)
+        return entry
+    except IntegrityError:
+        db.rollback()
+        existing = (
+            db.query(models.CalorieLog)
+            .filter(models.CalorieLog.user_id == current_user.id, models.CalorieLog.date == payload.date)
+            .first()
+        )
+        if existing:
+            for field, value in payload.model_dump().items():
+                setattr(existing, field, value)
+            db.commit()
+            db.refresh(existing)
+            return existing
+        raise
 
 
 @router.get("", response_model=list[schemas.CalorieLogOut])

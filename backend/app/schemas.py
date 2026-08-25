@@ -209,7 +209,7 @@ class PowerliftingOut(BaseModel):
 
 class MacrosIn(BaseModel):
     calories: float = Field(gt=0)
-    goal: str  # 'cut', 'maintain', 'bulk'
+    goal: Literal["cut", "maintain", "bulk"]
 
 class MacrosOut(BaseModel):
     protein_g: int

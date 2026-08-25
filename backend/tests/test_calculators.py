@@ -28,7 +28,7 @@ def test_calc_powerlifting(client):
 def test_calc_macros(client):
     resp = client.post("/calculators/macros", json={
         "calories": 2500,
-        "goal": "maintenance"
+        "goal": "maintain"
     })
     assert resp.status_code == 200
     data = resp.json()

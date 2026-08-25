@@ -20,6 +20,11 @@ jobs:
         python -m pip install --upgrade pip
         cd backend
         pip install -r requirements.txt pytest
+    - name: Test Alembic Migrations
+      run: |
+        cd backend
+        export DATABASE_URL="sqlite:///test_migrations.db"
+        alembic upgrade head
     - name: Run tests
       run: |
         cd backend

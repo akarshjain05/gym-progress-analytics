@@ -105,3 +105,4 @@ def test_account_lockout(client):
     resp = client.post("/auth/login", data={"username": "lockeduser", "password": "password123"})
     assert resp.status_code == 401
     assert "Account is locked" in resp.json()["detail"]
+

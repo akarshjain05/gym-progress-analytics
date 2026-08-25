@@ -285,7 +285,7 @@ def _predict_strength_hybrid(lift_logs: list, db: Session, timezone_str: str) ->
 # HYBRID Weight Predictions
 # ---------------------------------------------------------------------------
 
-def _predict_weight_hybrid(weight_logs: list, profile_goal: Optional[float], current_weight: Optional[float]) -> dict:
+def _predict_weight_hybrid(weight_logs: list, profile_goal: Optional[float], current_weight: Optional[float], timezone_str: str = "UTC") -> dict:
     """
     Phase 1 (< 5 logs): baseline rate from goal direction.
     Phase 2 (>= 5 logs): personal regression.
@@ -597,7 +597,7 @@ def get_analysis(
     try:
         current_weight = weight_logs[-1].weight_kg if weight_logs else None
         strength = _predict_strength_hybrid(lift_logs, db, current_user.timezone)
-        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
+        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight, current_user.timezone or "UTC")
         muscle_vol = _muscle_group_volume(lift_logs, db, current_user.timezone)
         consistency = _consistency_score(lift_logs, weight_logs, calorie_logs, current_user.timezone)
         nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
@@ -673,7 +673,7 @@ async def get_advice(
     try:
         current_weight = weight_logs[-1].weight_kg if weight_logs else None
         strength = _predict_strength_hybrid(lift_logs, db, current_user.timezone)
-        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight)
+        weight_pred = _predict_weight_hybrid(weight_logs, current_user.goal_weight_kg, current_weight, current_user.timezone or "UTC")
         muscle_vol = _muscle_group_volume(lift_logs, db, current_user.timezone)
         consistency = _consistency_score(lift_logs, weight_logs, calorie_logs, current_user.timezone)
         nutrition_corr = _nutrition_correlation(lift_logs, calorie_logs)
