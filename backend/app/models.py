@@ -188,6 +188,7 @@ class CalorieLog(Base):
         CheckConstraint("protein_g >= 0", name="chk_protein_nonnegative"),
         CheckConstraint("carbs_g >= 0", name="chk_carbs_nonnegative"),
         CheckConstraint("fats_g >= 0", name="chk_fats_nonnegative"),
+        Index("idx_calorielog_user_date", "user_id", "date")
     )
 
 
@@ -201,7 +202,7 @@ class Goal(Base):
     goal_type = Column(String, nullable=False) # 'weight', 'nutrition', 'frequency', 'lift'
     
     # Lift Goal
-    exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=True)
+    exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="SET NULL"), nullable=True)
     target_weight_kg = Column(Float, nullable=True)
     target_reps = Column(Integer, nullable=True)
     
@@ -330,6 +331,10 @@ class WorkoutSession(Base):
     user = relationship("User", back_populates="workout_sessions")
     template = relationship("WorkoutTemplate")
     lift_logs = relationship("LiftLog", back_populates="session", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("idx_workoutsession_user_date", "user_id", "date"),
+    )
 
 
 class PushSubscription(Base):
