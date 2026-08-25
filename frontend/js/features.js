@@ -190,13 +190,10 @@ const IronlogPush = (function () {
 const IronlogExport = (function () {
   function download(format) {
     // Use fetch with auth token to get the file, then trigger download
-    const token = Auth.getToken();
-    if (!token) { showToast('Please log in to export data.', 'error'); return; }
-
     const url = `${escapeHtml(window.IRONLOG_API_BASE)}/export/${escapeHtml(format)}`;
     showToast(`Preparing your ${escapeHtml(format.toUpperCase())} export…`);
 
-    fetch(url, { headers: { Authorization: `Bearer ${escapeHtml(token)}` } })
+    fetch(url, { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error(`Export failed (${escapeHtml(res.status)})`);
         const disposition = res.headers.get('Content-Disposition') || '';
