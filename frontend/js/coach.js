@@ -227,7 +227,6 @@
     textEl.innerHTML = DOMPurify.sanitize('<span class="advice-cursor">▍</span>');
     output.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-    const token = Auth.getToken();
     const baseUrl = window.IRONLOG_API_BASE;
 
     // Advice timeout
@@ -238,7 +237,7 @@
     }, 40000);
 
     fetch(baseUrl + "/coach/advice", {
-      headers: { "Authorization": "Bearer " + token }
+      credentials: "include"
     }).then(function(res) {
       clearTimeout(adviceTimeout);
       if (!res.ok || !res.body) {
