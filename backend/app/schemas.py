@@ -13,7 +13,18 @@ UnitPref = Literal["kg", "lb"]
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=30)
     email: EmailStr
-    password: str = Field(min_length=6)
+    password: str = Field(min_length=8)
+
+    @field_validator('password')
+    def password_complexity(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if not any(char.isdigit() for char in v):
+            raise ValueError('Password must contain at least one digit')
+        if not any(char.isalpha() for char in v):
+            raise ValueError('Password must contain at least one letter')
+        return v
+
 
 
 class UserLogin(BaseModel):

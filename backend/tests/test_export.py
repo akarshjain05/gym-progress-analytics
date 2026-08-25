@@ -1,7 +1,7 @@
 import pytest
 
 def test_export_json(client, auth_headers):
-    headers = auth_headers(client, "exportuser", "password")
+    headers = auth_headers(client, "exportuser", "password123")
     
     # Log some data first
     client.post("/measurements", json={"date": "2026-07-01", "chest": 100}, headers=headers)
@@ -16,7 +16,7 @@ def test_export_json(client, auth_headers):
     assert data["profile"]["username"] == "exportuser"
 
 def test_export_csv(client, auth_headers):
-    headers = auth_headers(client, "exportuser2", "password")
+    headers = auth_headers(client, "exportuser2", "password123")
     
     # Log data
     client.post("/measurements", json={"date": "2026-07-01", "chest": 100}, headers=headers)

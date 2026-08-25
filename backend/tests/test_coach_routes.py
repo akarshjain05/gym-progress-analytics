@@ -1,11 +1,11 @@
 def test_coach_analysis(client, auth_headers):
-    headers = auth_headers(client, "coachuser", "pass123")
+    headers = auth_headers(client, "coachuser", "password123")
     resp = client.get("/coach/analysis", headers=headers)
     assert resp.status_code == 200, resp.text
     assert "consistency" in resp.json()
 
 def test_coach_advice(client, auth_headers):
-    headers = auth_headers(client, "coachuser2", "pass123")
+    headers = auth_headers(client, "coachuser2", "password123")
     # Needs a goal
     client.post("/goals", json={
         "goal_type": "lift",

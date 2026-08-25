@@ -33,15 +33,6 @@ async def lifespan(app: FastAPI):
 
         db = SessionLocal()
         try:
-            if settings.initial_admin_username:
-                try:
-                    db.execute(
-                        text("UPDATE users SET role = 'admin' WHERE username = :u AND role != 'admin'"),
-                        {"u": settings.initial_admin_username}
-                    )
-                    db.commit()
-                except Exception as e:
-                    logger.info(f"Failed to set initial admin: {e}")
             seed_exercises(db)
         finally:
             db.close()
@@ -49,10 +40,18 @@ async def lifespan(app: FastAPI):
 
 
 if settings.sentry_dsn:
+    def scrub_data(event, hint):
+        # Scrub potentially sensitive health metrics or PII from requests
+        if 'request' in event and 'data' in event['request']:
+            event['request']['data'] = '[Scrubbed]'
+        return event
+
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+        send_default_pii=False,
+        before_send=scrub_data
     )
 
 app = FastAPI(title="Gym Progress Analytics API", version="1.0.0", lifespan=lifespan)

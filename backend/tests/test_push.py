@@ -2,7 +2,7 @@ import pytest
 from app import models
 
 def test_push_subscribe(client, auth_headers):
-    headers = auth_headers(client, "pushuser", "pass123")
+    headers = auth_headers(client, "pushuser", "password123")
     resp = client.post("/push/subscribe", json={
         "endpoint": "https://fcm.googleapis.com/fcm/send/fake-endpoint",
         "keys": {"p256dh": "key", "auth": "auth"}
@@ -10,7 +10,7 @@ def test_push_subscribe(client, auth_headers):
     assert resp.status_code == 201
 
 def test_push_unsubscribe(client, auth_headers):
-    headers = auth_headers(client, "unsubuser", "pass123")
+    headers = auth_headers(client, "unsubuser", "password123")
     client.post("/push/subscribe", json={
         "endpoint": "https://fcm.googleapis.com/fcm/send/fake-endpoint",
         "keys": {"p256dh": "key", "auth": "auth"}
@@ -19,7 +19,7 @@ def test_push_unsubscribe(client, auth_headers):
     assert resp.status_code == 204
 
 def test_push_test(client, auth_headers):
-    headers = auth_headers(client, "testuser", "pass123")
+    headers = auth_headers(client, "testuser", "password123")
     client.post("/push/subscribe", json={
         "endpoint": "https://fcm.googleapis.com/fcm/send/fake-endpoint",
         "keys": {"p256dh": "key", "auth": "auth"}

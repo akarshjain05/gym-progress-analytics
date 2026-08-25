@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # plain comma-separated value like an AWS CORS_ORIGINS env var would
     # crash on startup with a SettingsError. Splitting it ourselves in
     # cors_origins_list below avoids that entirely.
-    cors_origins: str = "*"
+    cors_origins: str = "http://localhost:8080"
 
     # Google Sign-In: OAuth client ID from Google Cloud Console. Required for
     # /auth/google to verify ID tokens. Leaving it blank disables Google

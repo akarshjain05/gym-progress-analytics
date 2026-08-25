@@ -1,7 +1,7 @@
 import pytest
 
 def test_measurements_crud(client, auth_headers):
-    headers = auth_headers(client, "measuser", "password")
+    headers = auth_headers(client, "measuser", "password123")
     
     # 1. Create a measurement
     resp = client.post("/measurements", json={

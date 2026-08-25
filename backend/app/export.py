@@ -143,6 +143,14 @@ def export_json(
     )
 
 
+def sanitize_csv_field(value) -> str:
+    if value is None:
+        return ""
+    val_str = str(value)
+    if val_str and val_str[0] in ('=', '+', '-', '@', '\t', '\r'):
+        return "'" + val_str
+    return val_str
+
 @router.get("/csv")
 def export_csv(
     db: Session = Depends(get_db),
@@ -161,7 +169,7 @@ def export_csv(
         writer.writerow([f"# {title}"])
         writer.writerow(list(rows[0].keys()))
         for row in rows:
-            writer.writerow(list(row.values()))
+            writer.writerow([sanitize_csv_field(v) for v in row.values()])
         writer.writerow([])
 
     # Header
@@ -173,7 +181,7 @@ def export_csv(
     # Profile section
     writer.writerow(["# PROFILE"])
     for k, v in data["profile"].items():
-        writer.writerow([k, v])
+        writer.writerow([sanitize_csv_field(k), sanitize_csv_field(v)])
     writer.writerow([])
 
     # Data sections

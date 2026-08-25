@@ -104,5 +104,5 @@ def test_account_lockout(client):
     # 2. 6th attempt with correct password should still fail because of lockout
     resp = client.post("/auth/login", data={"username": "lockeduser", "password": "password123"})
     assert resp.status_code == 401
-    assert "Account is locked" in resp.json()["detail"]
+    assert "temporarily locked" in resp.json()["detail"]
 

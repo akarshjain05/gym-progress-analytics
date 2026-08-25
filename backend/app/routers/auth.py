@@ -94,7 +94,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
         minutes_left = int((user.locked_until - now).total_seconds() / 60) + 1
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Account is locked due to too many failed attempts. Try again in {minutes_left} minutes.",
+            detail="Invalid credentials. If this account exists, it may be temporarily locked.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -113,7 +113,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Invalid credentials. If this account exists, it may be temporarily locked.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

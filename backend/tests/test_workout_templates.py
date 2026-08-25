@@ -10,7 +10,7 @@ def get_exercise_id(client, headers, name):
     return None
 
 def test_create_and_get_template(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     
     # Create template
     resp = client.post("/templates", json={
@@ -31,7 +31,7 @@ def test_create_and_get_template(client, auth_headers):
     assert templates[0]["id"] == template_id
 
 def test_update_template(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     
     resp = client.post("/templates", json={"name": "Old Name"}, headers=headers)
     t_id = resp.json()["id"]
@@ -45,7 +45,7 @@ def test_update_template(client, auth_headers):
     assert resp.json()["description"] == "Updated"
 
 def test_delete_template(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     
     resp = client.post("/templates", json={"name": "To Delete"}, headers=headers)
     t_id = resp.json()["id"]
@@ -57,7 +57,7 @@ def test_delete_template(client, auth_headers):
     assert not any(t["id"] == t_id for t in resp.json())
 
 def test_add_and_update_template_exercise(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     
     # Get an exercise ID (Squat)
     sq_id = get_exercise_id(client, headers, "Squat")
@@ -92,7 +92,7 @@ def test_add_and_update_template_exercise(client, auth_headers):
     assert resp.json()["exercises"][0]["target_sets"] == 5
 
 def test_delete_template_exercise(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     bc_id = get_exercise_id(client, headers, "Bicep Curl")
     
     resp = client.post("/templates", json={"name": "Arms"}, headers=headers)
@@ -111,7 +111,7 @@ def test_delete_template_exercise(client, auth_headers):
     assert len(resp.json()["exercises"]) == 0
 
 def test_reorder_exercises(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     
     sq_id = get_exercise_id(client, headers, "Squat")
     bp_id = get_exercise_id(client, headers, "Bench Press")
@@ -191,7 +191,7 @@ def test_share_and_import_template(client, auth_headers):
     assert any(t["id"] == imported_template["id"] for t in resp.json())
 
 def test_finish_workout_basic(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     sq_id = get_exercise_id(client, headers, "Squat")
     
     resp = client.post("/templates/free/finish", json={
@@ -213,7 +213,7 @@ def test_finish_workout_basic(client, auth_headers):
     assert "session_id" in resp.json()
 
 def test_finish_workout_pr_detection(client, auth_headers):
-    headers = auth_headers(client, "testuser", "password")
+    headers = auth_headers(client, "testuser", "password123")
     sq_id = get_exercise_id(client, headers, "Squat")
     
     # Workout 1: Squat 100kg x 5 -> epley 1RM = 100 * (1 + 5/30) = 116.67
